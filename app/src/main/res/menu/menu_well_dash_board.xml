@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="example.com.sdi_mrdd.WellDashBoardActivity">
+
+    <!-- Search, should appear as action button -->
+    <item android:id="@+id/add_curve"
+        android:icon="@drawable/ic_action_new"
+        android:title="@string/add_curve_action"
+        app:showAsAction="ifRoom|collapseActionView"/>
+
+    <item android:id="@+id/action_settings" android:title="@string/action_settings"
+        android:orderInCategory="100" app:showAsAction="never" />
+</menu>

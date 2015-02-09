@@ -1,0 +1,7 @@
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\classes\debug
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\pre-dexed\debug\support-annotations-21.0.3-5187431d27b02c423b5a85cbdf349070a44f28ff.jar
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\pre-dexed\debug\classes-a2bb9edcd711d0b203c581c80e0b5b4d864da456.jar
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\pre-dexed\debug\internal_impl-21.0.3-f5fafe940f8b0dd11f3a4e95bf98db88ec9b1804.jar
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\pre-dexed\debug\classes-1ce881fc2e70e346abc4842a09524c631c7e6161.jar
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\pre-dexed\debug\classes-bff5e6a08ebc398fb2480de1fb433c3a44b00f41.jar
+C:\Users\Kevin\Documents\CollegeYear4WinterQuarter\CPE405\SDI-MRDD\app\build\intermediates\pre-dexed\debug\classes-97e0dd746e957381b286fe3d3660b922abb30a6c.jar

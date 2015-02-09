@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SDI-MRDD</string>
+    <string name="well_page_name">Well Lists</string>
+    <string name="add_curve_page_name">Add Curve</string>
+    <string name="btn_sign_in">Sign In</string>
+    <string name="btn_logout_from_google">Logout</string>
+    <string name="btn_revoke_access">Revoke</string>
+    <string name="add_curve_action">Add Curve to Dashboard</string>
+    <string name="search_hint">Search Wells</string>
+    <string name="add_curve_action_search">Search Add Wells Page</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Strings for Add Curve Menu -->
+    <string name="add_curve_search_hint">Search curves</string>
+    <string name="add_curve_search_label">Add Curve Search</string>
+
+    <!-- Strings for Add Curve Page -->
+    <string name="confirm_curve_add_title">Confirm Add</string>
+    <string name="btn_add_curves">Add Curve(s)</string>
+    <string name="confirm_curve_msg">Are you sure you want to add the curve(s)?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="title_activity_well_list">WellListActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_well_dash_board">WellDashBoardActivity</string>
+    <string name="title_activity_add_curve">AddCurveActivity</string>
+
+</resources>
