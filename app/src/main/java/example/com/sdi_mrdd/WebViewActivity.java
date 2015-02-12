@@ -14,16 +14,21 @@ import android.webkit.WebViewClient;
  */
 public class WebViewActivity extends Activity{
 
+    WebView myWebView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
 
-        WebView myWebView = (WebView) findViewById(R.id.webview);
+        myWebView = (WebView) findViewById(R.id.webview);
 
         //Opens in-app instead of in browser
-        myWebView.setWebViewClient(new WebViewClient());
-        myWebView.setWebChromeClient(new WebChromeClient());
+        myWebView.setWebViewClient(new WebViewClient(){
+            public void onPageFinished(WebView view, String url){
+                myWebView.loadUrl("javascript:showData()");
+            }
+        });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         //Enable javascript
@@ -32,16 +37,6 @@ public class WebViewActivity extends Activity{
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
 
-        myWebView.loadUrl("http://www.gameinformer.com/");
-        //myWebView.loadUrl("file:///android_asset/www/index.html");
-        //myWebView.loadUrl("javascript:showData()");
-
-        //For minimum API 19 and up
-        /*myWebView.evaluateJavascript("showData()", new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String value) {
-                //store / process result received from executing Javascript.
-            }
-        }); */
+        myWebView.loadUrl("file:///android_asset/www/index.html");
     }
 }
