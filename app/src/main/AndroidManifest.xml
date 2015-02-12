@@ -9,8 +9,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -44,7 +42,7 @@
             android:name=".WellDashBoardActivity"
             android:label="@string/well_page_name"
             android:launchMode="singleTop"
-            android:parentActivityName="example.com.sdi_mrdd.WellListActivity" >
+            android:parentActivityName=".WellListActivity" >
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -57,7 +55,7 @@
             android:name=".AddCurveActivity"
             android:label="@string/add_curve_page_name"
             android:launchMode="singleTop"
-            android:parentActivityName="example.com.sdi_mrdd.WellDashBoardActivity" >
+            android:parentActivityName=".WellDashBoardActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -65,13 +63,18 @@
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable"
-                android:value=".AddCurveActivity"/>
+                android:value=".AddCurveActivity" />
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
         </activity>
-
+        <activity
+            android:name=".WebViewActivity"
+            android:label="@string/title_activity_web_view"
+            android:launchMode="singleTop"
+            android:parentActivityName=".WellListActivity">
+        </activity>
     </application>
 
 </manifest>

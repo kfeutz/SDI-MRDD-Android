@@ -37,6 +37,8 @@ public class LoginActivity extends ActionBarActivity {
     SharedPreferences pref;
     private Button signInBtn;
     private Button signOutBtn;
+    private Button webViewBtn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +102,14 @@ public class LoginActivity extends ActionBarActivity {
                 auth_dialog.show();
                 auth_dialog.setTitle("Authorize SDI");
                 auth_dialog.setCancelable(true);
+            }
+        });
+
+        webViewBtn =  (Button) findViewById(R.id.btn_webview);
+        webViewBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, WebViewActivity.class);
+                startActivity(intent);
             }
         });
     }
