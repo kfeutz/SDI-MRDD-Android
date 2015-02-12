@@ -21,7 +21,7 @@ public class WebViewActivity extends Activity{
 
         WebView myWebView = (WebView) findViewById(R.id.webview);
 
-        //Stops the browser from opening
+        //Opens in-app instead of in browser
         myWebView.setWebViewClient(new WebViewClient());
         myWebView.setWebChromeClient(new WebChromeClient());
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -32,9 +32,9 @@ public class WebViewActivity extends Activity{
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
 
-        //myWebView.loadUrl("http://www.google.com");
-        myWebView.loadUrl("file:///android_asset/www/index.html");
-        myWebView.loadUrl("javascript:showData()");
+        myWebView.loadUrl("http://www.gameinformer.com/");
+        //myWebView.loadUrl("file:///android_asset/www/index.html");
+        //myWebView.loadUrl("javascript:showData()");
 
         //For minimum API 19 and up
         /*myWebView.evaluateJavascript("showData()", new ValueCallback<String>() {
