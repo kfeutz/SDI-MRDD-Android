@@ -2,4 +2,4 @@
 <searchable xmlns:android="http://schemas.android.com/apk/res/android"
     android:label="@string/add_curve_search_label"
     android:hint="@string/add_curve_search_hint" >
-</searchable><!-- From: file:/C:/Users/Kevin/Documents/CollegeYear4WinterQuarter/CPE405/SDI-MRDD/app/src/main/res/xml/searchable.xml -->
+</searchable><!-- From: file:/C:/Users/Allen/Desktop/SDI-MRDD-Android/app/src/main/res/xml/searchable.xml -->

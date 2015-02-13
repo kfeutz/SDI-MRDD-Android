@@ -1431,10 +1431,10 @@ containing a value of this type.
         public static final int action_mode_bar=0x7f09002e;
         public static final int action_mode_bar_stub=0x7f09002d;
         public static final int action_mode_close_button=0x7f090020;
-        public static final int action_settings=0x7f09004c;
+        public static final int action_settings=0x7f09004e;
         public static final int activity_chooser_view_content=0x7f090021;
-        public static final int add_curve=0x7f09004d;
-        public static final int add_curve_search=0x7f09004b;
+        public static final int add_curve=0x7f09004f;
+        public static final int add_curve_search=0x7f09004d;
         public static final int add_curve_view=0x7f09003f;
         public static final int always=0x7f090016;
         public static final int beginning=0x7f090013;
@@ -1442,7 +1442,8 @@ containing a value of this type.
         public static final int btn_revoke_access=0x7f090046;
         public static final int btn_sign_in=0x7f090044;
         public static final int btn_sign_out=0x7f090045;
-        public static final int card_view=0x7f090047;
+        public static final int btn_webview=0x7f090047;
+        public static final int card_view=0x7f090049;
         public static final int checkbox=0x7f090029;
         public static final int collapseActionView=0x7f090017;
         public static final int decor_content_parent=0x7f09002f;
@@ -1459,7 +1460,7 @@ containing a value of this type.
         public static final int icon=0x7f090026;
         public static final int ifRoom=0x7f090018;
         public static final int image=0x7f090023;
-        public static final int info_text=0x7f090048;
+        public static final int info_text=0x7f09004a;
         public static final int listMode=0x7f090009;
         public static final int list_item=0x7f090025;
         public static final int login=0x7f090042;
@@ -1492,8 +1493,9 @@ containing a value of this type.
         public static final int up=0x7f090008;
         public static final int useLogo=0x7f090012;
         public static final int webv=0x7f090041;
-        public static final int well_dashboard_list=0x7f090049;
-        public static final int well_list_view=0x7f09004a;
+        public static final int webview=0x7f090048;
+        public static final int well_dashboard_list=0x7f09004b;
+        public static final int well_list_view=0x7f09004c;
         public static final int withText=0x7f09001a;
         public static final int wrap_content=0x7f09001d;
     }
@@ -1527,15 +1529,17 @@ containing a value of this type.
         public static final int activity_add_curve=0x7f030017;
         public static final int activity_auth_dialog=0x7f030018;
         public static final int activity_login=0x7f030019;
-        public static final int activity_well_dash_board=0x7f03001a;
-        public static final int activity_well_list=0x7f03001b;
-        public static final int support_simple_spinner_dropdown_item=0x7f03001c;
+        public static final int activity_web_view=0x7f03001a;
+        public static final int activity_well_dash_board=0x7f03001b;
+        public static final int activity_well_list=0x7f03001c;
+        public static final int support_simple_spinner_dropdown_item=0x7f03001d;
     }
     public static final class menu {
         public static final int menu_add_curve=0x7f0d0000;
         public static final int menu_login=0x7f0d0001;
-        public static final int menu_well_dash_board=0x7f0d0002;
-        public static final int menu_well_list=0x7f0d0003;
+        public static final int menu_web_view=0x7f0d0002;
+        public static final int menu_well_dash_board=0x7f0d0003;
+        public static final int menu_well_list=0x7f0d0004;
     }
     public static final class string {
         public static final int abc_action_bar_home_description=0x7f0b0000;
@@ -1565,16 +1569,18 @@ containing a value of this type.
         public static final int btn_logout_from_google=0x7f0b0018;
         public static final int btn_revoke_access=0x7f0b0019;
         public static final int btn_sign_in=0x7f0b001a;
-        public static final int confirm_curve_add_title=0x7f0b001b;
-        public static final int confirm_curve_msg=0x7f0b001c;
-        public static final int hello_world=0x7f0b001d;
-        public static final int no=0x7f0b001e;
-        public static final int search_hint=0x7f0b001f;
-        public static final int title_activity_add_curve=0x7f0b0020;
-        public static final int title_activity_well_dash_board=0x7f0b0021;
-        public static final int title_activity_well_list=0x7f0b0022;
-        public static final int well_page_name=0x7f0b0023;
-        public static final int yes=0x7f0b0024;
+        public static final int btn_webview=0x7f0b001b;
+        public static final int confirm_curve_add_title=0x7f0b001c;
+        public static final int confirm_curve_msg=0x7f0b001d;
+        public static final int hello_world=0x7f0b001e;
+        public static final int no=0x7f0b001f;
+        public static final int search_hint=0x7f0b0020;
+        public static final int title_activity_add_curve=0x7f0b0021;
+        public static final int title_activity_web_view=0x7f0b0022;
+        public static final int title_activity_well_dash_board=0x7f0b0023;
+        public static final int title_activity_well_list=0x7f0b0024;
+        public static final int well_page_name=0x7f0b0025;
+        public static final int yes=0x7f0b0026;
     }
     public static final class style {
         /**  Customize your theme here. 

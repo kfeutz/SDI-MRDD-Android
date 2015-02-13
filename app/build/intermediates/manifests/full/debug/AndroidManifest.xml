@@ -76,6 +76,12 @@
                 android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
         </activity>
         <activity
+            android:name="example.com.sdi_mrdd.WebViewActivity"
+            android:label="@string/title_activity_web_view"
+            android:launchMode="singleTop"
+            android:parentActivityName="example.com.sdi_mrdd.WellListActivity" >
+        </activity>
+        <activity
             android:name="android.support.v7.widget.TestActivity"
             android:label="RecyclerViewTestActivity" />
     </application>
