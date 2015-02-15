@@ -4,13 +4,17 @@
     <string name="app_name">SDI-MRDD</string>
     <string name="well_page_name">Well Lists</string>
     <string name="add_curve_page_name">Add Curve</string>
-    <string name="btn_sign_in">Sign In</string>
-    <string name="btn_logout_from_google">Logout</string>
+
     <string name="btn_revoke_access">Revoke</string>
     <string name="add_curve_action">Add Curve to Dashboard</string>
     <string name="search_hint">Search Wells</string>
     <string name="add_curve_action_search">Search Add Wells Page</string>
     <string name="action_settings">Settings</string>
+
+    <!--Strings for Login Page-->
+    <string name="btn_sign_in">Sign In</string>
+    <string name="btn_logout_from_google">SDI Sign In</string>
+    <string name="btn_cancel_login">Cancel</string>
 
     <!-- Strings for Add Curve Menu -->
     <string name="add_curve_search_hint">Search curves</string>

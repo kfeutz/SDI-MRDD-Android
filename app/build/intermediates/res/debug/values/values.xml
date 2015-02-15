@@ -189,7 +189,8 @@
     <string name="add_curve_search_label">Add Curve Search</string>
     <string name="app_name">SDI-MRDD</string>
     <string name="btn_add_curves">Add Curve(s)</string>
-    <string name="btn_logout_from_google">Logout</string>
+    <string name="btn_cancel_login">Cancel</string>
+    <string name="btn_logout_from_google">SDI Sign In</string>
     <string name="btn_revoke_access">Revoke</string>
     <string name="btn_sign_in">Sign In</string>
     <string name="confirm_curve_add_title">Confirm Add</string>
