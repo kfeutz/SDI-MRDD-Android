@@ -33,8 +33,13 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/btn_revoke_access"/>
+        <Button
+            android:id="@+id/btn_webview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_webview"/>
     </LinearLayout>
 
 
 </RelativeLayout>
-<!-- From: file:/C:/Users/Kevin/Documents/CollegeYear4WinterQuarter/CPE405/SDI-MRDD/app/src/main/res/layout/activity_login.xml -->
+<!-- From: file:/C:/Users/Allen/Desktop/SDI-MRDD-Android/app/src/main/res/layout/activity_login.xml -->
