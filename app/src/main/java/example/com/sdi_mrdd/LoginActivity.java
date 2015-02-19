@@ -159,8 +159,6 @@ public class LoginActivity extends ActionBarActivity {
                             dialog.dismiss();
                             /*Creates Asynchronous class to retrieve the actual token using the access code*/
                             new TokenGet().execute();
-
-                            Toast.makeText(getApplicationContext(),"Authorization Code is: " +authCode, Toast.LENGTH_SHORT).show();
                         }
                         /* Run on login failure */
                         else if(url.contains("error=access_denied")){
@@ -297,9 +295,11 @@ public class LoginActivity extends ActionBarActivity {
             pDialog.dismiss();
             if (json != null){
                 try {
+                    /* This is were you should POST the JSONObject to a URL provided by Daniel */
                     String tok = json.getString("access_token");
                     String expire = json.getString("expires_in");
                     String refresh = json.getString("token_type");
+                    Toast.makeText(getApplicationContext(),"Successfully retrieved token", Toast.LENGTH_SHORT).show();
                     Log.d("Token Access", tok);
                     Log.d("Expire", expire);
                     Log.d("Token Type", refresh);

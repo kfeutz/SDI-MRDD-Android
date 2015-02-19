@@ -19,8 +19,11 @@ public class WellDashBoardActivity extends ActionBarActivity {
     private String title;
     private String wellTitle;
     private ArrayList<String> curvesToAdd;
+    private ArrayList<String> curvesToDisplay;
     private ArrayAdapter<String> addedCurves;
     private ListView curvesList;
+    private DatabaseCommunicator dbCommunicator;/* Initialize the db communicator */
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,6 +32,8 @@ public class WellDashBoardActivity extends ActionBarActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        dbCommunicator = new DatabaseCommunicator(this);
+        dbCommunicator.open();
         /**
          * Get Title  from intent extras
          * Field will be null if value does not exist depending on which
@@ -40,7 +45,11 @@ public class WellDashBoardActivity extends ActionBarActivity {
             setTitle(title);
         }
 
+        curvesToDisplay = dbCommunicator.getCurveStringsForDashboard(wellTitle);
+        addedCurves = new ArrayAdapter<String>(WellDashBoardActivity.this,
+                android.R.layout.simple_list_item_1, curvesToDisplay);
         curvesList = (ListView) findViewById(R.id.well_dashboard_list);
+        curvesList.setAdapter(addedCurves);
     }
 
     @Override
@@ -85,16 +94,16 @@ public class WellDashBoardActivity extends ActionBarActivity {
          * Field will be null if value does not exist depending on which
          * intent started or resumed this activity.
          */
+        curvesToAdd = data.getStringArrayListExtra("curveList");
         if(requestCode==1  && resultCode==RESULT_OK) {
-            curvesToAdd = data.getExtras().getStringArrayList("curveList");
             if (curvesToAdd != null) {
                 /**
                  * Curve data has been passed to this activity.
                  * Display curve data here
                  */
                 Toast.makeText(WellDashBoardActivity.this, "Number of curves to add: " + curvesToAdd.size(), Toast.LENGTH_LONG).show();
-                addedCurves = new ArrayAdapter<String>(WellDashBoardActivity.this, android.R.layout.simple_list_item_1, curvesToAdd);
-                curvesList.setAdapter(addedCurves);
+                addedCurves.addAll(curvesToAdd);
+                addedCurves.notifyDataSetChanged();
             }
         }
     }

@@ -44,6 +44,7 @@ public class AddCurveActivity extends ActionBarActivity {
     private Button btnAddCurves;
     private String wellTitle;
     private ArrayList<String> curveData;
+    private DatabaseCommunicator dbCommunicator;
 
     String[] curves = new String[] {"Curve 1", "Curve 2", "Curve 3", "Curve 4",
             "Curve 5", "Curve 6", "Curve 7", "Curve 8", "Curve 9", "Curve 10",
@@ -57,6 +58,10 @@ public class AddCurveActivity extends ActionBarActivity {
         setContentView(R.layout.activity_add_curve);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
+
+        /* Initialize the db communicator */
+        dbCommunicator = new DatabaseCommunicator(this);
+        dbCommunicator.open();
 
         wellTitle = getIntent().getExtras().getString("wellName");
 
@@ -83,6 +88,7 @@ public class AddCurveActivity extends ActionBarActivity {
                                     boolean value = checked.get(key);
                                     if (value && curveList != null) {
                                         selectedCurveList.add(curveList.get(key));
+                                        dbCommunicator.createCurve(curveList.get(key), wellTitle);
                                     }
                                 }
                                 Intent intent = new Intent(AddCurveActivity.this, WellDashBoardActivity.class);
@@ -94,6 +100,7 @@ public class AddCurveActivity extends ActionBarActivity {
                                 intent.putStringArrayListExtra("curveList", selectedCurveList);
                                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 setResult(RESULT_OK, intent);
+
                                 AddCurveActivity.this.finish();
                                 startActivity(intent);
                                 //Stop the activity
