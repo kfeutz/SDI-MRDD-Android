@@ -80,6 +80,9 @@ public class LoginActivity extends ActionBarActivity {
     /* Button to sign out. Currently this starts SDI authentication */
     private Button signOutBtn;
 
+    /* Button to view the Web View */
+    private Button webViewBtn;
+
     /**
      * Set view of the page to the activity login template.
      * Add listeners to sign in button and sign out button.
@@ -91,6 +94,14 @@ public class LoginActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         pref = getSharedPreferences("AppPref", MODE_PRIVATE);
+
+        webViewBtn =  (Button) findViewById(R.id.btn_webview);
+        webViewBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(LoginActivity.this, WebViewActivity.class);
+                startActivity(intent);
+            }
+        });
 
         /* Currently sign in button just goes to well view page.
          * TODO: Change to same listener as sign out button once SDI authentication is fully working
@@ -160,7 +171,7 @@ public class LoginActivity extends ActionBarActivity {
                             /*Creates Asynchronous class to retrieve the actual token using the access code*/
                             new TokenGet().execute();
 
-                            Toast.makeText(getApplicationContext(),"Authorization Code is: " +authCode, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(),"Authorization Code is: " +authCode, Toast.LENGTH_SHORT).show();
                         }
                         /* Run on login failure */
                         else if(url.contains("error=access_denied")){
@@ -303,6 +314,8 @@ public class LoginActivity extends ActionBarActivity {
                     Log.d("Token Access", tok);
                     Log.d("Expire", expire);
                     Log.d("Token Type", refresh);
+
+                    new TokenPost(tok).execute();
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -311,6 +324,75 @@ public class LoginActivity extends ActionBarActivity {
                 Toast.makeText(getApplicationContext(), "Network Error", Toast.LENGTH_SHORT).show();
                 pDialog.dismiss();
             }
+        }
+    }
+
+    private class TokenPost extends AsyncTask<String, String, JSONObject> {
+        private String token;
+
+        private TokenPost(String token) {
+            this.token = token;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            System.out.println("Pre Execute");
+        }
+
+        /**
+         * This method sets up the URL for the POST request. Parameters
+         * are added to the token URL and a post is made.
+         *
+         * @param args
+         * @return JSONObject  A JSONObject representing the authentication token
+         */
+        @Override
+        protected JSONObject doInBackground(String... args) {
+            /* Creating HTTP client */
+            HttpClient httpClient = new DefaultHttpClient();
+
+                    /* Creating HTTP Post with token URL */
+            HttpPost httpPost = new HttpPost("http://10.0.2.2:5000/authenticate");
+
+                    /* List to hold parameters to append to our POST request */
+            List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(1);
+
+                    /* Add all appropriate parameters to POST request */
+            nameValuePair.add(new BasicNameValuePair("token", token));
+
+            try {
+                httpPost.setEntity(new UrlEncodedFormEntity(nameValuePair));
+            } catch (UnsupportedEncodingException e) {
+                // writing error to Log
+                e.printStackTrace();
+            }
+
+                    /* Making the actual HTTP Request and returning the JSON object */
+            try {
+                HttpResponse response = httpClient.execute(httpPost);
+
+                // writing response to log
+                Log.d("Http Response:", response.toString());
+                return new JSONObject(EntityUtils.toString(response.getEntity()));
+            } catch (ClientProtocolException e) {
+                // writing exception to log
+                e.printStackTrace();
+            } catch (IOException e) {
+                // writing exception to log
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject json) {
+            System.out.println("Post Execute");
+            Toast.makeText(getApplicationContext(),"Sign in Successful", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(LoginActivity.this, WellListActivity.class);
+            startActivity(intent);
         }
     }
 }
