@@ -7,3 +7,14 @@ local.properties
 app/build/
 /app/build/
 /build/
+app/build
+/app/build
+/build
+/*/out
+/*/build
+/*/*/build
+/*/*/production
+*.iws
+*.ipr
+*~
+*.swp
