@@ -29,6 +29,12 @@ public class ViewPlotActivity extends ActionBarActivity {
          */
         plotToDisplay = getIntent().getParcelableExtra("plot");
         plotName = plotToDisplay.getName();
+        /* Example of how to get a random unit value from a curve by providing a range */
+        int num1 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
+        int num2 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
+        int num3 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
+        int num4 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
+        int num5 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
         setTitle(plotName);
     }
 

@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * This class represents Curves as defined by SDI. Curves contain a unique
@@ -45,6 +46,17 @@ public abstract class Curve implements Parcelable {
     public Curve(Parcel in) {
         this.id = in.readString();
         this.name = in.readString();
+    }
+
+    /**
+     * Retrieves a random number to represent the units of this curve based on the passed range.
+     *
+     * @param low   The lower bound of the range in which to generate the number
+     * @param high  The upper bound of the range in which to generate the number
+     */
+    public int getUnitFromRange(int low, int high) {
+        Random r = new Random();
+        return r.nextInt(high - low) + low;
     }
 
     /**
