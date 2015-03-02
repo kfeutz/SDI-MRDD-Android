@@ -11,38 +11,91 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class serves as a communicator between the SQLite database
+ * and our Android activities. Contains a SQLiteDatabase and
+ * SQLiteDatabase helper. This class provides methods that perform SQLite queries
+ * to write and read data to and from our local database.
+ *
  * Created by Kevin on 2/16/2015.
  */
 public class DatabaseCommunicator {
-    // Database fields
+
+    /* Reference to SQLite database */
     private SQLiteDatabase database;
+
+    /* SQLite database helper instance */
     private SQLiteHelper dbHelper;
+
+    /* Array of the curve table column names */
     private String[] allCurveColumns = { SQLiteHelper.COLUMN_CURVE_KEY,  SQLiteHelper.COLUMN_CURVE_ID,
             SQLiteHelper.COLUMN_CURVE, SQLiteHelper.COLUMN_WELL_DASH };
 
+    /* Array of the plot table column names */
     private String[] allPlotColumns = { SQLiteHelper.COLUMN_PLOT_KEY,  SQLiteHelper.COLUMN_PLOT_NAME,
             SQLiteHelper.COLUMN_PLOT_WELLID};
 
+    /* Array of the plotcurves table column names */
     private String[] allPlotCurvesColumns = { SQLiteHelper.COLUMN_PLOTCURVES_KEY,  SQLiteHelper.COLUMN_PLOTCURVES_CURVE,
             SQLiteHelper.COLUMN_PLOTCURVES_PLOT};
 
+    /* Array of the dashboardcurves table column names */
     private String[] allDashboardCurvesColumns = { SQLiteHelper.COLUMN_DASHBOARDCURVES_KEY,  SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL,
             SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE};
 
+    /**
+     * Creates a new database helper based on the context. Typically pass
+     * the application that owns whatever activity is creating the database.
+     * Ex: this.getApplication()
+     *
+     * @param context   Used to open or create the database
+     */
     public DatabaseCommunicator(Context context) {
         dbHelper = new SQLiteHelper(context);
     }
 
+    /**
+     * Retrieves the database reference
+     *
+     * @throws SQLException
+     */
     public void open() throws SQLException {
         database = dbHelper.getWritableDatabase();
     }
 
+    /**
+     * Closes any open database object. Important to do when activity stops and database is
+     * no longer in use.
+     */
     public void close() {
         dbHelper.close();
     }
 
     /**
-     * Adds a curve to the SQLite database
+     * Checks to see if the Database is already running on the thread. Typically do this
+     * before using it.
+     *
+     * @return  True if the database is locked by the current thread, false otherwise.
+     */
+    public boolean isDbLockedByCurrentThread() { return database.isDbLockedByCurrentThread(); }
+
+    /**
+     * Checks to see if the Database locked on other threads. Typically do this
+     * before using it.
+     *
+     * @return  True if the database is locked by other threads, false otherwise.
+     */
+    public boolean isDbLockedByOtherThreads() {return database.isDbLockedByOtherThreads();}
+
+    /**
+     * Checks to see if the database connection is open. Typically d this before opening it.
+     *
+     * @return  True if the database connection is already open, false otherwise.
+     */
+    public boolean isOpen() { return database.isOpen(); }
+
+    /**
+     * Adds a curve to the curve table in the SQLite database
+     *
      * @param curveId   ID of the curve from SDI's servers
      * @param name      Name of the curve
      * @param wellDash  ID of the well the curve belongs too
@@ -64,13 +117,22 @@ public class DatabaseCommunicator {
         return newCurve;
     }
 
+    /**
+     * Deletes a curve from the curve table in the SQLite database
+     *
+     * @param curve     The Curve object to delete
+     */
     public void deleteCurve(Curve curve) {
         String id = curve.getId();
-        System.out.println("Curve deleted with id: " + id);
         database.delete(SQLiteHelper.TABLE_CURVES, SQLiteHelper.COLUMN_CURVE_ID
                 + " = " + id, null);
     }
 
+    /**
+     * Retrieves all curves from the curve table in the SQLite database
+     *
+     * @return  List<Curve>     List of all curves in the database
+     */
     public List<Curve> getAllCurves() {
         List<Curve> curves = new ArrayList<Curve>();
 
@@ -83,11 +145,18 @@ public class DatabaseCommunicator {
             curves.add(tempComment);
             cursor.moveToNext();
         }
-        // make sure to close the cursor
         cursor.close();
         return curves;
     }
 
+    /**
+     * Adds a curve to a specific well dashboard by inserting it into the
+     * dashboardcurves table.
+     *
+     * @param curveToAdd    The curve object to add to a well dashboard
+     * @param wellId        The id of the well that owns the dashboard
+     * @return  Curve       The added curve object
+     */
     public Curve addCurveToDashboard(Curve curveToAdd, String wellId) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL, wellId);
@@ -101,11 +170,17 @@ public class DatabaseCommunicator {
         return curveToAdd;
     }
 
+    /**
+     * Retrieves all curve objects belonging to the passed well's dashboard
+     *
+     * @param wellId            The id to the well that the curves should belong to.
+     * @return  List<Curve>     List of curves belonging to the passed well's dashboard.
+     */
     public List<Curve> getCurvesForDashboard(String wellId) {
         List<Curve> curves = new ArrayList<Curve>();
-        /* SELECT c.id, c.curveId, c.name, c.wellId FROM curves c, dashboardcurves pc,
-         * WHERE c.curveId = pc.curveId
-         * AND pc.plotId = plot.getId()
+        /* SELECT c.id, c.curveId, c.name, c.wellId FROM curves c, dashboardcurves dc,
+         * WHERE c.curveId = dc.curveId
+         * AND dc.plotId = wellId
          */
         String selectCurvesQuery = "SELECT "
                 + "c." + SQLiteHelper.COLUMN_CURVE_KEY + ", " + "c." + SQLiteHelper.COLUMN_CURVE_ID
@@ -122,27 +197,18 @@ public class DatabaseCommunicator {
             curves.add(tempComment);
             cursor.moveToNext();
         }
-        // make sure to close the cursor
+
         cursor.close();
         return curves;
     }
 
-    public ArrayList<String> getCurveStringsForDashboard(String wellDashName) {
-        ArrayList<String> curves = new ArrayList<String>();
-        Cursor cursor = database.query(SQLiteHelper.TABLE_CURVES,
-                allCurveColumns, SQLiteHelper.COLUMN_WELL_DASH + " = " + "'" + wellDashName + "'",
-                null, null, null, null);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            curves.add(cursor.getString(2));
-            cursor.moveToNext();
-        }
-        // make sure to close the cursor
-        cursor.close();
-        return curves;
-    }
-
+    /**
+     * Creates a curve based on the Cursor position. The cursor corresponds to the columns
+     * on the well table, which is currently ['_id', 'curve_id', 'name', 'well_id']
+     *
+     * @param cursor    Cursor pointing at query result rows
+     * @return          The curve corresponding to the cursor
+     */
     private Curve cursorToCurve(Cursor cursor) {
         Curve curve = new TimeCurve(cursor.getString(1), cursor.getString(2));
         curve.setId(cursor.getString(1));
@@ -151,7 +217,8 @@ public class DatabaseCommunicator {
 
     /**
      * Adds a plot to the SQLite database
-     * @param name      Custome name of the plot
+     *
+     * @param name      Custom name of the plot
      * @param wellId    ID to the well in which the Plot belongs
      * @return  Plot   The newly created plot
      */
@@ -172,6 +239,7 @@ public class DatabaseCommunicator {
 
     /**
      * Get all Plot objects stored with the well Id
+     *
      * @param wellId    Id of the well to which the plot belongs
      * @return          List of plots belonging to the passed wellId
      */
@@ -184,19 +252,21 @@ public class DatabaseCommunicator {
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
             Plot tempComment = cursorToPlot(cursor);
+            /* Get each curve and add it to the plot */
             tempComment.setCurves(getCurvesForPlot(tempComment));
             plots.add(tempComment);
             cursor.moveToNext();
         }
-        // make sure to close the cursor
         cursor.close();
         return plots;
     }
 
     /**
-     * Retrieves a list of curves belonging to the passed plot
+     * Retrieves a list of curves belonging to the passed plot. Helper method called by
+     * getPlotsForWell(...)
+     *
      * @param plot  The plot used to retrieve its curves
-     * @return      An arrayList of curves belong to the passed plot
+     * @return      An arrayList of curves belonging to the passed plot
      */
     public List<Curve> getCurvesForPlot(Plot plot) {
         List<Curve> curves = new ArrayList<Curve>();
@@ -220,28 +290,17 @@ public class DatabaseCommunicator {
             curves.add(tempComment);
             cursor.moveToNext();
         }
-        // make sure to close the cursor
         cursor.close();
         return curves;
     }
 
-    public List<Plot> getAllPlots() {
-        List<Plot> plots = new ArrayList<Plot>();
-
-        Cursor cursor = database.query(SQLiteHelper.TABLE_PLOTS,
-                allPlotColumns, null, null, null, null, null);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Plot tempComment = cursorToPlot(cursor);
-            plots.add(tempComment);
-            cursor.moveToNext();
-        }
-        // make sure to close the cursor
-        cursor.close();
-        return plots;
-    }
-
+    /**
+     * Adds a Curve object to a Plot object by inserting a row on the plotcurves table.
+     *
+     * @param plot          The plot object to add a curve to.
+     * @param curveToAdd    The curve object to be added to the plot.
+     * @return Plot         The plot object with the curve object added to its list.
+     */
     public Plot addCurveToPlot(Plot plot, Curve curveToAdd) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_PLOTCURVES_CURVE, curveToAdd.getId());
@@ -256,6 +315,13 @@ public class DatabaseCommunicator {
         return plot;
     }
 
+    /**
+     * Converts a Cursor to a plot by retrieving indices in the cursor that
+     * match the plot table rows ['_id', 'name', 'wellId']
+     *
+     * @param cursor    Cursor pointing to the plot table
+     * @return Plot     A plot created from cursor fields
+     */
     private Plot cursorToPlot(Cursor cursor) {
         Plot plot = new Plot(cursor.getInt(0), cursor.getString(1), cursor.getString(2));
         return plot;

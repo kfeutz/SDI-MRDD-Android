@@ -76,8 +76,11 @@ public class CreatePlotActivity extends ActionBarActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         /* Initialize the db communicator */
-        dbCommunicator = new DatabaseCommunicator(this);
+        dbCommunicator = new DatabaseCommunicator(this.getApplication());
         dbCommunicator.open();
+        while(dbCommunicator.isDbLockedByCurrentThread() || dbCommunicator.isDbLockedByOtherThreads()) {
+            //db is locked, keep looping
+        }
 
         wellId = getIntent().getExtras().getString("wellId");
 

@@ -17,20 +17,29 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-
+/**
+ * The object representing our view for the Well Dashboard. Contains a well title to display
+ * in the action bar; a reference to the well that it belongs to; a tab adapter and tab labels;
+ * a ViewPager for rendering the Fragments; and a DatabaseCommunicator to make SQLite calls
+ */
 public class WellDashBoardActivity extends ActionBarActivity implements
         ActionBar.TabListener {
 
     /* Title of the well */
     private String wellTitle;
+
     /* The well that the dashboard is displaying */
     private Well displayWell;
+
     /* Titles for the tabs */
     private String[] tabs = {"Dashboard", "Plots"};
+
     /* Custom adapter for the tabs */
     private TabsDashBoardAdapter mAdapter;
+
     /* view pager for the custom tabs */
     private ViewPager viewPager;
+
     /* Communicator to our database */
     private DatabaseCommunicator dbCommunicator;
 
@@ -44,24 +53,28 @@ public class WellDashBoardActivity extends ActionBarActivity implements
         dbCommunicator = new DatabaseCommunicator(this.getApplication());
         dbCommunicator.open();
 
+        /* Loop while the database is busy before using it */
+        while(dbCommunicator.isDbLockedByCurrentThread() || dbCommunicator.isDbLockedByOtherThreads()) {
+            //db is locked, keep looping
+        }
 
+        /* Set up our tabs adapter and add to ViewPage */
         mAdapter = new TabsDashBoardAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.dashboardPager);
-
-        final ActionBar actionBar = getSupportActionBar();
         viewPager.setAdapter(mAdapter);
+
+        /* Set up our action bar to display the tabs */
+        final ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-        // Adding Tabs
+        /* Add each tab to the bar */
         for (String tab_name : tabs) {
             actionBar.addTab(actionBar.newTab().setText(tab_name)
                     .setTabListener(this));
         }
 
-        /**
-         * on swiping the viewpager make respective tab selected
-         * */
+        /* Enables screen swiping to switch from tab to tab */
         viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
             @Override
@@ -81,37 +94,54 @@ public class WellDashBoardActivity extends ActionBarActivity implements
         });
 
 
-        /**
-         * Get Title  from intent extras
-         * Field will be null if value does not exist depending on which
-         * intent started or resumed this activity.
-         */
+        /* Get Title  from intent extras and set to page title */
         displayWell = getIntent().getParcelableExtra("well");
         wellTitle = displayWell.getName();
         setTitle(wellTitle);
     }
 
+    /**
+     * Closes the database connection when this activity is ended.
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+        dbCommunicator.close();
+    }
+
+    /**
+     * Retrieves the well title belonging to this WellDashBoardActivity
+     *
+     * @return String   The well title belonging to this WellDashBoardActivity
+     */
     public String getWellTitle() {
         return displayWell.getName();
     }
 
+    /**
+     * Retrieves the well id belonging to this WellDashBoardActivity
+     *
+     * @return String   The well id belonging to this WellDashBoardActivity
+     */
     public String getWellId() {
         return displayWell.getWellId();
     }
 
+    /**
+     * Retrieves the DatabaseCommunicator belonging to this WellDashBoardActivity
+     *
+     * @return DatabaseCommunicator   The DatabaseCommunicator title belonging
+     *                                to this WellDashBoardActivity
+     */
     public DatabaseCommunicator getDbCommunicator() {
         return dbCommunicator;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();  // Always call the superclass method first
-    }
-
+    /**
+     *  Changes tab selection based on which tab is selected
+     */
     @Override
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-        // on tab selected
-        // show respected fragment view
         viewPager.setCurrentItem(tab.getPosition());
     }
 
@@ -123,5 +153,10 @@ public class WellDashBoardActivity extends ActionBarActivity implements
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 }

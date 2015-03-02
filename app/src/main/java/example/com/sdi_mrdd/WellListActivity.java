@@ -26,15 +26,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-
+/**
+ * This class makes a REST call to retrieve all Wells from our backend service.
+ * It contains a WellAdapter to display the list of Wells, a Json parser to parse
+ * JSON strings into java Well objects, a ListView to reference the view to render the
+ * well list, and a list of Well objects retrieved from the REST call
+ */
 public class WellListActivity extends ActionBarActivity {
 
+    /* Adapter to display Wells on the list view */
     private WellAdapter listAdapter;
+
     /* Object to parse json strings into well objects */
     private WellJsonParser wellJsonParser = WellJsonParser.getInstance();
-    ListView wellListView;
-    List<Well> wellList;
 
+    /* The view reference in which to display the well list */
+    private ListView wellListView;
+
+    /* The list of Well objects resulting from the REST call */
+    private List<Well> wellList;
+
+    /**
+     * Sets the content view, declares our list view, and calls for
+     * the asynchronous REST GET request to retrieve the list of wells
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +62,27 @@ public class WellListActivity extends ActionBarActivity {
         new LoadWells().execute("");
     }
 
+    /**
+     * Asynchronous Task class that makes a REST GET request to the backend service.
+     * Currently, we are testing on local host.
+     *
+     * Use 'http://10.0.3.2:5000/' for Genymotion emulators
+     * Use 'http://10.0.2.2:5000/' for Android Studio emulators
+     */
     private class LoadWells extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
         String server = "http://10.0.3.2:5000/getWells";
         HttpGet request = new HttpGet(server);
         String jsonString = "";
+
+        /**
+         * Executes the REST getWells request. Reads the data as a string and appends
+         * it into one large JSON string. It returns this value to onPostExecute(...)
+         * result parameter
+         *
+         * @param params
+         * @return String   The JSON string representation of an array of wells.
+         */
         @Override
         protected String doInBackground(String... params) {
             Scanner scanner;
@@ -77,12 +110,22 @@ public class WellListActivity extends ActionBarActivity {
             return jsonString;
         }
 
+        /**
+         * Called after the REST call has completed. Parses the JSON string parameter result
+         * and adds each well to the well adapter. The list view's adapter is set to the well
+         * adapter and each item has an on click listener to direct the user to the respective
+         * Well dashboard page.
+         *
+         * @param result    The return value of the function above
+         *                  'doInBackground(String... params)'
+         */
         @Override
         protected void onPostExecute(String result) {
             Log.i("", "Result after getWells GET : " + result);
             wellList = wellJsonParser.parse(result);
             listAdapter = new WellAdapter (WellListActivity.this, R.layout.listview_well_row, wellList);
             wellListView.setAdapter(listAdapter);
+            /* Set onClick listeners for each row. Open that well's dashboard activity. */
             wellListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
             {
                 @Override
@@ -90,7 +133,8 @@ public class WellListActivity extends ActionBarActivity {
                                         long arg3)
                 {
                     Well value = (Well)adapter.getItemAtPosition(position);
-
+                    /* Attach the well object as an intent extra. Can now access well data
+                     * in WellDashBoardActivity */
                     Intent intent = new Intent(WellListActivity.this, WellDashBoardActivity.class);
                     intent.putExtra("well", value);
                     startActivity(intent);
@@ -113,22 +157,28 @@ public class WellListActivity extends ActionBarActivity {
 
     }
 
-
+    /**
+     * Renders the menu_well_list.xml display data for this menu
+     *
+     * @param menu
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_well_list, menu);
         return true;
     }
 
+    /**
+     * Adds listeners for the menu items.
+     *
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }

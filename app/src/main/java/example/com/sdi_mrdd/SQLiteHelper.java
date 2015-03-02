@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
+ * This class defines the database name, table names, and table structure of our
+ * SQLite database
+ *
  * Created by Kevin on 2/16/2015.
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
@@ -46,9 +49,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     /* Create table statement for Curves table */
     private static final String CREATE_TABLE_CURVES = "create table "
             + TABLE_CURVES + "(" + COLUMN_CURVE_KEY
-            + " integer primary key autoincrement, " + COLUMN_CURVE
-            + " text not null, " + COLUMN_CURVE_ID
-            + " text not null, "+  COLUMN_WELL_DASH
+            + " integer primary key autoincrement, " + COLUMN_CURVE_ID
+            + " text not null, " + COLUMN_CURVE
+            + " text not null, " + COLUMN_WELL_DASH
             + " text not null);";
 
     /* Create table statement for Plots table */
@@ -76,6 +79,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    /**
+     * Creates each table based on our String queries defined above.
+     *
+     * @param db
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_TABLE_CURVES);

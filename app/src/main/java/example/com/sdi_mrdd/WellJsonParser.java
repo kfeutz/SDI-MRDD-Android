@@ -9,19 +9,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Helper singleton class which parses JSON strings into
+ * Well objects based on the current REST api.
+ *
  * Created by Kevin on 2/28/2015.
  */
 public class WellJsonParser implements Parser<Well> {
 
+    /* Instance to itself (Singleton) */
     private static final WellJsonParser instance = new WellJsonParser();
 
+    /* Class tag for Log cat */
+    private static final String TAG = "WellJsonParser";
+
+    /**
+     * Retrieves the instance of the well json parser
+     *
+     * @return  WellJsonParser     The well json parser object
+     */
     public static WellJsonParser getInstance() {
         return instance;
     }
 
-    private static final String TAG = "WellJsonParser";
     /**
      * Converts a json string to a list of Well objects
+     *
      * @param jsonString    The JSON representation of the list of wells
      * @return  List<Well>  A List containing the Wells from the JSON string.
      */

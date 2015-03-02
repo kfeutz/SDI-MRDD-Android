@@ -11,15 +11,23 @@ import android.widget.TextView;
 import java.util.List;
 
 /**
+ * Provides a way for wells to be rendered as rows in a ListView
+ *
  * Created by Kevin on 2/28/2015.
  */
 public class WellAdapter extends ArrayAdapter<Well> {
-    Context context;
-    int layoutResourceId;
-    List<Well> data = null;
+    /** The context to which the adapter belongs */
+    private Context context;
+
+    /** Resource id of the layout file we want to use for displaying each plot */
+    private int layoutResourceId;
+
+    /** The list of Wells to display */
+    private List<Well> data = null;
 
     /**
      * Create a Well Adapter for displaying on the Well List page.
+     *
      * @param context   A reference to the activity in which we use WellAdapter
      * @param layoutResourceId  Resource id of the layout file we want to use for displaying each ListView
      *                          item. It is in listview_well_row.xml
@@ -35,6 +43,7 @@ public class WellAdapter extends ArrayAdapter<Well> {
     /**
      * Will be called for each item in the ListView being rendered. Creates view with the properties set
      * as we want
+     *
      * @param position      Position of the item in the list view
      * @param convertView   The actual row being displayed
      * @param parent        Used to inflate each row
@@ -66,6 +75,10 @@ public class WellAdapter extends ArrayAdapter<Well> {
         return row;
     }
 
+    /**
+     * Static class that represents the android widget objects to include in each Well
+     * row
+     */
     static class WellHolder
     {
         TextView txtTitle;

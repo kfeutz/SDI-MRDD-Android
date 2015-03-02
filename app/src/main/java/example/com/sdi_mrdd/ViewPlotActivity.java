@@ -5,7 +5,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
+/**
+ * This class displays a graphical representation of a plot. Each ViewPlotActivity
+ * has a Plot and a String plotName
+ */
 public class ViewPlotActivity extends ActionBarActivity {
 
     /* Hold the plot object to display */
@@ -29,22 +32,29 @@ public class ViewPlotActivity extends ActionBarActivity {
         setTitle(plotName);
     }
 
-
+    /**
+     * Specifies which menu to render for ViewPlotActivity
+     *
+     * @param menu
+     * @return true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_view_plot, menu);
         return true;
     }
 
+    /**
+     * Handles action bar clicks
+     *
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        /* Example for seeing which item was selected */
         if (id == R.id.action_settings) {
             return true;
         }

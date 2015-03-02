@@ -71,7 +71,7 @@ public class AddCurveActivity extends ActionBarActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         /* Initialize the db communicator */
-        dbCommunicator = new DatabaseCommunicator(this);
+        dbCommunicator = new DatabaseCommunicator(getApplicationContext());
         dbCommunicator.open();
 
         wellId = getIntent().getExtras().getString("wellId");
