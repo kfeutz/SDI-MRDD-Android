@@ -14,7 +14,6 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name" >
@@ -53,7 +52,7 @@
 
         <!-- Activity declaration for AddCurveActivity -->
         <activity
-            android:name=".AddCurveActivity"
+            android:name=".activities.AddCurveActivity"
             android:label="@string/add_curve_page_name"
             android:launchMode="singleTop"
             android:parentActivityName=".WellDashBoardActivity" >
@@ -70,11 +69,32 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
         </activity>
+
+        <!-- Activity declaration for CreatePlotActivity -->
+        <activity
+            android:name=".activities.CreatePlotActivity"
+            android:label="@string/create_plot_page_name"
+            android:launchMode="singleTop"
+            android:parentActivityName=".WellDashBoardActivity" >
+
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
+        </activity>
         <activity
             android:name=".WebViewActivity"
             android:label="@string/title_activity_web_view"
             android:launchMode="singleTop"
-            android:parentActivityName=".WellListActivity">
+            android:parentActivityName=".WellListActivity" >
+        </activity>
+        <activity
+            android:name=".ViewPlotActivity"
+            android:label="@string/title_activity_view_plot"
+            android:parentActivityName=".WellDashBoardActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
         </activity>
     </application>
 

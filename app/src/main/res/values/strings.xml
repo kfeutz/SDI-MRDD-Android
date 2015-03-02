@@ -4,7 +4,6 @@
     <string name="app_name">SDI-MRDD</string>
     <string name="well_page_name">Well Lists</string>
     <string name="add_curve_page_name">Add Curve</string>
-
     <string name="btn_revoke_access">Revoke</string>
     <string name="btn_webview">Webview</string>
     <string name="add_curve_action">Add Curve to Dashboard</string>
@@ -12,7 +11,7 @@
     <string name="add_curve_action_search">Search Add Wells Page</string>
     <string name="action_settings">Settings</string>
 
-    <!--Strings for Login Page-->
+    <!-- Strings for Login Page -->
     <string name="btn_sign_in">Sign In</string>
     <string name="btn_logout_from_google">SDI Sign In</string>
     <string name="btn_cancel_login">Cancel</string>
@@ -32,5 +31,11 @@
     <string name="title_activity_well_dash_board">WellDashBoardActivity</string>
     <string name="title_activity_add_curve">AddCurveActivity</string>
     <string name="title_activity_web_view">WebViewActivity</string>
+
+    <!-- Strings for Create Plot Page -->
+    <string name="btn_create_plot">Create Plot</string>
+    <string name="plot_name_prompt">Plot Name: </string>
+    <string name="create_plot_page_name">Create New Plot</string>
+    <string name="title_activity_view_plot">ViewPlotActivity</string>
 
 </resources>

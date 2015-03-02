@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,13 +23,17 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 
 public class WellListActivity extends ActionBarActivity {
 
-    private ArrayAdapter<String> listAdapter;
+    private WellAdapter listAdapter;
+    /* Object to parse json strings into well objects */
+    private WellJsonParser wellJsonParser = WellJsonParser.getInstance();
     ListView wellListView;
-    ArrayList<String> wellList;
+    List<Well> wellList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,38 +47,41 @@ public class WellListActivity extends ActionBarActivity {
 
     private class LoadWells extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.2.2:5000/getWells";
+        String server = "http://10.0.3.2:5000/getWells";
         HttpGet request = new HttpGet(server);
+        String jsonString = "";
         @Override
         protected String doInBackground(String... params) {
+            Scanner scanner;
+            HttpResponse response;
+            HttpEntity entity;
             try {
-                HttpResponse response = client.execute(request);
-                wellList = new ArrayList<String>();
-                HttpEntity entity = response.getEntity();
-                JSONArray wellArray = new JSONArray();
+                response = client.execute(request);
+                entity = response.getEntity();
 
                 if(entity != null) {
                     InputStream input = entity.getContent();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-                    String wells;
-                    while((wells = reader.readLine()) != null){
-                        wellArray = new JSONArray(wells);
-                    }
-                    for(int i = 0; i < wellArray.length(); i++)
-                    {
-                        wellList.add(wellArray.getString(i));
+                    if (input != null) {
+                        scanner = new Scanner(input);
+
+                        while (scanner.hasNext()) {
+                            jsonString += scanner.next();
+                        }
+                        input.close();
                     }
                 }
             }
             catch(Exception e) {
                 e.printStackTrace();
             }
-            return "Executed";
+            return jsonString;
         }
 
         @Override
         protected void onPostExecute(String result) {
-            listAdapter = new ArrayAdapter<String>(WellListActivity.this, android.R.layout.simple_list_item_1, wellList);
+            Log.i("", "Result after getWells GET : " + result);
+            wellList = wellJsonParser.parse(result);
+            listAdapter = new WellAdapter (WellListActivity.this, R.layout.listview_well_row, wellList);
             wellListView.setAdapter(listAdapter);
             wellListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
             {
@@ -81,10 +89,10 @@ public class WellListActivity extends ActionBarActivity {
                 public void onItemClick(AdapterView<?> adapter, View v, int position,
                                         long arg3)
                 {
-                    String value = (String)adapter.getItemAtPosition(position);
+                    Well value = (Well)adapter.getItemAtPosition(position);
 
                     Intent intent = new Intent(WellListActivity.this, WellDashBoardActivity.class);
-                    intent.putExtra("title", value);
+                    intent.putExtra("well", value);
                     startActivity(intent);
                 }
             });
