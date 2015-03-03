@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.activities.AddCurveActivity;
 import example.com.sdi_mrdd.activities.WellDashBoardActivity;
+import example.com.sdi_mrdd.adapters.CurveAdapter;
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.Curve;
 
@@ -33,6 +35,9 @@ public class WellDashBoardFragment extends Fragment {
     /* Result tag used to check the result of adding a curve */
     private static final int RESULT_OK = -1;
 
+    /* Adapter to display Wells on the list view */
+    private CurveAdapter listAdapter;
+
     /* Contains the names of curves added from the Add Curve screen */
     private ArrayList<String> curvesToAdd;
 
@@ -46,7 +51,7 @@ public class WellDashBoardFragment extends Fragment {
     private List<Curve> curveList;
 
     /* The list view widget displayed on the dashboard fragment */
-    private ListView curvesListView;
+    private GridView curvesListView;
 
     /* Database communicator to talk to our SQLite database */
     private DatabaseCommunicator dbCommunicator;
@@ -85,10 +90,12 @@ public class WellDashBoardFragment extends Fragment {
 
         /* Initializes the array adapter to display on the page
          * TODO: Change this to be ArrayAdapter<Curve> so we display Curves instead of strings */
-        addedCurves = new ArrayAdapter<String>(rootView.getContext(),
-                android.R.layout.simple_list_item_1, curvesToDisplay);
-        curvesListView = (ListView) rootView.findViewById(R.id.well_dashboard_list);
-        curvesListView.setAdapter(addedCurves);
+
+        listAdapter = new CurveAdapter(rootView.getContext(), R.layout.well_dash_board_card);
+        listAdapter.addAll(curveList);
+
+        curvesListView = (GridView) rootView.findViewById(R.id.well_dashboard_list);
+        curvesListView.setAdapter(listAdapter);
 
         return rootView;
     }
@@ -151,8 +158,8 @@ public class WellDashBoardFragment extends Fragment {
                  * Curve data has been passed to this activity.
                  * Display curve data here
                  */
-                addedCurves.addAll(curvesToAdd);
-                addedCurves.notifyDataSetChanged();
+                /*addedCurves.addAll(curvesToAdd);
+                addedCurves.notifyDataSetChanged();*/
             }
         }
     }

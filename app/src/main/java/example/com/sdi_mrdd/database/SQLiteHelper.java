@@ -52,7 +52,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + " integer primary key autoincrement, " + COLUMN_CURVE_ID
             + " text not null, " + COLUMN_CURVE
             + " text not null, " + COLUMN_WELL_DASH
-            + " text not null);";
+            + " text not null, "
+            + "UNIQUE (" + COLUMN_CURVE + ", " + COLUMN_WELL_DASH +  ")" + " ON CONFLICT REPLACE);";
 
     /* Create table statement for Plots table */
     private static final String CREATE_TABLE_PLOTS = "create table "

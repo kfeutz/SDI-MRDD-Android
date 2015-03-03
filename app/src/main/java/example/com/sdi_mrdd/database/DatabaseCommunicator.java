@@ -109,14 +109,28 @@ public class DatabaseCommunicator {
         values.put(SQLiteHelper.COLUMN_CURVE_ID, curveId);
         values.put(SQLiteHelper.COLUMN_CURVE, name);
         values.put(SQLiteHelper.COLUMN_WELL_DASH, wellDash);
-        long insertId = database.insert(SQLiteHelper.TABLE_CURVES, null,
+
+        String insertCurveQuery = "INSERT OR IGNORE INTO " + SQLiteHelper.TABLE_CURVES + " ("
+                + SQLiteHelper.COLUMN_CURVE_ID + ", " + SQLiteHelper.COLUMN_CURVE + ", " + SQLiteHelper.COLUMN_WELL_DASH + ")"
+                + " values ('" + curveId + "', '" + name + "', '" + wellDash + "');";
+        Cursor cursor = database.rawQuery(insertCurveQuery, null);
+
+        /*long insertId = database.insert(SQLiteHelper.TABLE_CURVES, null,
                 values);
         Cursor cursor = database.query(SQLiteHelper.TABLE_CURVES,
                 allCurveColumns, SQLiteHelper.COLUMN_CURVE_KEY + " = " + insertId, null,
-                null, null, null);
+                null, null, null);*/
+
         cursor.moveToFirst();
-        Curve newCurve = cursorToCurve(cursor);
-        cursor.close();
+        Curve newCurve;
+        /* Curve already exists */
+        if (cursor.getColumnCount() == 0) {
+            newCurve = new TimeCurve(curveId, name);
+        }
+        else {
+            newCurve = cursorToCurve(cursor);
+            cursor.close();
+        }
         return newCurve;
     }
 
@@ -164,6 +178,7 @@ public class DatabaseCommunicator {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL, wellId);
         values.put(SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE, curveToAdd.getId());
+
         long insertId = database.insert(SQLiteHelper.TABLE_DASHBOARDCURVES, null,
                 values);
         Cursor cursor = database.query(SQLiteHelper.TABLE_DASHBOARDCURVES,
@@ -273,17 +288,17 @@ public class DatabaseCommunicator {
      */
     public List<Curve> getCurvesForPlot(Plot plot) {
         List<Curve> curves = new ArrayList<Curve>();
-        String curveColumn[] = {SQLiteHelper.COLUMN_PLOTCURVES_CURVE};
         /* SELECT c.id, c.curveId, c.name, c.wellId FROM curves c, plotcurves pc,
          * WHERE c.curveId = pc.curveId
          * AND pc.plotId = plot.getId()
          */
+        long plotId = plot.getId();
         String selectCurvesQuery = "SELECT "
                 + "c." + SQLiteHelper.COLUMN_CURVE_KEY + ", " + "c." + SQLiteHelper.COLUMN_CURVE_ID
                 + ", " + "c." +  SQLiteHelper.COLUMN_CURVE + ", " + "c." +  SQLiteHelper.COLUMN_WELL_DASH
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_PLOTCURVES + " pc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "pc." + SQLiteHelper.COLUMN_PLOTCURVES_CURVE
-                + " AND pc." + SQLiteHelper.COLUMN_PLOTCURVES_PLOT + " = " + "'" + plot.getId() + "';";
+                + " AND pc." + SQLiteHelper.COLUMN_PLOTCURVES_PLOT + " = " +  plotId;
 
         Cursor cursor = database.rawQuery(selectCurvesQuery, null);
 
