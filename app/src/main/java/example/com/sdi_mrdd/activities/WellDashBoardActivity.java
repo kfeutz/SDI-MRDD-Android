@@ -1,21 +1,15 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.activities;
 
 import android.support.v7.app.ActionBar;
-import android.content.Intent;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.Window;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
 
-import java.util.ArrayList;
+import example.com.sdi_mrdd.database.DatabaseCommunicator;
+import example.com.sdi_mrdd.R;
+import example.com.sdi_mrdd.adapters.TabsDashBoardAdapter;
+import example.com.sdi_mrdd.dataitems.Well;
 
 /**
  * The object representing our view for the Well Dashboard. Contains a well title to display

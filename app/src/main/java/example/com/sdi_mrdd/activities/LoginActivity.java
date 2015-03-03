@@ -1,28 +1,23 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.activities;
 
 import android.app.Activity;
- import android.app.AlertDialog;
- import android.app.Dialog;
+import android.app.Dialog;
  import android.app.ProgressDialog;
- import android.content.DialogInterface;
- import android.content.Intent;
+import android.content.Intent;
  import android.content.SharedPreferences;
  import android.net.Uri;
  import android.os.AsyncTask;
  import android.support.v7.app.ActionBarActivity;
  import android.os.Bundle;
  import android.util.Log;
- import android.util.SparseBooleanArray;
- import android.view.Menu;
+import android.view.Menu;
  import android.view.MenuItem;
  import android.view.View;
  import android.view.WindowManager;
  import android.webkit.WebView;
  import android.webkit.WebViewClient;
  import android.widget.Button;
- import android.widget.LinearLayout;
- import android.widget.TextView;
- import android.widget.Toast;
+import android.widget.Toast;
  import android.graphics.Bitmap;
 
  import org.apache.http.HttpResponse;
@@ -41,6 +36,8 @@ import android.app.Activity;
  import java.io.UnsupportedEncodingException;
  import java.util.ArrayList;
  import java.util.List;
+
+import example.com.sdi_mrdd.R;
 
 /**
  * This class handles all login details. A request is made to SDI's

@@ -1,4 +1,4 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +15,11 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.List;
 
+import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.activities.AddCurveActivity;
+import example.com.sdi_mrdd.activities.WellDashBoardActivity;
+import example.com.sdi_mrdd.database.DatabaseCommunicator;
+import example.com.sdi_mrdd.dataitems.Curve;
 
 /**
  * This class represents a Fragment to show when the Dashboard tab is selected

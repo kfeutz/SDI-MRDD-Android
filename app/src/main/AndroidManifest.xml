@@ -15,7 +15,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,28 +26,28 @@
 
         <!-- Activity declaration for WellListActivity -->
         <activity
-            android:name=".WellListActivity"
+            android:name=".activities.WellListActivity"
             android:label="@string/well_page_name"
             android:launchMode="singleTop"
-            android:parentActivityName=".LoginActivity" >
+            android:parentActivityName=".activities.LoginActivity" >
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="example.com.sdi_mrdd.LoginActivity" />
+                android:value=".activities.LoginActivity" />
         </activity>
 
         <!-- Activity declaration for WellDashboardActivity -->
         <activity
-            android:name=".WellDashBoardActivity"
+            android:name=".activities.WellDashBoardActivity"
             android:label="@string/well_page_name"
             android:launchMode="singleTop"
-            android:parentActivityName=".WellListActivity" >
+            android:parentActivityName=".activities.WellListActivity" >
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="example.com.sdi_mrdd.WellListActivity" />
+                android:value=".activities.WellListActivity" />
         </activity>
 
         <!-- Activity declaration for AddCurveActivity -->
@@ -55,7 +55,7 @@
             android:name=".activities.AddCurveActivity"
             android:label="@string/add_curve_page_name"
             android:launchMode="singleTop"
-            android:parentActivityName=".WellDashBoardActivity" >
+            android:parentActivityName=".activities.WellDashBoardActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -67,7 +67,7 @@
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
+                android:value=".activities.WellDashBoardActivity" />
         </activity>
 
         <!-- Activity declaration for CreatePlotActivity -->
@@ -75,26 +75,26 @@
             android:name=".activities.CreatePlotActivity"
             android:label="@string/create_plot_page_name"
             android:launchMode="singleTop"
-            android:parentActivityName=".WellDashBoardActivity" >
+            android:parentActivityName=".activities.WellDashBoardActivity" >
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
+                android:value=".activities.WellDashBoardActivity" />
         </activity>
         <activity
-            android:name=".WebViewActivity"
+            android:name=".activities.WebViewActivity"
             android:label="@string/title_activity_web_view"
             android:launchMode="singleTop"
-            android:parentActivityName=".WellListActivity" >
+            android:parentActivityName=".activities.WellListActivity" >
         </activity>
         <activity
-            android:name=".ViewPlotActivity"
+            android:name=".activities.ViewPlotActivity"
             android:label="@string/title_activity_view_plot"
-            android:parentActivityName=".WellDashBoardActivity" >
+            android:parentActivityName=".activities.WellDashBoardActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="example.com.sdi_mrdd.WellDashBoardActivity" />
+                android:value=".activities.WellDashBoardActivity" />
         </activity>
     </application>
 

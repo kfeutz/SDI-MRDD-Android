@@ -1,4 +1,4 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -8,6 +8,8 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import example.com.sdi_mrdd.R;
 
 /**
  * Created by Olin on 2/3/2015.

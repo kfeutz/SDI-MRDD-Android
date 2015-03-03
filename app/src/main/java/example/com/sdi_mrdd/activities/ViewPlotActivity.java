@@ -1,9 +1,12 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.activities;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import example.com.sdi_mrdd.dataitems.Plot;
+import example.com.sdi_mrdd.R;
 
 /**
  * This class displays a graphical representation of a plot. Each ViewPlotActivity

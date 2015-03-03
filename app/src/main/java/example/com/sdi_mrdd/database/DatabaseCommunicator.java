@@ -1,14 +1,17 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.database;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import example.com.sdi_mrdd.dataitems.Curve;
+import example.com.sdi_mrdd.dataitems.Plot;
+import example.com.sdi_mrdd.dataitems.TimeCurve;
 
 /**
  * This class serves as a communicator between the SQLite database

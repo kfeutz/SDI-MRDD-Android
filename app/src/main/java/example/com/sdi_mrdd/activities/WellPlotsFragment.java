@@ -1,4 +1,4 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.activities;
 
 import android.content.Intent;
   import android.os.Bundle;
@@ -12,10 +12,15 @@ import android.content.Intent;
   import android.widget.AdapterView;
   import android.widget.ListView;
 
-  import java.util.ArrayList;
-  import java.util.List;
+import java.util.List;
 
-  import example.com.sdi_mrdd.activities.CreatePlotActivity;
+import example.com.sdi_mrdd.R;
+import example.com.sdi_mrdd.activities.CreatePlotActivity;
+import example.com.sdi_mrdd.activities.ViewPlotActivity;
+import example.com.sdi_mrdd.activities.WellDashBoardActivity;
+import example.com.sdi_mrdd.adapters.PlotAdapter;
+import example.com.sdi_mrdd.database.DatabaseCommunicator;
+import example.com.sdi_mrdd.dataitems.Plot;
 
 /**
    * This class represents a Fragment to show when the Plot tab is selected on the Well dashboard

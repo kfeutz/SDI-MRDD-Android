@@ -1,4 +1,4 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.dataitems;
 
 import android.os.Parcel;
 import android.os.Parcelable;

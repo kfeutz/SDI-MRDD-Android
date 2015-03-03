@@ -1,8 +1,11 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.adapters;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+
+import example.com.sdi_mrdd.activities.WellDashBoardFragment;
+import example.com.sdi_mrdd.activities.WellPlotsFragment;
 
 /**
  * Used by WellDashboard to render the tabs. This class defines which

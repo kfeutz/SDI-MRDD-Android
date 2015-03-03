@@ -29,12 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import example.com.sdi_mrdd.Curve;
-import example.com.sdi_mrdd.CurveJsonParser;
-import example.com.sdi_mrdd.DatabaseCommunicator;
-import example.com.sdi_mrdd.Plot;
+import example.com.sdi_mrdd.dataitems.Curve;
+import example.com.sdi_mrdd.dataitems.CurveJsonParser;
+import example.com.sdi_mrdd.database.DatabaseCommunicator;
+import example.com.sdi_mrdd.dataitems.Plot;
 import example.com.sdi_mrdd.R;
-import example.com.sdi_mrdd.WellDashBoardActivity;
 
 /**
  * Created by Kevin on 3/1/2015.

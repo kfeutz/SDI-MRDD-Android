@@ -1,4 +1,4 @@
-package example.com.sdi_mrdd;
+package example.com.sdi_mrdd.adapters;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.List;
+
+import example.com.sdi_mrdd.dataitems.Plot;
+import example.com.sdi_mrdd.R;
 
 /**
  * Provides a way for plots to be rendered as rows in a ListView
