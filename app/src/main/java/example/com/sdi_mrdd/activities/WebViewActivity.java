@@ -1,6 +1,7 @@
 package example.com.sdi_mrdd.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -11,6 +12,9 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+
+import java.util.Random;
 
 import example.com.sdi_mrdd.R;
 
@@ -20,11 +24,21 @@ import example.com.sdi_mrdd.R;
 public class WebViewActivity extends ActionBarActivity {
 
     WebView myWebView;
+    private Button JSBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web_view);
+
+        JSBtn =  (Button) findViewById(R.id.btn_testJS);
+        JSBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Random r = new Random();
+                int i = r.nextInt(20 - 1) + 1;
+                myWebView.loadUrl("javascript:setV(\""+i+"\")");
+            }
+        });
 
         myWebView = (WebView) findViewById(R.id.webview);
 

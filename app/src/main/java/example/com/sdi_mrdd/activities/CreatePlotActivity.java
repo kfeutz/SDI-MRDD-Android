@@ -143,7 +143,7 @@ public class CreatePlotActivity extends ActionBarActivity {
 
     private class LoadCurves extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.3.2:5000/getCurvesForWell?well="
+        String server = "http://10.0.2.2:5000/getCurvesForWell?well="
                 + CreatePlotActivity.this.getWellId();
         HttpGet request = new HttpGet(server);
         String jsonString = "";

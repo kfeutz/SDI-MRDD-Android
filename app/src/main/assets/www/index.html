@@ -35,19 +35,28 @@
 
                 var t = -1;
                 var n = 40;
-                var v = 0;
+                var v = 10;
                 var data = d3.range(n).map(next);
+
+                this.setV = function (value) {
+                    v = value;
+                }
+
+                function getV () {
+                    return v;
+                }
 
                 function next () {
                     return {
                         time: ++t,
-                        value: v = Math.floor(Math.random()*20)
+                        value: v
+                        // value: v = Math.floor(Math.random()*20)
                     };
                 }
 
                 var margin = {top: 10, right: 10, bottom: 20, left: 40},
-                width = 960 - margin.left - margin.right,
-                height = 500 - margin.top - margin.bottom;
+                width = 300 - margin.left - margin.right,
+                height = 340 - margin.top - margin.bottom;
 
                 var x = d3.scale.linear()
                 .domain([0, n - 1])
