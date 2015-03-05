@@ -1,27 +1,43 @@
 package example.com.sdi_mrdd.activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.JsonReader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.activities.AddCurveActivity;
 import example.com.sdi_mrdd.activities.WellDashBoardActivity;
 import example.com.sdi_mrdd.adapters.CurveAdapter;
+import example.com.sdi_mrdd.adapters.WellAdapter;
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.Curve;
+import example.com.sdi_mrdd.dataitems.Well;
 
 /**
  * This class represents a Fragment to show when the Dashboard tab is selected
@@ -94,6 +110,11 @@ public class WellDashBoardFragment extends Fragment {
         listAdapter = new CurveAdapter(rootView.getContext(), R.layout.well_dash_board_card);
         listAdapter.addAll(curveList);
 
+        for (int i = 0; i < curveList.size(); i++) {
+            new UpdateCurve(((WellDashBoardActivity) getActivity()).getWellId(),
+                    curveList.get(i)).execute();
+        }
+
         curvesListView = (GridView) rootView.findViewById(R.id.well_dashboard_list);
         curvesListView.setAdapter(listAdapter);
 
@@ -121,6 +142,12 @@ public class WellDashBoardFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
+            case R.id.refresh:
+                for (int i = 0; i < curveList.size(); i++) {
+                    new UpdateCurve(((WellDashBoardActivity) getActivity()).getWellId(),
+                            curveList.get(i)).execute();
+                }
+                return true;
             case R.id.add_curve:
                 Intent intent = new Intent(getActivity(), AddCurveActivity.class);
                 intent.putExtra("wellId", ((WellDashBoardActivity) getActivity()).getWellId());
@@ -145,22 +172,124 @@ public class WellDashBoardFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode,
                                     Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        /**
-         * Get ArrayList from intent extras. This ArrayList contains the string
-         * list representing the selected curves to add to the dashboard
-         * Field will be null if value does not exist depending on which
-         * intent started or resumed this activity.
-         */
+
         if(requestCode==1  && resultCode==RESULT_OK) {
-            curvesToAdd = data.getStringArrayListExtra("curveList");
-            if (curvesToAdd != null) {
-                /**
-                 * Curve data has been passed to this activity.
-                 * Display curve data here
-                 */
-                /*addedCurves.addAll(curvesToAdd);
-                addedCurves.notifyDataSetChanged();*/
+            /* Open the database communicator if it is closed */
+            if (!dbCommunicator.isOpen()) {
+                dbCommunicator.open();
             }
+            /**
+             * Get ArrayList of curves for this dashboard from the SQLite database.
+             * This ArrayList contains the string
+             * list representing the selected curves to add to the dashboard
+             * Field will be null if value does not exist depending on which
+             * intent started or resumed this activity.
+             */
+            curveList = dbCommunicator.getCurvesForDashboard(((WellDashBoardActivity) getActivity()).getWellId());
+            for (int i = 0; i < curveList.size(); i++) {
+                new UpdateCurve(((WellDashBoardActivity) getActivity()).getWellId(),
+                        curveList.get(i)).execute();
+            }
+            if (requestCode == 1 && resultCode == RESULT_OK) {
+                listAdapter.clear();
+                listAdapter.addAll(curveList);
+                listAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    /**
+     * Asynchronous Task class that makes a REST GET request to the backend service.
+     * Currently, we are testing on local host.
+     *
+     * Use 'http://10.0.3.2:5000/' for Genymotion emulators
+     * Use 'http://10.0.2.2:5000/' for Android Studio emulators
+     */
+    private class UpdateCurve extends AsyncTask<String, Void, String> {
+        HttpClient client = new DefaultHttpClient();
+        String server = "http://10.0.3.2:5000/getCurveValue";
+        HttpGet request;
+        String wellId;
+        String curveId;
+        String jsonString = "";
+        Curve theCurve;
+
+        private UpdateCurve (String wellId, Curve curve) {
+            this.wellId = wellId;
+            this.theCurve = curve;
+            this.curveId = curve.getId();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            this.server += ("?well=" + this.wellId);
+            this.server += ("&curve=" + this.curveId);
+            this.request = new HttpGet(server);
+        }
+
+
+        /**
+         * Executes the REST getWells request. Reads the data as a string and appends
+         * it into one large JSON string. It returns this value to onPostExecute(...)
+         * result parameter
+         *
+         * @param params
+         * @return String   The JSON string representation of an array of wells.
+         */
+        @Override
+        protected String doInBackground(String... params) {
+            Scanner scanner;
+            HttpResponse response;
+            HttpEntity entity;
+
+            try {
+                response = client.execute(request);
+                entity = response.getEntity();
+
+                if(entity != null) {
+                    InputStream input = entity.getContent();
+                    if (input != null) {
+                        scanner = new Scanner(input);
+
+                        while (scanner.hasNext()) {
+                            jsonString += scanner.next() + " ";
+                        }
+                        input.close();
+                    }
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+            return jsonString;
+        }
+
+        /**
+         * Called after the REST call has completed. Parses the JSON string parameter result
+         * and adds each well to the well adapter. The list view's adapter is set to the well
+         * adapter and each item has an on click listener to direct the user to the respective
+         * Well dashboard page.
+         *
+         * @param result    The return value of the function above
+         *                  'doInBackground(String... params)'
+         */
+        @Override
+        protected void onPostExecute(String result) {
+            JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
+            double updatedValue = theCurve.getUnits();
+            try {
+                jsonReader.beginObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+               updatedValue = Double.parseDouble(jsonReader.nextString());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            this.theCurve.setUnits(updatedValue);
+            listAdapter.notifyDataSetChanged();
         }
     }
 }

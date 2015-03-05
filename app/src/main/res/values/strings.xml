@@ -16,6 +16,9 @@
     <string name="btn_logout_from_google">SDI Sign In</string>
     <string name="btn_cancel_login">Cancel</string>
 
+    <!--Strings for Well Dashboard Fragment-->
+    <string name="refresh_dashboard_action">Refresh Dashboard</string>
+
     <!-- Strings for Add Curve Menu -->
     <string name="add_curve_search_hint">Search curves</string>
     <string name="add_curve_search_label">Add Curve Search</string>

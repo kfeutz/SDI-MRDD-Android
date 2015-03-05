@@ -23,7 +23,7 @@ public abstract class Curve implements Parcelable {
     private String name;
 
     /* The number of units. Set default to 0 */
-    private int units = 0;
+    private double units = 0;
 
     /**
      * Constructor to create a Curve
@@ -83,7 +83,7 @@ public abstract class Curve implements Parcelable {
      *
      * @return  int     The number of units belong to this Curve
      */
-    public int getUnits() {
+    public double getUnits() {
         return units;
     }
 
@@ -92,7 +92,7 @@ public abstract class Curve implements Parcelable {
      *
      * @param units     The number of units to set to this Curve
      */
-    public void setUnits(int units) {
+    public void setUnits(double units) {
         this.units = units;
     }
 
@@ -168,7 +168,7 @@ public abstract class Curve implements Parcelable {
     public int hashCode() {
         int result = id.hashCode();
         result = 31 * result + name.hashCode();
-        result = 31 * result + units;
+        result = 31 * result + (int) units;
         return result;
     }
 }

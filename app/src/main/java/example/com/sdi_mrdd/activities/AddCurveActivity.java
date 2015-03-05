@@ -195,7 +195,7 @@ public class AddCurveActivity extends ActionBarActivity {
                         scanner = new Scanner(input);
 
                         while (scanner.hasNext()) {
-                            jsonString += scanner.next();
+                            jsonString += scanner.next() + " ";
                         }
                         input.close();
                     }

@@ -49,8 +49,8 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
             LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             row = inflater.inflate(R.layout.well_dash_board_card, parent, false);
             viewHolder = new CurveCardHolder();
-            viewHolder.name = (TextView) row.findViewById(R.id.name);
-            viewHolder.units = (TextView) row.findViewById(R.id.units);
+            viewHolder.name = (TextView) row.findViewById(R.id.curveTitle);
+            viewHolder.units = (TextView) row.findViewById(R.id.curveData);
             row.setTag(viewHolder);
 
         }
@@ -59,7 +59,7 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
         }
         Curve curve = getItem(position);
         viewHolder.name.setText(curve.getName());
-        viewHolder.units.setText(Integer.toString(curve.getUnitFromRange(1, 100)));
+        viewHolder.units.setText(Double.toString(curve.getUnits()));
         return row;
     }
 }
