@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+<!-- <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
@@ -129,6 +129,186 @@
                 }
             }
 
+        </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .axis path, .axis line {
+        fill: none;
+        stroke: #777;
+        shape-rendering: crispEdges;
+        }
+
+        .text {
+        font-family: 'Arial';
+        font-size: 14px;
+        }
+
+        .axis text {
+        font-family: 'Arial';
+        font-size: 13px;
+        }
+
+        .bar {
+        fill: FireBrick;
+        }
+
+        .grid .tick {
+        stroke: grey;
+        opacity: 0.7;
+        }
+
+        .grid path {
+        stroke-width: 0;
+        }
+
+        .tick line {
+        stroke: lightgrey;
+        opacity: 0.7;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="_/base.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+<div class="container">
+    <div id="chart"> </div>
+    </section>
+</div>
+
+<script type="text/javascript">
+            //InitChart();
+
+            function InitChart(screenWidth, screenHeight) {
+
+                var lineData = [{
+                                'x': 1,
+                                'y': 5
+                                }, {
+                                'x': 20,
+                                'y': 20
+                                }, {
+                                'x': 40,
+                                'y': 10
+                                }, {
+                                'x': 60,
+                                'y': 40
+                                }, {
+                                'x': 80,
+                                'y': 5
+                                }, {
+                                'x': 100,
+                                'y': 60
+                                }];
+
+                var MARGINS = {
+                    top: 10,
+                    right: 10,
+                    bottom: 20,
+                    left: 30
+                };
+
+                var WIDTH = screenWidth - MARGINS.left - MARGINS.right;
+                var HEIGHT = screenHeight - MARGINS.top - MARGINS.bottom;
+
+                var vis = d3.select('#chart').append('svg')
+                //.style('background', '#F0F3F5')
+                .attr('width', WIDTH + MARGINS.right)
+                .attr('height', HEIGHT + MARGINS.top)
+                .text("time", "depth");
+
+                //range of the x and y
+                xRange = d3.scale.linear()
+                .range([MARGINS.left, WIDTH - MARGINS.right])
+                .domain([d3.min(lineData,
+                                function (d) {
+                                return d.x;
+                                }),
+                         d3.max(lineData, function (d) {
+                                return d.x;
+                                })
+                         ]),
+
+                 yRange = d3.scale.linear()
+                 .range([HEIGHT - MARGINS.top, MARGINS.bottom])
+                 .domain(
+                         [d3.max(lineData, function (d) {
+                                 return d.y;
+                                 }),
+                          d3.min(lineData, function (d) {
+                                 return d.y;
+                                 })]
+                         ),
+
+                  //UI x and y axis stuff
+                  xAxis = d3.svg.axis()
+                  .scale(xRange)
+                  .tickSize(5)
+                  .orient("top")
+                  .innerTickSize(-HEIGHT + MARGINS.top + MARGINS.bottom)
+                  .outerTickSize(0)
+                  .tickPadding(5),
+
+                  yAxis = d3.svg.axis()
+                  .scale(yRange)
+                  .tickSize(5)
+                  .orient("left")
+                  .innerTickSize(-WIDTH + MARGINS.left + MARGINS.right)
+                  .outerTickSize(0)
+                  .tickPadding(5);
+
+                  //add to the graphs
+                  vis.append("svg:g")
+                  .attr("class", "x axis")
+                  .attr("transform", "translate(0," + (MARGINS.bottom + MARGINS.top) + ")")
+                  .call(xAxis);
+
+                  // text label for the x axis
+                  vis.append("svg:text")
+                  .attr("class", "text")
+                  .attr("x", screenWidth / 2 )
+                  .attr("y",  MARGINS.top )
+                  .style("text-anchor", "middle")
+                  .text("Time");
+
+                  vis.append("svg:g")
+                  .attr("class", "y axis")
+                  .attr("transform", "translate(" + (MARGINS.left) + ", " +  (MARGINS.top) + ")")
+                  .call(yAxis);
+
+                  vis.append("svg:text")
+                  .attr("class", "text")
+                  .attr("transform", "rotate(-90)")
+                  .attr("x",  -MARGINS.top - MARGINS.bottom)
+                  //.attr("y",  MARGINS.left)
+                  .attr("dy", "1em")
+                  .style("text-anchor", "middle")
+                  .text("Value");
+
+                  //drawing the line
+                  var lineFunc = d3.svg.line()
+                  .x(function (d) {
+                     return xRange(d.x);
+                     })
+                     .y(function (d) {
+                        return yRange(d.y);
+                        })
+                        .interpolate('linear');
+
+                  vis.append("svg:path")
+                     .attr("d", lineFunc(lineData))
+                     .attr("stroke", "blue")
+                     .attr("stroke-width", 2)
+                     .attr("fill", "none")
+                     .attr('transform', 'translate(' + 0 + ', ' + MARGINS.top + ')');
+
+            }
         </script>
 </body>
 </html>
