@@ -29,6 +29,7 @@
     <string name="confirm_curve_msg">Are you sure you want to add the curve(s)?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="random">Random</string>
     <string name="title_activity_well_list">WellListActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_well_dash_board">WellDashBoardActivity</string>

@@ -4,6 +4,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.widget.Button;
+
+import java.util.Random;
 
 import example.com.sdi_mrdd.dataitems.Plot;
 import example.com.sdi_mrdd.R;
@@ -19,6 +26,10 @@ public class ViewPlotActivity extends ActionBarActivity {
 
     /* Name of the plot used for title of page */
     private String plotName;
+
+    private WebView myWebView;
+
+    private Button JSBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +50,31 @@ public class ViewPlotActivity extends ActionBarActivity {
         int num4 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
         int num5 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
         setTitle(plotName);
+
+        JSBtn =  (Button) findViewById(R.id.btn_testJS);
+        JSBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                myWebView.loadUrl("javascript:setV(\""+plotToDisplay.getCurves().get(0).getUnitFromRange(0, 20)+"\")");
+            }
+        });
+
+        myWebView = (WebView) findViewById(R.id.webview);
+
+        //Opens in-app instead of in browser
+        myWebView.setWebViewClient(new WebViewClient(){
+            public void onPageFinished(WebView view, String url){
+                myWebView.loadUrl("javascript:showData()");
+            }
+        });
+        myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+
+        //Enable javascript
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+
+        myWebView.loadUrl("file:///android_asset/www/index.html");
     }
 
     /**
