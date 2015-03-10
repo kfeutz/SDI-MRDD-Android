@@ -63,7 +63,8 @@ public class ViewPlotActivity extends ActionBarActivity {
         //Opens in-app instead of in browser
         myWebView.setWebViewClient(new WebViewClient(){
             public void onPageFinished(WebView view, String url){
-                myWebView.loadUrl("javascript:showData()");
+                //myWebView.loadUrl("javascript:showData()");
+                myWebView.loadUrl("javascript:InitChart(360,400)");
             }
         });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
