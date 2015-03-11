@@ -43,18 +43,14 @@ public class ViewPlotActivity extends ActionBarActivity {
          */
         plotToDisplay = getIntent().getParcelableExtra("plot");
         plotName = plotToDisplay.getName();
-        /* Example of how to get a random unit value from a curve by providing a range */
-        int num1 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
-        int num2 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
-        int num3 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
-        int num4 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
-        int num5 = plotToDisplay.getCurves().get(0).getUnitFromRange(10, 100);
+
         setTitle(plotName);
 
         JSBtn =  (Button) findViewById(R.id.btn_testJS);
         JSBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                myWebView.loadUrl("javascript:setV(\""+plotToDisplay.getCurves().get(0).getUnitFromRange(0, 20)+"\")");
+                myWebView.loadUrl("javascript:setV(\""+
+                    plotToDisplay.getCurves().get(0).getUnitFromRange(0, 20)+"\")");
             }
         });
 
@@ -64,7 +60,7 @@ public class ViewPlotActivity extends ActionBarActivity {
         myWebView.setWebViewClient(new WebViewClient(){
             public void onPageFinished(WebView view, String url){
                 //myWebView.loadUrl("javascript:showData()");
-                myWebView.loadUrl("javascript:InitChart(360,400)");
+                myWebView.loadUrl("javascript:InitChart(350,400)");
             }
         });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -76,6 +72,10 @@ public class ViewPlotActivity extends ActionBarActivity {
         webSettings.setDomStorageEnabled(true);
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
+    }
+
+    public String getPlotURL() {
+        return myWebView.getUrl();
     }
 
     /**
