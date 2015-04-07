@@ -22,6 +22,20 @@ public abstract class Curve implements Parcelable {
     /* The name of the curve defined by SDI */
     private String name;
 
+    /* The name of the curve's independent variable */
+    private String ivName;
+
+    /* The name of the curve's dependent variable */
+    private String dvName;
+
+    private String ivUnit;
+
+    private String dvUnit;
+
+    private String ivValue;
+
+    private String dvValue;
+
     /* The number of units. Set default to 0 */
     private double units = 0;
 
@@ -31,9 +45,15 @@ public abstract class Curve implements Parcelable {
      * @param id    The unique id belonging to the Curve
      * @param name  The name of the new curve
      */
-    public Curve (String id, String name) {
+    public Curve (String id, String name, String ivName, String dvName, String ivUnit, String dvUnit) {
         this.id = id;
         this.name = name;
+        this.ivName = ivName;
+        this.dvName = dvName;
+        this.ivUnit = ivUnit;
+        this.dvUnit = dvUnit;
+        this.ivValue = "0.0";
+        this.dvValue = "0.0";
     }
 
     /**
@@ -45,6 +65,10 @@ public abstract class Curve implements Parcelable {
     public Curve(Parcel in) {
         this.id = in.readString();
         this.name = in.readString();
+        this.ivName = in.readString();
+        this.dvName = in.readString();
+        this.ivUnit = in.readString();
+        this.dvUnit = in.readString();
     }
 
     /**
@@ -114,6 +138,54 @@ public abstract class Curve implements Parcelable {
         this.id = id;
     }
 
+    public String getIvName() {
+        return ivName;
+    }
+
+    public void setIvName(String ivName) {
+        this.ivName = ivName;
+    }
+
+    public String getDvName() {
+        return dvName;
+    }
+
+    public void setDvName(String dvName) {
+        this.dvName = dvName;
+    }
+
+    public String getIvUnit() {
+        return ivUnit;
+    }
+
+    public void setIvUnit(String ivUnit) {
+        this.ivUnit = ivUnit;
+    }
+
+    public String getDvUnit() {
+        return dvUnit;
+    }
+
+    public void setDvUnit(String dvUnit) {
+        this.dvUnit = dvUnit;
+    }
+
+    public String getIvValue() {
+        return ivValue;
+    }
+
+    public void setIvValue(String ivValue) {
+        this.ivValue = ivValue;
+    }
+
+    public String getDvValue() {
+        return dvValue;
+    }
+
+    public void setDvValue(String dvValue) {
+        this.dvValue = dvValue;
+    }
+
     /**
      * Required for Parceable objects. Must override and return 0
      * for our object to be parceable
@@ -136,6 +208,10 @@ public abstract class Curve implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
         dest.writeString(name);
+        dest.writeString(ivName);
+        dest.writeString(dvName);
+        dest.writeString(ivUnit);
+        dest.writeString(dvUnit);
     }
 
     /**

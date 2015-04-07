@@ -22,8 +22,8 @@ public class CurveTest {
 
     @Before
     public void setup()  {
-        timeCurve = new TimeCurve("curveId", "curveName");
-        wellboreCurve = new WellboreCurve("wellbore1", "wellbore");
+        timeCurve = new TimeCurve("curveId", "curveName", "", "", "", "");
+        wellboreCurve = new WellboreCurve("wellbore1", "wellbore", "", "", "", "");
     }
 
     @Test
@@ -72,8 +72,8 @@ public class CurveTest {
 
     @Test
     public void testEquals() {
-        Curve curve1 = new TimeCurve("curve", "curve");
-        Curve curve2 = new TimeCurve("curve", "curve");
+        Curve curve1 = new TimeCurve("curve", "curve", "", "", "", "");
+        Curve curve2 = new TimeCurve("curve", "curve", "", "", "", "");
         Assert.assertEquals(curve1, curve2);
     }
 }

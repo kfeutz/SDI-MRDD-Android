@@ -9,16 +9,14 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Helper singleton class which parses JSON strings into
- * Curve objects based on the current REST api.
- *
- * Created by Kevin on 2/28/2015.
+ * Created by Kevin on 3/11/2015.
  */
-public class CurveJsonParser implements Parser<Curve> {
-
+public class CurveJsonParser {
     /* Instance to itself (Singleton) */
     private static final CurveJsonParser instance = new CurveJsonParser();
 
@@ -40,90 +38,48 @@ public class CurveJsonParser implements Parser<Curve> {
      * @param jsonString        The JSON representation of the list of curves
      * @return  List<Curve>     A List containing the Curves from the JSON string.
      */
-    @Override
-    public List<Curve> parse(String jsonString) {
+    /*@Override*/
+    public Curve parse(String jsonString, String trueCurveId) {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-        List<Curve> curves = new ArrayList<>();
         String curveJsonArray = null;
+        String curveId = trueCurveId;
+        String curveName = null;
+        String ivName = null;
+        String dvName = null;
+        String ivUnit = null;
+        String dvUnit = null;
         JSONArray curveArray = null;
 
         try {
             jsonReader.beginObject();
             while (jsonReader.hasNext()) {
                 String token = jsonReader.nextName();
-                /* Retrieve array containing all wellbore_curves */
-                if (token.equals("wellbore_curves")) {
-                    /* Grab the json array string from wellbore_curves */
-                    jsonReader.beginArray();
-                    /*Loop through each curve in the json array */
-                    while (jsonReader.hasNext()) {
-                        /* Pass each json object to retrieve a curve object */
-                        curves.add(readJsonCurve(jsonReader, "wellbore_curves"));
-                    }
+                /* Grab curve name field */
+                if (token.equals("name")) {
+                    curveName = jsonReader.nextString();
                 }
-                /* Retrieve array containing all time_curves */
-                else if (token.equals("time_curves")) {
-                    /* Grab the json array string from wellbore_curves */
-                    jsonReader.beginArray();
-                    /*Loop through each curve in the json array */
-                    while (jsonReader.hasNext()) {
-                        /* Pass each json object to retrieve a curve object */
-                        curves.add(readJsonCurve(jsonReader, "time_curves"));
-                    }
+                /* Grab curve iv_name field */
+                else if (token.equals("iv_name")) {
+                    ivName = jsonReader.nextString();
+                }
+                else if (token.equals("dv_name")) {
+                    dvName = jsonReader.nextString();
+                }
+                else if (token.equals("iv_unit")) {
+                    ivUnit = jsonReader.nextString();
+                }
+                else if (token.equals("dv_unit")) {
+                    dvUnit = jsonReader.nextString();
                 }
                 else {
                     jsonReader.skipValue();
                 }
             }
-            jsonReader.endArray();
+            jsonReader.endObject();
             jsonReader.close();
         } catch (IOException e) {
             Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
-        } catch (JSONException e) {
-            Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
         }
-        return curves;
-    }
-
-    /**
-     * Parses a JSON Curve Object and returns a java Curve object
-     * Used as a helper method in parse above
-     *
-     * @param reader        JsonReader that contains a curve representation
-     * @param curveType     The type of curve to create. Either wellbore_curve or time_curve
-     * @return  Curve       Java object representation of the passed Curve Json object
-     * @throws IOException  Thrown if error when reading json object
-     */
-    private Curve readJsonCurve(JsonReader reader, String curveType) throws IOException, JSONException {
-        String curveId = null;
-        String name = null;
-
-        reader.beginObject();
-        /* Loop for entire curve object */
-        while (reader.hasNext()) {
-            String token = reader.nextName();
-            /* Grab curve id field */
-            if (token.equals("id")) {
-                curveId = reader.nextString();
-            }
-            /* Grab curve name field */
-            else if (token.equals("name")) {
-                name = reader.nextString();
-            }
-            else {
-                reader.skipValue();
-            }
-        }
-        reader.endObject();
-        /* Create WellboreCurves and TimeCurves respectively */
-        if (curveType.equals("wellbore_curves")) {
-            return new WellboreCurve(curveId, name);
-        }
-        else if (curveType.equals("time_curves")) {
-            return new TimeCurve(curveId, name);
-        }
-        else {
-            return null;
-        }
+        return new TimeCurve (curveId, curveName, ivName, dvName, ivUnit, dvUnit);
     }
 }

@@ -17,8 +17,8 @@ public class WellboreCurve extends Curve {
      * @param id    The id to give to the WellboreCurve
      * @param name  The name to give to the WellboreCurve
      */
-    public WellboreCurve(String id, String name) {
-        super(id, name);
+    public WellboreCurve(String id, String name, String ivName, String dvName, String ivUnit, String dvUnit) {
+        super(id, name, ivName, dvName, ivUnit, dvUnit);
     }
 
     /**

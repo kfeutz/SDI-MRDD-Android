@@ -17,8 +17,8 @@ public class TimeCurve extends Curve {
      * @param id    The id to give to the curve
      * @param name  The name to give to the curve
      */
-    public TimeCurve(String id, String name) {
-        super(id, name);
+    public TimeCurve(String id, String name, String ivName, String dvName, String ivUnit, String dvUnit) {
+        super(id, name, ivName, dvName, ivUnit, dvUnit);
     }
 
     /**

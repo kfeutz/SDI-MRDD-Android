@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -37,6 +38,8 @@ import example.com.sdi_mrdd.adapters.CurveAdapter;
 import example.com.sdi_mrdd.adapters.WellAdapter;
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.Curve;
+import example.com.sdi_mrdd.dataitems.CurveJsonParser;
+import example.com.sdi_mrdd.dataitems.CurveValueParser;
 import example.com.sdi_mrdd.dataitems.Well;
 
 /**
@@ -71,6 +74,8 @@ public class WellDashBoardFragment extends Fragment {
 
     /* Database communicator to talk to our SQLite database */
     private DatabaseCommunicator dbCommunicator;
+
+    private CurveValueParser curveValueParser = CurveValueParser.getInstance();
 
     /**
      * Creates the Well Dashboard fragment view and sets up the fragment view's
@@ -111,8 +116,7 @@ public class WellDashBoardFragment extends Fragment {
         listAdapter.addAll(curveList);
 
         for (int i = 0; i < curveList.size(); i++) {
-            new UpdateCurve(((WellDashBoardActivity) getActivity()).getWellId(),
-                    curveList.get(i)).execute();
+            new UpdateCurve(curveList.get(i)).execute();
         }
 
         curvesListView = (GridView) rootView.findViewById(R.id.well_dashboard_list);
@@ -144,8 +148,7 @@ public class WellDashBoardFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.refresh:
                 for (int i = 0; i < curveList.size(); i++) {
-                    new UpdateCurve(((WellDashBoardActivity) getActivity()).getWellId(),
-                            curveList.get(i)).execute();
+                    new UpdateCurve(curveList.get(i)).execute();
                 }
                 return true;
             case R.id.add_curve:
@@ -187,8 +190,7 @@ public class WellDashBoardFragment extends Fragment {
              */
             curveList = dbCommunicator.getCurvesForDashboard(((WellDashBoardActivity) getActivity()).getWellId());
             for (int i = 0; i < curveList.size(); i++) {
-                new UpdateCurve(((WellDashBoardActivity) getActivity()).getWellId(),
-                        curveList.get(i)).execute();
+                new UpdateCurve(curveList.get(i)).execute();
             }
             if (requestCode == 1 && resultCode == RESULT_OK) {
                 listAdapter.clear();
@@ -207,24 +209,21 @@ public class WellDashBoardFragment extends Fragment {
      */
     private class UpdateCurve extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.3.2:5000/getCurveValue";
+        String server = "http://10.0.3.2:5000/getCurveFromCurveIdPresent";
         HttpGet request;
-        String wellId;
         String curveId;
         String jsonString = "";
         Curve theCurve;
 
-        private UpdateCurve (String wellId, Curve curve) {
-            this.wellId = wellId;
+        private UpdateCurve (Curve curve) {
             this.theCurve = curve;
             this.curveId = curve.getId();
+            this.server += ("?curve=" + this.curveId);
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            this.server += ("?well=" + this.wellId);
-            this.server += ("&curve=" + this.curveId);
             this.request = new HttpGet(server);
         }
 
@@ -276,19 +275,14 @@ public class WellDashBoardFragment extends Fragment {
          */
         @Override
         protected void onPostExecute(String result) {
-            JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-            double updatedValue = theCurve.getUnits();
-            try {
-                jsonReader.beginObject();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-               updatedValue = Double.parseDouble(jsonReader.nextString());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            this.theCurve.setUnits(updatedValue);
+            String ivValues = curveValueParser.parseIvValues(result);
+            List<String> ivValueList = Arrays.asList(ivValues.split(","));
+            /* Right now, just pull the most recent data */
+            theCurve.setIvValue(ivValueList.get(ivValueList.size() - 1));
+            listAdapter.notifyDataSetChanged();
+            String dvValues = curveValueParser.parseDvValues(result);
+            List<String> dvValueList = Arrays.asList(dvValues.split(","));
+            theCurve.setDvValue(dvValueList.get(dvValueList.size() - 1));
             listAdapter.notifyDataSetChanged();
         }
     }

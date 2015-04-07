@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,12 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
 
     static class CurveCardHolder {
         TextView name;
-        TextView units;
+        TextView ivName;
+        TextView ivData;
+        TextView dvName;
+        TextView dvData;
+        TextView ivUnit;
+        TextView dvUnit;
     }
 
     public CurveAdapter(Context context, int textViewResourceId) {
@@ -50,7 +57,12 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
             row = inflater.inflate(R.layout.well_dash_board_card, parent, false);
             viewHolder = new CurveCardHolder();
             viewHolder.name = (TextView) row.findViewById(R.id.curveTitle);
-            viewHolder.units = (TextView) row.findViewById(R.id.curveData);
+            viewHolder.ivUnit = (TextView) row.findViewById(R.id.curveIvUnit);
+            viewHolder.ivName = (TextView) row.findViewById(R.id.curveIvName);
+            viewHolder.dvUnit = (TextView) row.findViewById(R.id.curveDvUnit);
+            viewHolder.dvName = (TextView) row.findViewById(R.id.curveDvName);
+            viewHolder.ivData = (TextView) row.findViewById(R.id.curveIvData);
+            viewHolder.dvData = (TextView) row.findViewById(R.id.curveDvData);
             row.setTag(viewHolder);
 
         }
@@ -59,7 +71,12 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
         }
         Curve curve = getItem(position);
         viewHolder.name.setText(curve.getName());
-        viewHolder.units.setText(Double.toString(curve.getUnits()));
+        viewHolder.ivName.setText(curve.getIvName());
+        viewHolder.dvName.setText(curve.getDvName());
+        viewHolder.ivUnit.setText(curve.getIvUnit());
+        viewHolder.dvUnit.setText(curve.getDvUnit());
+        viewHolder.ivData.setText(curve.getIvValue());
+        viewHolder.dvData.setText(curve.getDvValue());
         return row;
     }
 }

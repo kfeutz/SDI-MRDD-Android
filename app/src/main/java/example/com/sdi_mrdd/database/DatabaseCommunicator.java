@@ -38,12 +38,12 @@ public class DatabaseCommunicator {
             SQLiteHelper.COLUMN_PLOT_WELLID};
 
     /* Array of the plotcurves table column names */
-    private String[] allPlotCurvesColumns = { SQLiteHelper.COLUMN_PLOTCURVES_KEY,  SQLiteHelper.COLUMN_PLOTCURVES_CURVE,
-            SQLiteHelper.COLUMN_PLOTCURVES_PLOT};
+    private String[] allPlotCurvesColumns = { SQLiteHelper.COLUMN_PLOTCURVES_KEY,
+            SQLiteHelper.COLUMN_PLOTCURVES_CURVE, SQLiteHelper.COLUMN_PLOTCURVES_PLOT};
 
     /* Array of the dashboardcurves table column names */
-    private String[] allDashboardCurvesColumns = { SQLiteHelper.COLUMN_DASHBOARDCURVES_KEY,  SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL,
-            SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE};
+    private String[] allDashboardCurvesColumns = { SQLiteHelper.COLUMN_DASHBOARDCURVES_KEY,
+            SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL, SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE};
 
     /**
      * Creates a new database helper based on the context. Typically pass
@@ -104,28 +104,34 @@ public class DatabaseCommunicator {
      * @param wellDash  ID of the well the curve belongs too
      * @return  Curve   The newly created curve
      */
-    public Curve createCurve(String curveId, String name, String wellDash) {
+    public Curve createCurve(String curveId, String name, String ivName, String dvName,
+                             String ivUnit, String dvUnit, String wellDash) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_CURVE_ID, curveId);
         values.put(SQLiteHelper.COLUMN_CURVE, name);
+        values.put(SQLiteHelper.COLUMN_CURVE_IVNAME, ivName);
+        values.put(SQLiteHelper.COLUMN_CURVE_DVNAME, dvName);
+        values.put(SQLiteHelper.COLUMN_CURVE_IVUNIT, ivUnit);
+        values.put(SQLiteHelper.COLUMN_CURVE_DVUNIT, dvUnit);
         values.put(SQLiteHelper.COLUMN_WELL_DASH, wellDash);
 
         String insertCurveQuery = "INSERT OR IGNORE INTO " + SQLiteHelper.TABLE_CURVES + " ("
-                + SQLiteHelper.COLUMN_CURVE_ID + ", " + SQLiteHelper.COLUMN_CURVE + ", " + SQLiteHelper.COLUMN_WELL_DASH + ")"
-                + " values ('" + curveId + "', '" + name + "', '" + wellDash + "');";
+                + SQLiteHelper.COLUMN_CURVE_ID + ", "
+                + SQLiteHelper.COLUMN_CURVE + ", "
+                + SQLiteHelper.COLUMN_CURVE_IVNAME + ", "
+                + SQLiteHelper.COLUMN_CURVE_DVNAME + ", "
+                + SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
+                + SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
+                + SQLiteHelper.COLUMN_WELL_DASH + ")"
+                + " values ('" + curveId + "', '" + name + "', '" + ivName +
+                    "', '" + dvName + "', '" + ivUnit + "', '" + dvUnit + "', '" + wellDash + "');";
         Cursor cursor = database.rawQuery(insertCurveQuery, null);
-
-        /*long insertId = database.insert(SQLiteHelper.TABLE_CURVES, null,
-                values);
-        Cursor cursor = database.query(SQLiteHelper.TABLE_CURVES,
-                allCurveColumns, SQLiteHelper.COLUMN_CURVE_KEY + " = " + insertId, null,
-                null, null, null);*/
 
         cursor.moveToFirst();
         Curve newCurve;
         /* Curve already exists */
         if (cursor.getColumnCount() == 0) {
-            newCurve = new TimeCurve(curveId, name);
+            newCurve = new TimeCurve(curveId, name, ivName, dvName, ivUnit, dvUnit);
         }
         else {
             newCurve = cursorToCurve(cursor);
@@ -201,8 +207,14 @@ public class DatabaseCommunicator {
          * AND dc.plotId = wellId
          */
         String selectCurvesQuery = "SELECT "
-                + "c." + SQLiteHelper.COLUMN_CURVE_KEY + ", " + "c." + SQLiteHelper.COLUMN_CURVE_ID
-                + ", " + "c." +  SQLiteHelper.COLUMN_CURVE + ", " + "c." +  SQLiteHelper.COLUMN_WELL_DASH
+                + "c." + SQLiteHelper.COLUMN_CURVE_KEY + ", "
+                + "c." + SQLiteHelper.COLUMN_CURVE_ID + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_IVNAME + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_DVNAME + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
+                + "c." +  SQLiteHelper.COLUMN_WELL_DASH
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_DASHBOARDCURVES + " dc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "dc." + SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE
                 + " AND dc." + SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL + " = " + "'" + wellId + "';";
@@ -228,7 +240,8 @@ public class DatabaseCommunicator {
      * @return          The curve corresponding to the cursor
      */
     private Curve cursorToCurve(Cursor cursor) {
-        Curve curve = new TimeCurve(cursor.getString(1), cursor.getString(2));
+        Curve curve = new TimeCurve(cursor.getString(1), cursor.getString(2),
+                cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6));
         curve.setId(cursor.getString(1));
         return curve;
     }
@@ -294,8 +307,14 @@ public class DatabaseCommunicator {
          */
         long plotId = plot.getId();
         String selectCurvesQuery = "SELECT "
-                + "c." + SQLiteHelper.COLUMN_CURVE_KEY + ", " + "c." + SQLiteHelper.COLUMN_CURVE_ID
-                + ", " + "c." +  SQLiteHelper.COLUMN_CURVE + ", " + "c." +  SQLiteHelper.COLUMN_WELL_DASH
+                + "c." + SQLiteHelper.COLUMN_CURVE_KEY + ", "
+                + "c." + SQLiteHelper.COLUMN_CURVE_ID + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_IVNAME + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_DVNAME + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
+                + "c." +  SQLiteHelper.COLUMN_WELL_DASH
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_PLOTCURVES + " pc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "pc." + SQLiteHelper.COLUMN_PLOTCURVES_CURVE
                 + " AND pc." + SQLiteHelper.COLUMN_PLOTCURVES_PLOT + " = " +  plotId;

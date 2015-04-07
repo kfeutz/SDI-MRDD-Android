@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -26,19 +28,32 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveJsonParser;
+import example.com.sdi_mrdd.dataitems.CurvesForWellJsonParser;
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.Plot;
 import example.com.sdi_mrdd.R;
 
 /**
+ * This class represents an Activity that allows the user to
+ * create a plot. Currently, this activity has a ListView to display curves to
+ * add to the plot, an EditText to prompt the user for a plot name, and a button
+ * for the user to create the plot. Curves are populated in the list after a
+ * REST GET call. After the user confirms adding a plot, the plot is added to the
+ * sqlite database and the user is returned to the plot list fragment.
+ *
  * Created by Kevin on 3/1/2015.
  */
 public class CreatePlotActivity extends ActionBarActivity {
+
     /* Array adapter to display the titles of curves */
     private ArrayAdapter<String> listAdapter;
 
@@ -58,10 +73,14 @@ public class CreatePlotActivity extends ActionBarActivity {
     private DatabaseCommunicator dbCommunicator;
 
     /* Object that parses json strings into curve objects */
+    private CurvesForWellJsonParser curvesForWellJsonParser = CurvesForWellJsonParser.getInstance();
+
     private CurveJsonParser curveJsonParser = CurveJsonParser.getInstance();
 
     /* The actual curves to display */
     private List<Curve> curveList = new ArrayList<Curve>();
+
+    Map<String, String> curveMap = new HashMap<>();
 
     /* The curve titles to display */
     ArrayList<String> curveStringList = new ArrayList<String>();
@@ -91,7 +110,7 @@ public class CreatePlotActivity extends ActionBarActivity {
         btnCreatePlot =  (Button) findViewById(R.id.btn_create_plot);
         btnCreatePlot.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //Ask the user if they want to add the curves
+                /* Ask the user if they want to add the curves to the plot */
                 new AlertDialog.Builder(CreatePlotActivity.this)
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .setTitle(R.string.confirm_curve_add_title)
@@ -103,21 +122,35 @@ public class CreatePlotActivity extends ActionBarActivity {
                                 SparseBooleanArray checked = CreatePlotActivity.this.getListView().getCheckedItemPositions();
                                 List<Curve> curvesToAdd = new ArrayList<Curve>();
                                 Plot plotToAdd;
+                                String curveToAddId;
+                                Curve curveToAdd;
+                                String loadedCurve;
                                 int size = checked.size(); // number of name-value pairs in the array
                                 for (int i = 0; i < size; i++) {
                                     int key = checked.keyAt(i);
                                     boolean value = checked.get(key);
                                     if (value && curveStringList != null) {
-                                        /* Create the curve, create the plot, then add the curve to the plot */
-                                        curvesToAdd.add(dbCommunicator.createCurve(curveList.get(key).getId(),
-                                                curveList.get(key).getName(), wellId));
+                                        curveToAddId = curveMap.get(curveStringList.get(key));
+                                        try {
+                                            loadedCurve = new LoadCurveData(curveToAddId).execute().get();
+                                            curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId);
+                                            Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
+                                                    curveToAdd.getName(), curveToAdd.getIvName(),
+                                                    curveToAdd.getDvName(), curveToAdd.getIvUnit(),
+                                                    curveToAdd.getDvUnit(), wellId);
+                                            curveList.add(addedCurve);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        } catch (ExecutionException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }
                                 plotToAdd = dbCommunicator.createPlot(inputTitle.getText().toString(),
                                         wellId);
-                                /* Write all curves to the plot in our database */
-                                for (int i = 0; i < curvesToAdd.size(); i++) {
-                                    dbCommunicator.addCurveToPlot(plotToAdd, curvesToAdd.get(i));
+
+                                for(int i = 0; i < curveList.size(); i++) {
+                                    dbCommunicator.addCurveToPlot(plotToAdd, curveList.get(i));
                                 }
 
                                 Intent intent = new Intent(CreatePlotActivity.this, WellDashBoardActivity.class);
@@ -143,7 +176,7 @@ public class CreatePlotActivity extends ActionBarActivity {
 
     private class LoadCurves extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.2.2:5000/getCurvesForWell?well="
+        String server = "http://10.0.3.2:5000/getCurvesForWell?well="
                 + CreatePlotActivity.this.getWellId();
         HttpGet request = new HttpGet(server);
         String jsonString = "";
@@ -177,15 +210,66 @@ public class CreatePlotActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(String result) {
             Log.i("", "Result after getCurvesForWell GET : " + result);
-            curveList = curveJsonParser.parse(result);
-            for (int i = 0; i < curveList.size(); i++) {
-                curveStringList.add(curveList.get(i).getName());
+            curveMap = curvesForWellJsonParser.parse(result);
+            Iterator mapIterator = curveMap.keySet().iterator();
+            while (mapIterator.hasNext()) {
+                curveStringList.add((String) mapIterator.next());
             }
             listAdapter = new ArrayAdapter<String>(CreatePlotActivity.this,
                     android.R.layout.simple_list_item_multiple_choice, curveStringList);
             curveListView.setAdapter(listAdapter);
             curveListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             curveListView.setTextFilterEnabled(true);
+        }
+
+        @Override
+        protected void onPreExecute() {}
+    }
+
+    private class LoadCurveData extends AsyncTask<String, Void, String> {
+        HttpClient client = new DefaultHttpClient();
+        String server;
+        HttpGet request;
+        String jsonString = "";
+        String curveId;
+        private LoadCurveData(String curveId) {
+            this.curveId = curveId;
+            server = "http://10.0.3.2:5000/getCurveFromCurveId?curve="
+                    + this.curveId;
+            request  = new HttpGet(server);
+        }
+        @Override
+        protected String doInBackground(String... params) {
+            Scanner scanner;
+            HttpResponse response;
+            HttpEntity entity;
+            try {
+                response = client.execute(request);
+                entity = response.getEntity();
+
+                if(entity != null) {
+                    InputStream input = entity.getContent();
+                    if (input != null) {
+                        scanner = new Scanner(input);
+
+                        while (scanner.hasNext()) {
+                            jsonString += scanner.next() + " ";
+                        }
+                        input.close();
+                    }
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+            return jsonString;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.i("", "Result after getCurveFromCurveId GET : " + result);
+
+
         }
 
         @Override
@@ -202,12 +286,9 @@ public class CreatePlotActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        /* TODO: add checks for when menu items are added in later dev */
         if (id == R.id.action_settings) {
             return true;
         }

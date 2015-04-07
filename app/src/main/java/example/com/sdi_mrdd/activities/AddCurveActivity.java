@@ -1,6 +1,7 @@
 package example.com.sdi_mrdd.activities;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,11 +30,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveJsonParser;
+import example.com.sdi_mrdd.dataitems.CurvesForWellJsonParser;
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.dataitems.Well;
@@ -53,18 +61,21 @@ public class AddCurveActivity extends ActionBarActivity {
     /* Contains reference to the well the curves will be added to */
     private Well well;
     /* Object that parses json strings into curve objects */
+    private CurvesForWellJsonParser curvesForWellJsonParser = CurvesForWellJsonParser.getInstance();
     private CurveJsonParser curveJsonParser = CurveJsonParser.getInstance();
 
     String[] curves = new String[] {"Curve 1", "Curve 2", "Curve 3", "Curve 4",
             "Curve 5", "Curve 6", "Curve 7", "Curve 8", "Curve 9", "Curve 10",
             "Curve 11", "Curve 12", "Curve 13", "Curve 14", "Curve 15", "Curve 16"};
-    List<Curve> curveList = new ArrayList<Curve>();
+    Map<String, String> curveMap = new HashMap<>();
+    List<Curve> curveList = new ArrayList<>();
     ArrayList<String> curveStringList = new ArrayList<String>();
     ArrayList<String> selectedCurveList = new ArrayList<String>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        String curveToAddId;
         setContentView(R.layout.activity_add_curve);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -91,6 +102,8 @@ public class AddCurveActivity extends ActionBarActivity {
 
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                String curveToAddId;
+                                String loadedCurve = null;
                                 Curve curveToAdd;
                                 SparseBooleanArray checked = AddCurveActivity.this.getListView().getCheckedItemPositions();
                                 int size = checked.size(); // number of name-value pairs in the array
@@ -99,11 +112,23 @@ public class AddCurveActivity extends ActionBarActivity {
                                     boolean value = checked.get(key);
                                     if (value && curveStringList != null) {
                                         selectedCurveList.add(curveStringList.get(key));
-                                        curveToAdd = dbCommunicator.createCurve(curveList.get(key).getId(),
-                                                curveStringList.get(key), wellId);
-                                        dbCommunicator.addCurveToDashboard(curveToAdd, wellId);
+                                        curveToAddId = curveMap.get(curveStringList.get(key));
+                                        try {
+                                            loadedCurve = new LoadCurveData(curveToAddId).execute().get();
+                                            curveToAdd =  curveJsonParser.parse(loadedCurve, curveToAddId);
+                                            Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
+                                                    curveToAdd.getName(), curveToAdd.getIvName(),
+                                                    curveToAdd.getDvName(), curveToAdd.getIvUnit(),
+                                                    curveToAdd.getDvUnit(), wellId);
+                                            dbCommunicator.addCurveToDashboard(addedCurve, wellId);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        } catch (ExecutionException e) {
+                                            e.printStackTrace();
+                                        }
                                     }
                                 }
+
                                 Intent intent = new Intent(AddCurveActivity.this, WellDashBoardActivity.class);
                                 /*
                                   *   Adds the ArrayList of selected strings to the intent which will be passed to
@@ -176,10 +201,21 @@ public class AddCurveActivity extends ActionBarActivity {
 
     private class LoadCurves extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.2.2:5000/getCurvesForWell?well="
+        String server = "http://10.0.3.2:5000/getCurvesForWell?well="
                 + AddCurveActivity.this.getWellId();
         HttpGet request = new HttpGet(server);
         String jsonString = "";
+        /** progress dialog to show user that the curves are loading. */
+        private ProgressDialog dialog;
+
+
+        @Override
+        protected void onPreExecute() {
+            dialog = new ProgressDialog(AddCurveActivity.this);
+            dialog.setMessage("Retrieving curves");
+            dialog.show();
+        }
+
         @Override
         protected String doInBackground(String... params) {
             Scanner scanner;
@@ -210,15 +246,64 @@ public class AddCurveActivity extends ActionBarActivity {
         @Override
         protected void onPostExecute(String result) {
             Log.i("", "Result after getCurvesForWell GET : " + result);
-            curveList = curveJsonParser.parse(result);
-            for (int i = 0; i < curveList.size(); i++) {
-                curveStringList.add(curveList.get(i).getName());
+            curveMap = curvesForWellJsonParser.parse(result);
+            Iterator mapIterator = curveMap.keySet().iterator();
+            while (mapIterator.hasNext()) {
+                curveStringList.add((String) mapIterator.next());
             }
             listAdapter = new ArrayAdapter<String>(AddCurveActivity.this,
                     android.R.layout.simple_list_item_multiple_choice, curveStringList);
             curveListView.setAdapter(listAdapter);
             curveListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
             curveListView.setTextFilterEnabled(true);
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+
+    private class LoadCurveData extends AsyncTask<String, Void, String> {
+        HttpClient client = new DefaultHttpClient();
+        String server;
+        HttpGet request;
+        String jsonString = "";
+        String curveId;
+        private LoadCurveData(String curveId) {
+            this.curveId = curveId;
+            server = "http://10.0.3.2:5000/getCurveFromCurveId?curve="
+                    + this.curveId;
+            request  = new HttpGet(server);
+        }
+        @Override
+        protected String doInBackground(String... params) {
+            Scanner scanner;
+            HttpResponse response;
+            HttpEntity entity;
+            try {
+                response = client.execute(request);
+                entity = response.getEntity();
+
+                if(entity != null) {
+                    InputStream input = entity.getContent();
+                    if (input != null) {
+                        scanner = new Scanner(input);
+
+                        while (scanner.hasNext()) {
+                            jsonString += scanner.next() + " ";
+                        }
+                        input.close();
+                    }
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+            return jsonString;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.i("", "Result after getCurveFromCurveId GET : " + result);
         }
 
         @Override
