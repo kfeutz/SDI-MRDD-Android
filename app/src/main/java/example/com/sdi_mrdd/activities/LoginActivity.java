@@ -357,7 +357,7 @@ public class LoginActivity extends ActionBarActivity {
              HttpClient httpClient = new DefaultHttpClient();
 
              /* Creating HTTP Post with token URL */
-             HttpPost httpPost = new HttpPost("http://10.0.3.2:5000/authenticate/");
+             HttpPost httpPost = new HttpPost("http://54.67.103.185/authenticate/");
 
              /* List to hold parameters to append to our POST request */
              List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(1);

@@ -97,7 +97,7 @@ public class WellListActivity extends ActionBarActivity {
      */
     private class LoadWells extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.3.2:5000/getWells";
+        String server = "http://54.67.103.185/getWells";
         HttpGet request = new HttpGet(server);
         String jsonString = "";
 

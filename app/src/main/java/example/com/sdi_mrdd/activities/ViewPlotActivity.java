@@ -1,5 +1,6 @@
 package example.com.sdi_mrdd.activities;
 
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,8 +11,21 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
-import java.util.Random;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
+import example.com.sdi_mrdd.dataitems.Curve;
+import example.com.sdi_mrdd.dataitems.CurveValueParser;
 import example.com.sdi_mrdd.dataitems.Plot;
 import example.com.sdi_mrdd.R;
 
@@ -30,6 +44,8 @@ public class ViewPlotActivity extends ActionBarActivity {
     private WebView myWebView;
 
     private Button JSBtn;
+
+    private CurveValueParser curveValueParser = CurveValueParser.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,5 +122,98 @@ public class ViewPlotActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Asynchronous Task class that makes a REST GET request to the backend service.
+     * Currently, we are testing on local host.
+     *
+     * Use 'http://10.0.3.2:5000/' for Genymotion emulators
+     * Use 'http://10.0.2.2:5000/' for Android Studio emulators
+     */
+    private class UpdateCurve extends AsyncTask<String, Void, String> {
+        HttpClient client = new DefaultHttpClient();
+        String server = "http://54.67.103.185/getCurveFromCurveIdPresent";
+        HttpGet request;
+        String curveId;
+        String jsonString = "";
+        Curve theCurve;
+
+        private UpdateCurve (Curve curve) {
+            this.theCurve = curve;
+            this.curveId = curve.getId();
+            this.server += ("?curve=" + this.curveId);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            this.request = new HttpGet(server);
+        }
+
+
+        /**
+         * Executes the REST getWells request. Reads the data as a string and appends
+         * it into one large JSON string. It returns this value to onPostExecute(...)
+         * result parameter
+         *
+         * @param params
+         * @return String   The JSON string representation of an array of wells.
+         */
+        @Override
+        protected String doInBackground(String... params) {
+            Scanner scanner;
+            HttpResponse response;
+            HttpEntity entity;
+
+            try {
+                response = client.execute(request);
+                entity = response.getEntity();
+
+                if(entity != null) {
+                    InputStream input = entity.getContent();
+                    if (input != null) {
+                        scanner = new Scanner(input);
+
+                        while (scanner.hasNext()) {
+                            jsonString += scanner.next() + " ";
+                        }
+                        input.close();
+                    }
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+            return jsonString;
+        }
+
+        /**
+         * Called after the REST call has completed. Parses the JSON string parameter result
+         * and adds each well to the well adapter. The list view's adapter is set to the well
+         * adapter and each item has an on click listener to direct the user to the respective
+         * Well dashboard page.
+         *
+         * @param result    The return value of the function above
+         *                  'doInBackground(String... params)'
+         */
+        @Override
+        protected void onPostExecute(String result) {
+            String ivValues = curveValueParser.parseIvValues(result);
+            List<String> ivValueList = Arrays.asList(ivValues.split(","));
+            List<Double> ivDoubleList = new ArrayList<>();
+            /* Loop through the iv list and convert string values to doubles */
+            for (int i = 0; i < ivValueList.size(); i++) {
+                ivDoubleList.add(Double.parseDouble(ivValueList.get(i)));
+            }
+            String dvValues = curveValueParser.parseDvValues(result);
+            List<String> dvValueList = Arrays.asList(dvValues.split(","));
+            List<Double> dvDoubleList = new ArrayList<>();
+            /* Loop through the list and convert string values to doubles */
+            for (int i = 0; i < ivValueList.size(); i++) {
+                dvDoubleList.add(Double.parseDouble(ivValueList.get(i)));
+            }
+            listAdapter.notifyDataSetChanged();
+        }
     }
 }

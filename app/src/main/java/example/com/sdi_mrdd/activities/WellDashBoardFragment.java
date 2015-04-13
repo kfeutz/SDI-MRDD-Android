@@ -209,7 +209,7 @@ public class WellDashBoardFragment extends Fragment {
      */
     private class UpdateCurve extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.3.2:5000/getCurveFromCurveIdPresent";
+        String server = "http://54.67.103.185/getCurveFromCurveIdPresent";
         HttpGet request;
         String curveId;
         String jsonString = "";

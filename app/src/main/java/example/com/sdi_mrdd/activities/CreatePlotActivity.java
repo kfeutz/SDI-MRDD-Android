@@ -176,7 +176,7 @@ public class CreatePlotActivity extends ActionBarActivity {
 
     private class LoadCurves extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://10.0.3.2:5000/getCurvesForWell?well="
+        String server = "http://54.67.103.185/getCurvesForWell?well="
                 + CreatePlotActivity.this.getWellId();
         HttpGet request = new HttpGet(server);
         String jsonString = "";
@@ -234,7 +234,7 @@ public class CreatePlotActivity extends ActionBarActivity {
         String curveId;
         private LoadCurveData(String curveId) {
             this.curveId = curveId;
-            server = "http://10.0.3.2:5000/getCurveFromCurveId?curve="
+            server = "http://54.67.103.185/getCurveFromCurveId?curve="
                     + this.curveId;
             request  = new HttpGet(server);
         }
