@@ -88,6 +88,8 @@ public class ViewPlotActivity extends ActionBarActivity {
         webSettings.setDomStorageEnabled(true);
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
+
+        new CurvePoints(plotToDisplay.getCurves().get(0)).execute();
     }
 
     public String getPlotURL() {
@@ -125,13 +127,10 @@ public class ViewPlotActivity extends ActionBarActivity {
     }
 
     /**
-     * Asynchronous Task class that makes a REST GET request to the backend service.
-     * Currently, we are testing on local host.
-     *
-     * Use 'http://10.0.3.2:5000/' for Genymotion emulators
-     * Use 'http://10.0.2.2:5000/' for Android Studio emulators
+     * Asynchronous Task class that makes a REST GET request to the backend service
+     * to retrieve an array of doubles that represent the iv and dv values of a curve
      */
-    private class UpdateCurve extends AsyncTask<String, Void, String> {
+    private class CurvePoints extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
         String server = "http://54.67.103.185/getCurveFromCurveIdPresent";
         HttpGet request;
@@ -139,7 +138,7 @@ public class ViewPlotActivity extends ActionBarActivity {
         String jsonString = "";
         Curve theCurve;
 
-        private UpdateCurve (Curve curve) {
+        private CurvePoints (Curve curve) {
             this.theCurve = curve;
             this.curveId = curve.getId();
             this.server += ("?curve=" + this.curveId);
@@ -153,7 +152,7 @@ public class ViewPlotActivity extends ActionBarActivity {
 
 
         /**
-         * Executes the REST getWells request. Reads the data as a string and appends
+         * Executes the REST request. Reads the data as a string and appends
          * it into one large JSON string. It returns this value to onPostExecute(...)
          * result parameter
          *
@@ -190,9 +189,7 @@ public class ViewPlotActivity extends ActionBarActivity {
 
         /**
          * Called after the REST call has completed. Parses the JSON string parameter result
-         * and adds each well to the well adapter. The list view's adapter is set to the well
-         * adapter and each item has an on click listener to direct the user to the respective
-         * Well dashboard page.
+         * and stores the iv and dv values into arrays
          *
          * @param result    The return value of the function above
          *                  'doInBackground(String... params)'
