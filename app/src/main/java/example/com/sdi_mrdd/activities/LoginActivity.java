@@ -76,14 +76,8 @@ public class LoginActivity extends ActionBarActivity {
      /* Shared preferences to relay the code to the token retrieval asynchronous class */
      private SharedPreferences pref;
 
-     /* Button to sign in */
-     private Button signInBtn;
-
      /* Button to sign out. Currently this starts SDI authentication */
-     private Button signOutBtn;
-
-     /* Button to view the Web View */
-     private Button webViewBtn;
+     private Button signInBtn;
 
      /**
       * Set view of the page to the activity login template.
@@ -98,93 +92,75 @@ public class LoginActivity extends ActionBarActivity {
          setContentView(R.layout.activity_login);
          pref = getSharedPreferences("AppPref", MODE_PRIVATE);
 
-         webViewBtn =  (Button) findViewById(R.id.btn_webview);
-         webViewBtn.setOnClickListener(new View.OnClickListener() {
-             public void onClick(View v) {
-                 Intent intent = new Intent(LoginActivity.this, WebViewActivity.class);
-                 startActivity(intent);
-             }
-         });
-
-         /* Currently sign in button just goes to well view page.
-          * TODO: Change to same listener as sign out button once SDI authentication is fully working
-          */
-         signInBtn =  (Button) findViewById(R.id.btn_sign_in);
-         signInBtn.setOnClickListener(new View.OnClickListener() {
-             public void onClick(View v) {
-                 Intent intent = new Intent(LoginActivity.this, WellListActivity.class);
-                 startActivity(intent);
-             }
-         });
-
          /* Currently acts as the SDI authentication button */
-         signOutBtn = (Button)findViewById(R.id.btn_sign_out);
-         signOutBtn.setOnClickListener(new View.OnClickListener() {
+         signInBtn = (Button)findViewById(R.id.btn_sign_in);
+         signInBtn.setOnClickListener(new View.OnClickListener() {
 
-         @Override
-         public void onClick(View arg0) {
+             @Override
+             public void onClick(View arg0) {
              /* Dialog which will display SDI's authentication page */
-             final Dialog dialog = new Dialog(LoginActivity.this);
+                 final Dialog dialog = new Dialog(LoginActivity.this);
              /* Set view of dialog to webview */
-             dialog.setContentView(R.layout.activity_auth_dialog);
+                 dialog.setContentView(R.layout.activity_auth_dialog);
              /* Full screen dialog */
-             dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+                 dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
 
-             web = (WebView) dialog.findViewById(R.id.webv);
-             web.getSettings().setJavaScriptEnabled(true);
+                 web = (WebView) dialog.findViewById(R.id.webv);
+                 web.getSettings().setJavaScriptEnabled(true);
              /* Entire URL used to display authentication page and retrieve access code */
-             authUrl = OAUTH_URL + "?response_type=code" + "&client_id=" + CLIENT_ID
-                     + "&redirect_uri="+ REDIRECT_URI + "&resource=" + RESOURCE_URL;
+                 authUrl = OAUTH_URL + "?response_type=code" + "&client_id=" + CLIENT_ID
+                         + "&redirect_uri=" + REDIRECT_URI + "&resource=" + RESOURCE_URL;
 
-             web.loadUrl(authUrl);
-             web.setWebViewClient(new WebViewClient() {
-                 boolean authComplete = false;
-                 Intent resultIntent = new Intent();
+                 web.loadUrl(authUrl);
+                 web.setWebViewClient(new WebViewClient() {
+                     boolean authComplete = false;
+                     Intent resultIntent = new Intent();
 
-                 @Override
-                 public void onPageStarted(WebView view, String url, Bitmap favicon){
-                     super.onPageStarted(view, url, favicon);
-                 }
-                 /* Used to temporarily store the access code and stores it in preferences */
-                 String authCode;
+                     @Override
+                     public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                         super.onPageStarted(view, url, favicon);
+                     }
 
-                 /**
-                  * Runs after the user has inputted their credentials.
-                  * On success, url will contain the access code.
-                  * On failure, method will notify user of failed login
-                  *
-                  * @param view
-                  * @param url
-                  */
-                 @Override
-                 public void onPageFinished(WebView view, String url) {
-                     super.onPageFinished(view, url);
+                     /* Used to temporarily store the access code and stores it in preferences */
+                     String authCode;
+
+                     /**
+                      * Runs after the user has inputted their credentials.
+                      * On success, url will contain the access code.
+                      * On failure, method will notify user of failed login
+                      *
+                      * @param view
+                      * @param url
+                      */
+                     @Override
+                     public void onPageFinished(WebView view, String url) {
+                         super.onPageFinished(view, url);
                      /* Run on login success */
-                     if (url.contains("?code=") && authComplete != true) {
-                         Uri uri = Uri.parse(url);
-                         authCode = uri.getQueryParameter("code");
-                         Log.i("", "CODE : " + authCode);
-                         authComplete = true;
-                         resultIntent.putExtra("code", authCode);
+                         if (url.contains("?code=") && authComplete != true) {
+                             Uri uri = Uri.parse(url);
+                             authCode = uri.getQueryParameter("code");
+                             Log.i("", "CODE : " + authCode);
+                             authComplete = true;
+                             resultIntent.putExtra("code", authCode);
 
-                         LoginActivity.this.setResult(Activity.RESULT_OK, resultIntent);
-                         setResult(Activity.RESULT_CANCELED, resultIntent);
-                         SharedPreferences.Editor edit = pref.edit();
-                         edit.putString("Code", authCode);
-                         edit.commit();
-                         dialog.dismiss();
+                             LoginActivity.this.setResult(Activity.RESULT_OK, resultIntent);
+                             setResult(Activity.RESULT_CANCELED, resultIntent);
+                             SharedPreferences.Editor edit = pref.edit();
+                             edit.putString("Code", authCode);
+                             edit.commit();
+                             dialog.dismiss();
                          /*Creates Asynchronous class to retrieve the actual token using the access code*/
-                         new TokenGet().execute();
-                     }
+                             new TokenGet().execute();
+                         }
                      /* Run on login failure */
-                     else if(url.contains("error=access_denied")){
-                         Log.i("", "ACCESS_DENIED_HERE");
-                         resultIntent.putExtra("code", authCode);
-                         authComplete = true;
-                         setResult(Activity.RESULT_CANCELED, resultIntent);
-                         Toast.makeText(getApplicationContext(), "Error Occured", Toast.LENGTH_SHORT).show();
+                         else if (url.contains("error=access_denied")) {
+                             Log.i("", "ACCESS_DENIED_HERE");
+                             resultIntent.putExtra("code", authCode);
+                             authComplete = true;
+                             setResult(Activity.RESULT_CANCELED, resultIntent);
+                             Toast.makeText(getApplicationContext(), "Error Occured", Toast.LENGTH_SHORT).show();
+                         }
                      }
-                 }
                  });
                  dialog.setTitle("Authorize SDI");
                  dialog.setCancelable(true);
