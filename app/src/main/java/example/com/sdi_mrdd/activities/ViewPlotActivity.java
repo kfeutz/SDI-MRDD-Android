@@ -213,7 +213,6 @@ public class ViewPlotActivity extends ActionBarActivity {
             for (int i = 0; i < ivValueList.size(); i++) {
                 dvDoubleList.add(Double.parseDouble(ivValueList.get(i)));
             }
-            listAdapter.notifyDataSetChanged();
         }
     }
 }
