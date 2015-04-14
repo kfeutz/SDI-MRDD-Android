@@ -45,6 +45,8 @@ public class ViewPlotActivity extends ActionBarActivity {
 
     private Button JSBtn;
 
+    private CurvePoints curvePoints;
+
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
 
     @Override
@@ -62,21 +64,22 @@ public class ViewPlotActivity extends ActionBarActivity {
 
         setTitle(plotName);
 
-        JSBtn =  (Button) findViewById(R.id.btn_testJS);
+        /*JSBtn =  (Button) findViewById(R.id.btn_testJS);
         JSBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 myWebView.loadUrl("javascript:setV(\""+
                     plotToDisplay.getCurves().get(0).getUnitFromRange(0, 20)+"\")");
             }
-        });
+        });*/
 
         myWebView = (WebView) findViewById(R.id.webview);
 
         //Opens in-app instead of in browser
         myWebView.setWebViewClient(new WebViewClient(){
             public void onPageFinished(WebView view, String url){
-                //myWebView.loadUrl("javascript:showData()");
-                myWebView.loadUrl("javascript:InitChart(350,400)");
+                //myWebView.loadUrl("javascript:InitChart(350,400,\""+curvePoints.getDvList().toArray()+"\",\""+curvePoints.getIvList().toArray()+"\")");
+                myWebView.loadUrl("javascript:InitChart(350,400,[10,50,20,30,35,25],[10,20,30,40,50,60])");
+                //myWebView.loadUrl("javascript:testData()");
             }
         });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -89,7 +92,8 @@ public class ViewPlotActivity extends ActionBarActivity {
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
 
-        new CurvePoints(plotToDisplay.getCurves().get(0)).execute();
+        curvePoints = new CurvePoints(plotToDisplay.getCurves().get(0));
+        curvePoints.execute();
     }
 
     public String getPlotURL() {
@@ -137,6 +141,8 @@ public class ViewPlotActivity extends ActionBarActivity {
         String curveId;
         String jsonString = "";
         Curve theCurve;
+        List<Double> ivDoubleList;
+        List<Double> dvDoubleList;
 
         private CurvePoints (Curve curve) {
             this.theCurve = curve;
@@ -198,18 +204,38 @@ public class ViewPlotActivity extends ActionBarActivity {
         protected void onPostExecute(String result) {
             String ivValues = curveValueParser.parseIvValues(result);
             List<String> ivValueList = Arrays.asList(ivValues.split(","));
-            List<Double> ivDoubleList = new ArrayList<>();
+            ivDoubleList = new ArrayList<>();
             /* Loop through the iv list and convert string values to doubles */
             for (int i = 0; i < ivValueList.size(); i++) {
                 ivDoubleList.add(Double.parseDouble(ivValueList.get(i)));
             }
             String dvValues = curveValueParser.parseDvValues(result);
             List<String> dvValueList = Arrays.asList(dvValues.split(","));
-            List<Double> dvDoubleList = new ArrayList<>();
+             dvDoubleList = new ArrayList<>();
             /* Loop through the list and convert string values to doubles */
             for (int i = 0; i < ivValueList.size(); i++) {
-                dvDoubleList.add(Double.parseDouble(ivValueList.get(i)));
+                dvDoubleList.add(Double.parseDouble(dvValueList.get(i)));
             }
+
+            /*myWebView.loadUrl("javascript:setData(\""+
+                    dvDoubleList.toArray()+"\",\""+ivDoubleList.toArray()+"\")");*/
+        }
+
+        public List<Double> getDvList() {
+            return dvDoubleList;
+        }
+
+        public List<Double> getIvList() {
+            return ivDoubleList;
+        }
+
+        public String getDvIvString() {
+            String value = "[";
+            for (int i = 0; i < dvDoubleList.size(); i++) {
+                value += "{'x': " + dvDoubleList.get(i) + ", 'y': " + ivDoubleList.get(i) + "},";
+            }
+            value += "]";
+            return value;
         }
     }
 }

@@ -12,13 +12,6 @@
     <TextView android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <Button
-        android:id="@+id/btn_testJS"
-        android:layout_width="fill_parent"
-        android:text="@string/random"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"/>
-
     <WebView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/webview"
