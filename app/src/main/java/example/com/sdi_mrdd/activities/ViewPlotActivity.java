@@ -78,7 +78,7 @@ public class ViewPlotActivity extends ActionBarActivity {
         myWebView.setWebViewClient(new WebViewClient(){
             public void onPageFinished(WebView view, String url){
                 //myWebView.loadUrl("javascript:InitChart(350,400,\""+curvePoints.getDvList().toArray()+"\",\""+curvePoints.getIvList().toArray()+"\")");
-                myWebView.loadUrl("javascript:InitChart(350,400,[10,50,20,30,35,25],[10,20,30,40,50,60])");
+                myWebView.loadUrl("javascript:InitChart(350,400,[10,50,20,30,35,25],[10,20,30,40,50,60],\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
                 //myWebView.loadUrl("javascript:testData()");
             }
         });
@@ -216,9 +216,6 @@ public class ViewPlotActivity extends ActionBarActivity {
             for (int i = 0; i < ivValueList.size(); i++) {
                 dvDoubleList.add(Double.parseDouble(dvValueList.get(i)));
             }
-
-            /*myWebView.loadUrl("javascript:setData(\""+
-                    dvDoubleList.toArray()+"\",\""+ivDoubleList.toArray()+"\")");*/
         }
 
         public List<Double> getDvList() {
@@ -236,6 +233,10 @@ public class ViewPlotActivity extends ActionBarActivity {
             }
             value += "]";
             return value;
+        }
+
+        public Curve getCurve() {
+            return theCurve;
         }
     }
 }

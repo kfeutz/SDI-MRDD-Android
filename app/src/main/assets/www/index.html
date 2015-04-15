@@ -185,7 +185,7 @@
 <script type="text/javascript">
             //InitChart();
 
-            function InitChart(screenWidth, screenHeight, dv, iv) {
+            function InitChart(screenWidth, screenHeight, dv, iv, dvName, ivName) {
 
                 var lineData = [{
                         'x': 1,
@@ -307,7 +307,7 @@
                   .attr("x", screenWidth / 2 )
                   .attr("y",  MARGINS.top )
                   .style("text-anchor", "middle")
-                  .text("Time");
+                  .text(dvName);
 
                   vis.append("svg:g")
                   .attr("class", "y axis")
@@ -321,7 +321,7 @@
                   //.attr("y",  MARGINS.left)
                   .attr("dy", "1em")
                   .style("text-anchor", "middle")
-                  .text("Value");
+                  .text(ivName);
 
                   //drawing the line
                   var lineFunc = d3.svg.line()
