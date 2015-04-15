@@ -110,66 +110,69 @@ public class CreatePlotActivity extends ActionBarActivity {
         btnCreatePlot =  (Button) findViewById(R.id.btn_create_plot);
         btnCreatePlot.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                SparseBooleanArray checked = CreatePlotActivity.this.getListView().getCheckedItemPositions();
+                if (checked.size() > 0) { // Making sure there is at least 1 curve to plot
                 /* Ask the user if they want to add the curves to the plot */
-                new AlertDialog.Builder(CreatePlotActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle(R.string.confirm_curve_add_title)
-                        .setMessage(R.string.confirm_curve_msg)
-                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    new AlertDialog.Builder(CreatePlotActivity.this)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle(R.string.confirm_curve_add_title)
+                            .setMessage(R.string.confirm_curve_msg)
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                SparseBooleanArray checked = CreatePlotActivity.this.getListView().getCheckedItemPositions();
-                                List<Curve> curvesToAdd = new ArrayList<Curve>();
-                                Plot plotToAdd;
-                                String curveToAddId;
-                                Curve curveToAdd;
-                                String loadedCurve;
-                                int size = checked.size(); // number of name-value pairs in the array
-                                for (int i = 0; i < size; i++) {
-                                    int key = checked.keyAt(i);
-                                    boolean value = checked.get(key);
-                                    if (value && curveStringList != null) {
-                                        curveToAddId = curveMap.get(curveStringList.get(key));
-                                        try {
-                                            loadedCurve = new LoadCurveData(curveToAddId).execute().get();
-                                            curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId);
-                                            Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
-                                                    curveToAdd.getName(), curveToAdd.getIvName(),
-                                                    curveToAdd.getDvName(), curveToAdd.getIvUnit(),
-                                                    curveToAdd.getDvUnit(), wellId);
-                                            curveList.add(addedCurve);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        } catch (ExecutionException e) {
-                                            e.printStackTrace();
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    SparseBooleanArray checked = CreatePlotActivity.this.getListView().getCheckedItemPositions();
+                                    List<Curve> curvesToAdd = new ArrayList<Curve>();
+                                    Plot plotToAdd;
+                                    String curveToAddId;
+                                    Curve curveToAdd;
+                                    String loadedCurve;
+                                    int size = checked.size(); // number of name-value pairs in the array
+                                    for (int i = 0; i < size; i++) {
+                                        int key = checked.keyAt(i);
+                                        boolean value = checked.get(key);
+                                        if (value && curveStringList != null) {
+                                            curveToAddId = curveMap.get(curveStringList.get(key));
+                                            try {
+                                                loadedCurve = new LoadCurveData(curveToAddId).execute().get();
+                                                curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId);
+                                                Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
+                                                        curveToAdd.getName(), curveToAdd.getIvName(),
+                                                        curveToAdd.getDvName(), curveToAdd.getIvUnit(),
+                                                        curveToAdd.getDvUnit(), wellId);
+                                                curveList.add(addedCurve);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            } catch (ExecutionException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
-                                }
-                                plotToAdd = dbCommunicator.createPlot(inputTitle.getText().toString(),
-                                        wellId);
+                                    plotToAdd = dbCommunicator.createPlot(inputTitle.getText().toString(),
+                                            wellId);
 
-                                for(int i = 0; i < curveList.size(); i++) {
-                                    dbCommunicator.addCurveToPlot(plotToAdd, curveList.get(i));
-                                }
+                                    for (int i = 0; i < curveList.size(); i++) {
+                                        dbCommunicator.addCurveToPlot(plotToAdd, curveList.get(i));
+                                    }
 
-                                Intent intent = new Intent(CreatePlotActivity.this, WellDashBoardActivity.class);
+                                    Intent intent = new Intent(CreatePlotActivity.this, WellDashBoardActivity.class);
                                 /*
                                   *   Adds the ArrayList of selected strings to the intent which will be passed to
                                   *   the well dashboard. The list of strings represent curve names to be added to
                                   *   the dashboard
                                  */
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                setResult(RESULT_OK, intent);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    setResult(RESULT_OK, intent);
 
-                                CreatePlotActivity.this.finish();
-                                startActivity(intent);
-                                //Stop the activity
-                            }
+                                    CreatePlotActivity.this.finish();
+                                    startActivity(intent);
+                                    //Stop the activity
+                                }
 
-                        })
-                        .setNegativeButton(R.string.no, null)
-                        .show();
+                            })
+                            .setNegativeButton(R.string.no, null)
+                            .show();
+                }
             }
         });
     }
