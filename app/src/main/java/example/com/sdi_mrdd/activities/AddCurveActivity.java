@@ -93,60 +93,63 @@ public class AddCurveActivity extends ActionBarActivity {
         btnAddCurves =  (Button) findViewById(R.id.btn_add_curves);
         btnAddCurves.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //Ask the user if they want to add the curves
-                new AlertDialog.Builder(AddCurveActivity.this)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle(R.string.confirm_curve_add_title)
-                        .setMessage(R.string.confirm_curve_msg)
-                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                SparseBooleanArray checked = AddCurveActivity.this.getListView().getCheckedItemPositions();
+                if (checked.size() > 0) { // Check there is at least one item checked
+                    //Ask the user if they want to add the curves
+                    new AlertDialog.Builder(AddCurveActivity.this)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle(R.string.confirm_curve_add_title)
+                            .setMessage(R.string.confirm_curve_msg)
+                            .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String curveToAddId;
-                                String loadedCurve = null;
-                                Curve curveToAdd;
-                                SparseBooleanArray checked = AddCurveActivity.this.getListView().getCheckedItemPositions();
-                                int size = checked.size(); // number of name-value pairs in the array
-                                for (int i = 0; i < size; i++) {
-                                    int key = checked.keyAt(i);
-                                    boolean value = checked.get(key);
-                                    if (value && curveStringList != null) {
-                                        selectedCurveList.add(curveStringList.get(key));
-                                        curveToAddId = curveMap.get(curveStringList.get(key));
-                                        try {
-                                            loadedCurve = new LoadCurveData(curveToAddId).execute().get();
-                                            curveToAdd =  curveJsonParser.parse(loadedCurve, curveToAddId);
-                                            Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
-                                                    curveToAdd.getName(), curveToAdd.getIvName(),
-                                                    curveToAdd.getDvName(), curveToAdd.getIvUnit(),
-                                                    curveToAdd.getDvUnit(), wellId);
-                                            dbCommunicator.addCurveToDashboard(addedCurve, wellId);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        } catch (ExecutionException e) {
-                                            e.printStackTrace();
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String curveToAddId;
+                                    String loadedCurve = null;
+                                    Curve curveToAdd;
+                                    SparseBooleanArray checked = AddCurveActivity.this.getListView().getCheckedItemPositions();
+                                    int size = checked.size(); // number of name-value pairs in the array
+                                    for (int i = 0; i < size; i++) {
+                                        int key = checked.keyAt(i);
+                                        boolean value = checked.get(key);
+                                        if (value && curveStringList != null) {
+                                            selectedCurveList.add(curveStringList.get(key));
+                                            curveToAddId = curveMap.get(curveStringList.get(key));
+                                            try {
+                                                loadedCurve = new LoadCurveData(curveToAddId).execute().get();
+                                                curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId);
+                                                Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
+                                                        curveToAdd.getName(), curveToAdd.getIvName(),
+                                                        curveToAdd.getDvName(), curveToAdd.getIvUnit(),
+                                                        curveToAdd.getDvUnit(), wellId);
+                                                dbCommunicator.addCurveToDashboard(addedCurve, wellId);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
+                                            } catch (ExecutionException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
-                                }
 
-                                Intent intent = new Intent(AddCurveActivity.this, WellDashBoardActivity.class);
+                                    Intent intent = new Intent(AddCurveActivity.this, WellDashBoardActivity.class);
                                 /*
                                   *   Adds the ArrayList of selected strings to the intent which will be passed to
                                   *   the well dashboard. The list of strings represent curve names to be added to
                                   *   the dashboard
                                  */
-                                intent.putStringArrayListExtra("curveList", selectedCurveList);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                setResult(RESULT_OK, intent);
+                                    intent.putStringArrayListExtra("curveList", selectedCurveList);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    setResult(RESULT_OK, intent);
 
-                                AddCurveActivity.this.finish();
-                                startActivity(intent);
-                                //Stop the activity
-                            }
+                                    AddCurveActivity.this.finish();
+                                    startActivity(intent);
+                                    //Stop the activity
+                                }
 
-                        })
-                        .setNegativeButton(R.string.no, null)
-                        .show();
+                            })
+                            .setNegativeButton(R.string.no, null)
+                            .show();
+                }
             }
         });
     }
