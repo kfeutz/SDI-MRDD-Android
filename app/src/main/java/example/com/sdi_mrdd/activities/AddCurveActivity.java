@@ -113,8 +113,8 @@ public class AddCurveActivity extends ActionBarActivity {
                                         int key = checked.keyAt(i);
                                         boolean value = checked.get(key);
                                         if (value && curveStringList != null) {
-                                            selectedCurveList.add(curveStringList.get(key));
-                                            curveToAddId = curveMap.get(curveStringList.get(key));
+                                            selectedCurveList.add(listAdapter.getItem(key));
+                                            curveToAddId = curveMap.get(listAdapter.getItem(key));
                                             try {
                                                 loadedCurve = new LoadCurveData(curveToAddId).execute().get();
                                                 curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId);
@@ -168,7 +168,7 @@ public class AddCurveActivity extends ActionBarActivity {
         // Assumes current activity is the searchable activity
         searchView.setSearchableInfo(searchManager.getSearchableInfo(
                 new ComponentName(getApplicationContext(), AddCurveActivity.class)));
-        searchView.setIconifiedByDefault(true); // Collapseable widget
+        searchView.setIconifiedByDefault(false); // Collapseable widget
 
         SearchView.OnQueryTextListener textChangeListener = new SearchView.OnQueryTextListener()
         {
