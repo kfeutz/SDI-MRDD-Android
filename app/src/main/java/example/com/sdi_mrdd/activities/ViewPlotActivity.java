@@ -3,6 +3,7 @@ package example.com.sdi_mrdd.activities;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -75,11 +76,10 @@ public class ViewPlotActivity extends ActionBarActivity {
         myWebView = (WebView) findViewById(R.id.webview);
 
         //Opens in-app instead of in browser
-        myWebView.setWebViewClient(new WebViewClient(){
-            public void onPageFinished(WebView view, String url){
-                //myWebView.loadUrl("javascript:InitChart(350,400,\""+curvePoints.getDvList().toArray()+"\",\""+curvePoints.getIvList().toArray()+"\")");
-                myWebView.loadUrl("javascript:InitChart(350,400,[10,50,20,30,35,25],[10,20,30,40,50,60],\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
-                //myWebView.loadUrl("javascript:testData()");
+        myWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                myWebView.loadUrl("javascript:InitChart(350,400,"+ curvePoints.getDvString()+","
+                        +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
             }
         });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -230,6 +230,30 @@ public class ViewPlotActivity extends ActionBarActivity {
             String value = "[";
             for (int i = 0; i < dvDoubleList.size(); i++) {
                 value += "{'x': " + dvDoubleList.get(i) + ", 'y': " + ivDoubleList.get(i) + "},";
+            }
+            value += "]";
+            return value;
+        }
+
+        public String getDvString() {
+            String value = "[";
+            for (int i = 0; i < dvDoubleList.size(); i++) {
+                value += dvDoubleList.get(i);
+                if (i != dvDoubleList.size() - 1) {
+                    value += ", ";
+                }
+            }
+            value += "]";
+            return value;
+        }
+
+        public String getIvString() {
+            String value = "[";
+            for (int i = 0; i < ivDoubleList.size(); i++) {
+                value += ivDoubleList.get(i);
+                if (i != ivDoubleList.size() - 1) {
+                    value += ", ";
+                }
             }
             value += "]";
             return value;
