@@ -78,8 +78,8 @@ public class ViewPlotActivity extends ActionBarActivity {
         //Opens in-app instead of in browser
         myWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                myWebView.loadUrl("javascript:InitChart(350,400,"+ curvePoints.getDvString()+","
-                        +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
+                //myWebView.loadUrl("javascript:InitChart(350,400,"+ curvePoints.getDvString()+","
+                  //      +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
             }
         });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
