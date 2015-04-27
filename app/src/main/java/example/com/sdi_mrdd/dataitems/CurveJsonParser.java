@@ -39,43 +39,27 @@ public class CurveJsonParser {
      * @return  List<Curve>     A List containing the Curves from the JSON string.
      */
     /*@Override*/
-    public Curve parse(String jsonString, String trueCurveId) {
+    public Curve parse(String jsonString, String trueCurveId, String curveToCreateName) {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-        String curveJsonArray = null;
         String curveId = trueCurveId;
-        String curveName = null;
+        String curveName = curveToCreateName;
         String ivName = null;
         String dvName = null;
-        String ivUnit = null;
-        String dvUnit = null;
-        JSONArray curveArray = null;
+        String ivUnit = "";
+        String dvUnit = "";
 
         try {
-            jsonReader.beginObject();
-            while (jsonReader.hasNext()) {
-                String token = jsonReader.nextName();
-                /* Grab curve name field */
-                if (token.equals("name")) {
-                    curveName = jsonReader.nextString();
-                }
-                /* Grab curve iv_name field */
-                else if (token.equals("iv_name")) {
-                    ivName = jsonReader.nextString();
-                }
-                else if (token.equals("dv_name")) {
-                    dvName = jsonReader.nextString();
-                }
-                else if (token.equals("iv_unit")) {
-                    ivUnit = jsonReader.nextString();
-                }
-                else if (token.equals("dv_unit")) {
-                    dvUnit = jsonReader.nextString();
-                }
-                else {
-                    jsonReader.skipValue();
-                }
-            }
-            jsonReader.endObject();
+            jsonReader.beginArray();
+            /* Loop through json array twice to avoid unnecessary attributes */
+            jsonReader.skipValue();
+            jsonReader.skipValue();
+            /* Start array to grab iv and dv names */
+            jsonReader.beginArray();
+            ivName = jsonReader.nextString();
+            dvName = jsonReader.nextString();
+
+            jsonReader.endArray();
+            jsonReader.endArray();
             jsonReader.close();
         } catch (IOException e) {
             Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));

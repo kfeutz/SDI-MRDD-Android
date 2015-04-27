@@ -39,6 +39,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import example.com.sdi_mrdd.asynctasks.AsyncTaskCompleteListener;
+import example.com.sdi_mrdd.asynctasks.LoadCurveDataTask;
+import example.com.sdi_mrdd.asynctasks.LoadCurvesForWellTask;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveJsonParser;
 import example.com.sdi_mrdd.dataitems.CurvesForWellJsonParser;
@@ -47,7 +50,7 @@ import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.dataitems.Well;
 
 
-public class AddCurveActivity extends ActionBarActivity {
+public class AddCurveActivity extends ActionBarActivity implements AsyncTaskCompleteListener<String> {
 
     private ArrayAdapter<String> listAdapter;
 
@@ -64,18 +67,19 @@ public class AddCurveActivity extends ActionBarActivity {
     private CurvesForWellJsonParser curvesForWellJsonParser = CurvesForWellJsonParser.getInstance();
     private CurveJsonParser curveJsonParser = CurveJsonParser.getInstance();
 
-    String[] curves = new String[] {"Curve 1", "Curve 2", "Curve 3", "Curve 4",
-            "Curve 5", "Curve 6", "Curve 7", "Curve 8", "Curve 9", "Curve 10",
-            "Curve 11", "Curve 12", "Curve 13", "Curve 14", "Curve 15", "Curve 16"};
+    String jsonCurves;
     Map<String, String> curveMap = new HashMap<>();
-    List<Curve> curveList = new ArrayList<>();
     ArrayList<String> curveStringList = new ArrayList<String>();
     ArrayList<String> selectedCurveList = new ArrayList<String>();
+    ArrayList<Curve> curveList = new ArrayList<>();
+
+    /** progress dialog to show user that the curves are loading. */
+    private ProgressDialog dialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String curveToAddId;
+        String curveToAddId = null;
         setContentView(R.layout.activity_add_curve);
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -88,7 +92,10 @@ public class AddCurveActivity extends ActionBarActivity {
 
         curveListView = (ListView) findViewById(R.id.add_curve_view);
 
-        new LoadCurves().execute("");
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Retrieving curves");
+        dialog.show();
+        new LoadCurvesForWellTask(this, this.wellId).execute();
 
         btnAddCurves =  (Button) findViewById(R.id.btn_add_curves);
         btnAddCurves.setOnClickListener(new View.OnClickListener() {
@@ -104,8 +111,10 @@ public class AddCurveActivity extends ActionBarActivity {
 
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    String curveToAddId;
-                                    String loadedCurve = null;
+                                    String curveToAddId = null;
+                                    String curveToAddName;
+                                    String jsonLoadedCurve = null;
+                                    String curveType = null;
                                     Curve curveToAdd;
                                     SparseBooleanArray checked = AddCurveActivity.this.getListView().getCheckedItemPositions();
                                     int size = checked.size(); // number of name-value pairs in the array
@@ -113,15 +122,22 @@ public class AddCurveActivity extends ActionBarActivity {
                                         int key = checked.keyAt(i);
                                         boolean value = checked.get(key);
                                         if (value && curveStringList != null) {
-                                            selectedCurveList.add(listAdapter.getItem(key));
-                                            curveToAddId = curveMap.get(listAdapter.getItem(key));
+                                            curveToAddName = listAdapter.getItem(key);
                                             try {
-                                                loadedCurve = new LoadCurveData(curveToAddId).execute().get();
-                                                curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId);
+                                                for (int j = 0; j < curveList.size(); j++) {
+                                                    if(curveList.get(j).getName() == curveToAddName) {
+                                                        curveType = curveList.get(j).getCurveType();
+                                                        curveToAddId = curveList.get(j).getId();
+                                                    }
+                                                }
+                                                jsonLoadedCurve = new LoadCurveDataTask(curveToAddId,
+                                                        AddCurveActivity.this.getWellId()).execute().get();
+                                                curveToAdd = curveJsonParser.parse(jsonLoadedCurve, curveToAddId, curveToAddName);
+
                                                 Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
                                                         curveToAdd.getName(), curveToAdd.getIvName(),
                                                         curveToAdd.getDvName(), curveToAdd.getIvUnit(),
-                                                        curveToAdd.getDvUnit(), wellId);
+                                                        curveToAdd.getDvUnit(), wellId, curveType);
                                                 dbCommunicator.addCurveToDashboard(addedCurve, wellId);
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
@@ -152,6 +168,26 @@ public class AddCurveActivity extends ActionBarActivity {
                 }
             }
         });
+    }
+
+    @Override
+    public void onTaskComplete(String result) {
+        parseJsonCurveList(result);
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
+    }
+
+    public void parseJsonCurveList(String jsonString) {
+        curveList = curvesForWellJsonParser.parse(jsonString);
+        for (int i = 0; i < curveList.size(); i++) {
+            curveStringList.add(curveList.get(i).getName());
+        }
+        listAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_multiple_choice, curveStringList);
+        curveListView.setAdapter(listAdapter);
+        curveListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        curveListView.setTextFilterEnabled(true);
     }
 
     @Override
@@ -200,69 +236,6 @@ public class AddCurveActivity extends ActionBarActivity {
 
     public String getWellId() {
         return this.wellId;
-    }
-
-    private class LoadCurves extends AsyncTask<String, Void, String> {
-        HttpClient client = new DefaultHttpClient();
-        String server = "http://54.67.103.185/getCurvesForWell?well="
-                + AddCurveActivity.this.getWellId();
-        HttpGet request = new HttpGet(server);
-        String jsonString = "";
-        /** progress dialog to show user that the curves are loading. */
-        private ProgressDialog dialog;
-
-
-        @Override
-        protected void onPreExecute() {
-            dialog = new ProgressDialog(AddCurveActivity.this);
-            dialog.setMessage("Retrieving curves");
-            dialog.show();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            Scanner scanner;
-            HttpResponse response;
-            HttpEntity entity;
-            try {
-                response = client.execute(request);
-                entity = response.getEntity();
-
-                if(entity != null) {
-                    InputStream input = entity.getContent();
-                    if (input != null) {
-                        scanner = new Scanner(input);
-
-                        while (scanner.hasNext()) {
-                            jsonString += scanner.next() + " ";
-                        }
-                        input.close();
-                    }
-                }
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-            }
-            return jsonString;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Log.i("", "Result after getCurvesForWell GET : " + result);
-            curveMap = curvesForWellJsonParser.parse(result);
-            Iterator mapIterator = curveMap.keySet().iterator();
-            while (mapIterator.hasNext()) {
-                curveStringList.add((String) mapIterator.next());
-            }
-            listAdapter = new ArrayAdapter<String>(AddCurveActivity.this,
-                    android.R.layout.simple_list_item_multiple_choice, curveStringList);
-            curveListView.setAdapter(listAdapter);
-            curveListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            curveListView.setTextFilterEnabled(true);
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }
     }
 
     private class LoadCurveData extends AsyncTask<String, Void, String> {

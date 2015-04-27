@@ -7,6 +7,9 @@ import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Kevin on 3/11/2015.
@@ -20,6 +23,44 @@ public class CurveValueParser {
 
     public static CurveValueParser getInstance() {
         return instance;
+    }
+
+    public Map<String, String> parseRecentValues(String jsonString) {
+        Map<String, String> recentCurveValues = new HashMap<>();
+        JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
+        ArrayList<String> ivValues = new ArrayList<>();
+        ArrayList<String> dvValues = new ArrayList<>();
+
+        try {
+            jsonReader.beginArray();
+            /* Start array of points */
+            jsonReader.beginArray();
+            while(jsonReader.hasNext()) {
+                /* Begin one point array */
+                jsonReader.beginArray();
+                /* First value in point array is ivValue per API */
+                ivValues.add(jsonReader.nextString());
+                /* Second value in point array is dvValue per API */
+                dvValues.add(jsonReader.nextString());
+                jsonReader.endArray();
+            }
+            /* End array of points */
+            jsonReader.endArray();
+            /* Skip map ranges */
+            jsonReader.skipValue();
+            /* Skip array of iv and dv names */
+            jsonReader.skipValue();
+
+            jsonReader.endArray();
+            jsonReader.close();
+
+            /* Grab last iv and dv values in array */
+            recentCurveValues.put("ivValue", ivValues.get(ivValues.size() - 1));
+            recentCurveValues.put("dvValue", dvValues.get(dvValues.size() - 1));
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
+        }
+        return recentCurveValues;
     }
 
     public String parseIvValues(String jsonString) {

@@ -12,6 +12,7 @@ import java.util.List;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.Plot;
 import example.com.sdi_mrdd.dataitems.TimeCurve;
+import example.com.sdi_mrdd.dataitems.WellboreCurve;
 
 /**
  * This class serves as a communicator between the SQLite database
@@ -31,7 +32,7 @@ public class DatabaseCommunicator {
 
     /* Array of the curve table column names */
     private String[] allCurveColumns = { SQLiteHelper.COLUMN_CURVE_KEY,  SQLiteHelper.COLUMN_CURVE_ID,
-            SQLiteHelper.COLUMN_CURVE, SQLiteHelper.COLUMN_WELL_DASH };
+            SQLiteHelper.COLUMN_CURVE, SQLiteHelper.COLUMN_WELL_DASH, SQLiteHelper.COLUMN_CURVE_TYPE };
 
     /* Array of the plot table column names */
     private String[] allPlotColumns = { SQLiteHelper.COLUMN_PLOT_KEY,  SQLiteHelper.COLUMN_PLOT_NAME,
@@ -105,7 +106,7 @@ public class DatabaseCommunicator {
      * @return  Curve   The newly created curve
      */
     public Curve createCurve(String curveId, String name, String ivName, String dvName,
-                             String ivUnit, String dvUnit, String wellDash) {
+                             String ivUnit, String dvUnit, String wellDash, String curveType) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_CURVE_ID, curveId);
         values.put(SQLiteHelper.COLUMN_CURVE, name);
@@ -114,6 +115,7 @@ public class DatabaseCommunicator {
         values.put(SQLiteHelper.COLUMN_CURVE_IVUNIT, ivUnit);
         values.put(SQLiteHelper.COLUMN_CURVE_DVUNIT, dvUnit);
         values.put(SQLiteHelper.COLUMN_WELL_DASH, wellDash);
+        values.put(SQLiteHelper.COLUMN_CURVE_TYPE, curveType);
 
         String insertCurveQuery = "INSERT OR IGNORE INTO " + SQLiteHelper.TABLE_CURVES + " ("
                 + SQLiteHelper.COLUMN_CURVE_ID + ", "
@@ -122,9 +124,11 @@ public class DatabaseCommunicator {
                 + SQLiteHelper.COLUMN_CURVE_DVNAME + ", "
                 + SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
                 + SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
-                + SQLiteHelper.COLUMN_WELL_DASH + ")"
+                + SQLiteHelper.COLUMN_WELL_DASH + ", "
+                + SQLiteHelper.COLUMN_CURVE_TYPE +")"
                 + " values ('" + curveId + "', '" + name + "', '" + ivName +
-                    "', '" + dvName + "', '" + ivUnit + "', '" + dvUnit + "', '" + wellDash + "');";
+                    "', '" + dvName + "', '" + ivUnit + "', '" + dvUnit +
+                    "', '" + wellDash + "', '" + curveType + "');";
         Cursor cursor = database.rawQuery(insertCurveQuery, null);
 
         cursor.moveToFirst();
@@ -214,7 +218,8 @@ public class DatabaseCommunicator {
                 + "c." +  SQLiteHelper.COLUMN_CURVE_DVNAME + ", "
                 + "c." +  SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
                 + "c." +  SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
-                + "c." +  SQLiteHelper.COLUMN_WELL_DASH
+                + "c." +  SQLiteHelper.COLUMN_WELL_DASH + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_TYPE
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_DASHBOARDCURVES + " dc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "dc." + SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE
                 + " AND dc." + SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL + " = " + "'" + wellId + "';";
@@ -240,9 +245,18 @@ public class DatabaseCommunicator {
      * @return          The curve corresponding to the cursor
      */
     private Curve cursorToCurve(Cursor cursor) {
-        Curve curve = new TimeCurve(cursor.getString(1), cursor.getString(2),
-                cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6));
-        curve.setId(cursor.getString(1));
+        Curve curve;
+
+        if(cursor.getString(8).equals("time_curve")) {
+            curve = new TimeCurve(cursor.getString(1), cursor.getString(2),
+                    cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6));
+            curve.setId(cursor.getString(1));
+        }
+        else {
+            curve = new WellboreCurve(cursor.getString(1), cursor.getString(2),
+                    cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6));
+            curve.setId(cursor.getString(1));
+        }
         return curve;
     }
 
@@ -314,7 +328,8 @@ public class DatabaseCommunicator {
                 + "c." +  SQLiteHelper.COLUMN_CURVE_DVNAME + ", "
                 + "c." +  SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
                 + "c." +  SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
-                + "c." +  SQLiteHelper.COLUMN_WELL_DASH
+                + "c." +  SQLiteHelper.COLUMN_WELL_DASH + ", "
+                + "c." +  SQLiteHelper.COLUMN_CURVE_TYPE
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_PLOTCURVES + " pc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "pc." + SQLiteHelper.COLUMN_PLOTCURVES_CURVE
                 + " AND pc." + SQLiteHelper.COLUMN_PLOTCURVES_PLOT + " = " +  plotId;

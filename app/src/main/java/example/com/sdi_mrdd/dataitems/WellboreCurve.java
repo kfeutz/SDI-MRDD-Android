@@ -44,4 +44,9 @@ public class WellboreCurve extends Curve {
             return new Curve[size];
         }
     };
+
+    public String getCurveType() {
+        return "wellbore_curve";
+    }
+
 }

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+import example.com.sdi_mrdd.asynctasks.CurvePointsTask;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveValueParser;
 import example.com.sdi_mrdd.dataitems.Plot;
@@ -92,8 +93,9 @@ public class ViewPlotActivity extends ActionBarActivity {
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
 
-        curvePoints = new CurvePoints(plotToDisplay.getCurves().get(0));
-        curvePoints.execute();
+        /*curvePoints = new CurvePoints(plotToDisplay.getCurves().get(0), plotToDisplay);
+        curvePoints.execute();*/
+        new CurvePointsTask(this).execute();
     }
 
     public String getPlotURL() {
@@ -131,6 +133,15 @@ public class ViewPlotActivity extends ActionBarActivity {
     }
 
     /**
+     * Gets the plot belonging to this activity
+     *
+     * @return Plot     The plot belonging to this activity
+     */
+    public Plot getPlot() {
+        return this.plotToDisplay;
+    }
+
+    /**
      * Asynchronous Task class that makes a REST GET request to the backend service
      * to retrieve an array of doubles that represent the iv and dv values of a curve
      */
@@ -139,15 +150,17 @@ public class ViewPlotActivity extends ActionBarActivity {
         String server = "http://54.67.103.185/getCurveFromCurveIdPresent";
         HttpGet request;
         String curveId;
+        String wellId;
         String jsonString = "";
         Curve theCurve;
         List<Double> ivDoubleList;
         List<Double> dvDoubleList;
 
-        private CurvePoints (Curve curve) {
+        private CurvePoints (Curve curve, Plot plot) {
             this.theCurve = curve;
             this.curveId = curve.getId();
-            this.server += ("?curve=" + this.curveId);
+            this.wellId = plot.getWellId();
+            this.server += ("?well=" + this.wellId + "&curve=" + this.curveId);
         }
 
         @Override

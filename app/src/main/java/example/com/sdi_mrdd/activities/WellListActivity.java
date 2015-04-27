@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import example.com.sdi_mrdd.R;
+import example.com.sdi_mrdd.dataitems.ApiUrl;
 import example.com.sdi_mrdd.dataitems.Well;
 import example.com.sdi_mrdd.adapters.WellAdapter;
 import example.com.sdi_mrdd.dataitems.WellJsonParser;
@@ -97,7 +98,7 @@ public class WellListActivity extends ActionBarActivity {
      */
     private class LoadWells extends AsyncTask<String, Void, String> {
         HttpClient client = new DefaultHttpClient();
-        String server = "http://54.67.103.185/getWells";
+        String server = ApiUrl.BASEURL + "/getWells";
         HttpGet request = new HttpGet(server);
         String jsonString = "";
 

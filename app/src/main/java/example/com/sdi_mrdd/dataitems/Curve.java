@@ -186,6 +186,10 @@ public abstract class Curve implements Parcelable {
         this.dvValue = dvValue;
     }
 
+    public String getCurveType() {
+        return "Curve";
+    }
+
     /**
      * Required for Parceable objects. Must override and return 0
      * for our object to be parceable

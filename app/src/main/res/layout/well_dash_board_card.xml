@@ -64,14 +64,6 @@
                     android:gravity="right"
                     android:textAlignment="gravity"/>
 
-                <TextView
-                    android:id="@+id/curveIvUnit"
-                    android:layout_width="match_parent"
-                    android:layout_height="fill_parent"
-                    android:textSize="14dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="right"
-                    android:textAlignment="gravity"/>
 
             </LinearLayout>
 
@@ -103,14 +95,6 @@
                     android:gravity="right"
                     android:textAlignment="gravity"/>
 
-                <TextView
-                    android:id="@+id/curveDvUnit"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:layout_marginTop="5dp"
-                    android:gravity="right"
-                    android:textAlignment="gravity"/>
 
             </LinearLayout>
         </LinearLayout>

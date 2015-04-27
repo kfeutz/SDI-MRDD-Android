@@ -57,9 +57,7 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
             row = inflater.inflate(R.layout.well_dash_board_card, parent, false);
             viewHolder = new CurveCardHolder();
             viewHolder.name = (TextView) row.findViewById(R.id.curveTitle);
-            viewHolder.ivUnit = (TextView) row.findViewById(R.id.curveIvUnit);
             viewHolder.ivName = (TextView) row.findViewById(R.id.curveIvName);
-            viewHolder.dvUnit = (TextView) row.findViewById(R.id.curveDvUnit);
             viewHolder.dvName = (TextView) row.findViewById(R.id.curveDvName);
             viewHolder.ivData = (TextView) row.findViewById(R.id.curveIvData);
             viewHolder.dvData = (TextView) row.findViewById(R.id.curveDvData);
@@ -73,8 +71,6 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
         viewHolder.name.setText(curve.getName());
         viewHolder.ivName.setText(curve.getIvName());
         viewHolder.dvName.setText(curve.getDvName());
-        viewHolder.ivUnit.setText(curve.getIvUnit());
-        viewHolder.dvUnit.setText(curve.getDvUnit());
         viewHolder.ivData.setText(curve.getIvValue());
         viewHolder.dvData.setText(curve.getDvValue());
         return row;
