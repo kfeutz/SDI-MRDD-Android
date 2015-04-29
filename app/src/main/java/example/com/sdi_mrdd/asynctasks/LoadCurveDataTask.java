@@ -15,6 +15,8 @@ import java.util.Scanner;
 
 import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.dataitems.ApiUrl;
+import example.com.sdi_mrdd.dataitems.Curve;
+import example.com.sdi_mrdd.dataitems.CurveValueParser;
 
 /**
  * Created by Kevin on 4/26/2015.
@@ -27,6 +29,7 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
     String curveId;
     String wellId;
     long currentTimeLdap;
+    Curve curveToChange;
 
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
@@ -39,9 +42,9 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
         this.wellId = wellId;
         /* Converting current Unix epoch time to LDAP time format */
         this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
+
         server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
-                + this.wellId + "&curve=" + this.curveId
-                + "&start=" + STARTLDAPTIME + "&end=" + currentTimeLdap;
+                + this.wellId + "&curve=" + this.curveId;
         request  = new HttpGet(server);
     }
     @Override
@@ -73,7 +76,7 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        Log.i("", "Result after getCurveFromCurveId GET : " + result);
+        Log.i("", "Result after getCurveFromCurveId GET: " + result);
     }
 }
 

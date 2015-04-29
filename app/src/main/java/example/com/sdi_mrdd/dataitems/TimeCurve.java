@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -77,5 +78,4 @@ public class TimeCurve extends Curve {
     public String getCurveType() {
         return "time_curve";
     }
-
 }

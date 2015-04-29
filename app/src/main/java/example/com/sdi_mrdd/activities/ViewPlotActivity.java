@@ -1,5 +1,11 @@
 package example.com.sdi_mrdd.activities;
 
+import android.app.Activity;
+import android.app.Dialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -7,10 +13,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -21,10 +29,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
+import example.com.sdi_mrdd.asynctasks.AsyncTaskCompleteListener;
 import example.com.sdi_mrdd.asynctasks.CurvePointsTask;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveValueParser;
@@ -35,10 +45,10 @@ import example.com.sdi_mrdd.R;
  * This class displays a graphical representation of a plot. Each ViewPlotActivity
  * has a Plot and a String plotName
  */
-public class ViewPlotActivity extends ActionBarActivity {
+public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskCompleteListener<Curve> {
 
     /* Hold the plot object to display */
-    private Plot plotToDisplay;
+    public Plot plotToDisplay;
 
     /* Name of the plot used for title of page */
     private String plotName;
@@ -50,6 +60,8 @@ public class ViewPlotActivity extends ActionBarActivity {
     private CurvePoints curvePoints;
 
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
+
+    private Button refreshPointsBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +107,15 @@ public class ViewPlotActivity extends ActionBarActivity {
 
         /*curvePoints = new CurvePoints(plotToDisplay.getCurves().get(0), plotToDisplay);
         curvePoints.execute();*/
-        new CurvePointsTask(this).execute();
+        refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
+        refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                refreshPointsBtn.setEnabled(false);
+                new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
+            }
+        });
+
     }
 
     public String getPlotURL() {
@@ -139,6 +159,46 @@ public class ViewPlotActivity extends ActionBarActivity {
      */
     public Plot getPlot() {
         return this.plotToDisplay;
+    }
+    public String getDvString() {
+        List<Double> dvDoubleList = this.plotToDisplay.getCurves().get(0).getDvValues();
+        String value = "[";
+        for (int i = 0; i < dvDoubleList.size(); i++) {
+            value += dvDoubleList.get(i);
+            if (i != dvDoubleList.size() - 1) {
+                value += ", ";
+            }
+        }
+        value += "]";
+        return value;
+    }
+
+    public String getIvString() {
+        String value = "[";
+        List<String> ivDoubleList = this.plotToDisplay.getCurves().get(0).getIvValues();
+        for (int i = 0; i < ivDoubleList.size(); i++) {
+            value += ivDoubleList.get(i);
+            if (i != ivDoubleList.size() - 1) {
+                value += ", ";
+            }
+        }
+        value += "]";
+        return value;
+    }
+
+    @Override
+    public void onTaskComplete(Curve curveResult) {
+        this.plotToDisplay.setCurve(0, curveResult);
+        Log.i("ViewPlotActivity", "Update the points iv values : " + getIvString());
+        Log.i("ViewPlotActivity", "Update the points dv values : " + getDvString());
+        Log.i("ViewPlotActivity", "Update the points next start value : " + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
+        Log.i("ViewPlotActivity", "Update the points next end value : " + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
+        Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(350,400,"+ getDvString()+","
+                + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+        myWebView.loadUrl("javascript:clear_chart()");
+        myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
+                      + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+        refreshPointsBtn.setEnabled(true);
     }
 
     /**

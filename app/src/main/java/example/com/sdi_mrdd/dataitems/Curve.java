@@ -3,6 +3,8 @@ package example.com.sdi_mrdd.dataitems;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Random;
 
 /**
@@ -39,6 +41,17 @@ public abstract class Curve implements Parcelable {
     /* The number of units. Set default to 0 */
     private double units = 0;
 
+    private long nextStartUnit = 0;
+
+    private long nextEndUnit = 0;
+
+    private ArrayList<Double> dvValues = new ArrayList<>();
+
+    private ArrayList<String> ivValues = new ArrayList<>();
+
+    /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
+    private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
+
     /**
      * Constructor to create a Curve
      *
@@ -56,6 +69,43 @@ public abstract class Curve implements Parcelable {
         this.dvValue = "0.0";
     }
 
+    public ArrayList<Double> getDvValues() {
+        return dvValues;
+    }
+
+    public ArrayList<String> getIvValues() {
+        return ivValues;
+    }
+
+    public void setIvValues(ArrayList<String> ivValueList) {
+        this.ivValues.clear();
+        for(int i = 0; i < ivValueList.size(); i++) {
+            ivValues.add(ivValueList.get(i));
+        }
+    }
+
+    public void setDvValues(ArrayList<String> dvValueList) {
+        this.dvValues.clear();
+        for(int i = 0; i < dvValueList.size(); i++) {
+            dvValues.add(Double.parseDouble(dvValueList.get(i)));
+        }
+    }
+
+    public long getNextStartUnit() {
+        return nextStartUnit;
+    }
+
+    public long getNextEndUnit() {
+        return nextEndUnit;
+    }
+
+    public void setNextStartUnit(long start) {
+        this.nextStartUnit = start;
+    }
+
+    public void setNextEndUnit(long end) {
+        this.nextEndUnit= end;
+    }
     /**
      * Constructor that makes a parceable Curve. This allows us to pass Curves from activity
      * to activity.

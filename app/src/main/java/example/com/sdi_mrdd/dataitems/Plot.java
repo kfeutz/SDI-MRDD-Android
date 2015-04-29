@@ -51,6 +51,10 @@ public class Plot implements Parcelable {
         this.curves = curves;
     }
 
+    public void setCurve(int index, Curve curve) {
+        this.curves.set(index, curve);
+    }
+
     public void addCurve(Curve curve) {
         this.curves.add(curve);
     }

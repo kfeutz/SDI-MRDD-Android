@@ -27,7 +27,7 @@ import example.com.sdi_mrdd.dataitems.Plot;
  */
 public class CurvePointsTask extends AsyncTask<String, Void, String> {
     HttpClient client = new DefaultHttpClient();
-    String server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId";
+    String server;
     HttpGet request;
     String curveId;
     String wellId;
@@ -37,6 +37,8 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     List<Double> dvDoubleList;
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
     long currentTimeLdap;
+    Curve curveToChange;
+    AsyncTaskCompleteListener<Curve> activity;
 
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
@@ -44,14 +46,22 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     /* Start value for REST call, typically user will specifiy this but their API is acting weird */
     private final long STARTLDAPTIME = 120737630793553000L;
 
-    public CurvePointsTask (ViewPlotActivity activity) {
-        this.thePlot = activity.getPlot();
-        this.wellId = this.thePlot.getWellId();
-        this.curveId = this.thePlot.getCurves().get(0).getId();
+    public CurvePointsTask (AsyncTaskCompleteListener<Curve> activity, Plot thePlot) {
+        this.activity = activity;
+        this.wellId = thePlot.getWellId();
+        this.curveToChange = thePlot.getCurves().get(0);
+        this.curveId = curveToChange.getId();
         /* Converting current Unix epoch time to LDAP time format */
         this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
-        this.server += ("?well=" + this.wellId + "&curve=" + this.curveId
-            + "&start=" + STARTLDAPTIME + "&end=" + currentTimeLdap);
+        if(curveToChange.getNextStartUnit() != 0 && curveToChange.getNextEndUnit() != 0) {
+            server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId
+                    + "&start=" + curveToChange.getNextStartUnit() + "&end=" + curveToChange.getNextEndUnit();
+        }
+        else {
+            server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId;
+        }
     }
 
     @Override
@@ -107,21 +117,8 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         Log.i("ViewPlotActivity", "GET call result: " + result);
-
-        /*String ivValues = curveValueParser.parseIvValues(result);
-        List<String> ivValueList = Arrays.asList(ivValues.split(","));
-        ivDoubleList = new ArrayList<>();
-
-        for (int i = 0; i < ivValueList.size(); i++) {
-            ivDoubleList.add(Double.parseDouble(ivValueList.get(i)));
-        }
-        String dvValues = curveValueParser.parseDvValues(result);
-        List<String> dvValueList = Arrays.asList(dvValues.split(","));
-        dvDoubleList = new ArrayList<>();
-
-        for (int i = 0; i < ivValueList.size(); i++) {
-            dvDoubleList.add(Double.parseDouble(dvValueList.get(i)));
-        }*/
+        Curve newCurve = CurveValueParser.getInstance().parseIvDvValues(curveToChange, result);
+        this.activity.onTaskComplete(newCurve);
     }
 
     public List<Double> getDvList() {

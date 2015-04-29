@@ -487,6 +487,10 @@ function zoomed() {
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
+function clear_chart() {
+    d3.select("#area").select("svg").remove();
+}
+
 function InitChart(screenWidth, screenHeight, dv, iv, dvName, ivName) {
 
 /*var data = [{"item":4,"diameter":"30.00","point":"8.00"},{"item":2,"diameter":"25.00","point":"2.00"},
@@ -503,6 +507,7 @@ var data = [{"x":2,"y":30},{"x":3,"y":25},{"x":4,"y":20},{"x":3.5,"y":15},{"x":4
 /*
 var data = [{"x":4,"y":25},{"x":3,"y":20}];
 */
+
 function line_chart(field,el){
 margin = {
 top: 45,

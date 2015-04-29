@@ -57,10 +57,10 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
                 /* Retrieve array containing all wellbore_curves */
                 if (token.equals("wellbore_curves")) {
                     /* Grab the json array string from wellbore_curves */
-                    jsonReader.beginArray();
-                    /*Loop through each curve in the json array */
+                    /*jsonReader.beginArray();
+                    *//*Loop through each curve in the json array *//*
                     while (jsonReader.hasNext()) {
-                        /* Pass each json object to retrieve a curve object */
+                        *//* Pass each json object to retrieve a curve object *//*
                         singleCurve = readJsonCurve(jsonReader, "wellbore_curves");
                         for(String curveName : singleCurve.keySet()) {
                             curves.add(new WellboreCurve(singleCurve.get(curveName), curveName,
@@ -68,7 +68,8 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
                         }
 
                     }
-                    jsonReader.endArray();
+                    jsonReader.endArray();*/
+                    jsonReader.skipValue();
                 }
                 /* Retrieve array containing all time_curves */
                 else if (token.equals("time_curves")) {
