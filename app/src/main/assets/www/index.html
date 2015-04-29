@@ -487,6 +487,8 @@ function zoomed() {
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
+function InitChart(screenWidth, screenHeight, dv, iv, dvName, ivName) {
+
 /*var data = [{"item":4,"diameter":"30.00","point":"8.00"},{"item":2,"diameter":"25.00","point":"2.00"},
 {"item":7,"diameter":"20.00","point":"2.00"},{"item":9,"diameter":"15.00","point":"10.00"},
 {"item":4,"diameter":"5.00","point":"8.00"},{"item":5,"diameter":"0.00","point":"2.00"},
@@ -510,24 +512,36 @@ left: 45
 };
 tickno = 8;
 
-width = 300 - margin.left - margin.right;
-height = 400 - margin.top - margin.bottom;
+for (var i = 0; i < dv.length; i++) {
+    data[i] = {'x': dv[i], 'y': iv[i]};
+}
+
+this.setData = function (dv, iv) {
+    for (var i = 0; i < dv.length; i++) {
+        data[i] = {'x': dv[i], 'y': iv[i]};
+    }
+}
+
+width = screenWidth - margin.left - margin.right;
+height = screenHeight - margin.top - margin.bottom;
 
 //Based on data
-var ymax = 35; /*d3.max(data,function(d){
-return (parseInt(d[field])+1);
-});*/
-var ymin = 0; /*d3.min(data,function(d){
-return d[field];
-});*/
+var ymax = d3.max(data,function(d){
+    return (parseInt(d[field])+1);
+});
+var ymin = d3.min(data,function(d){
+    return d[field];
+});
 
 //User defined xmax
-var xmax = 10; /*d3.max(data,function(d){
-return d.name;
-});*/
+var xmax = d3.max(data,function(d){
+    return d.x + 1;
+});
 
 //User defined xmin
-var xmin = 0;
+var xmin = d3.min(data,function(d) {
+    return d.x - 1;
+});
 
 var x = d3.scale.linear().domain([xmin,xmax]) /*d3.extent(data, function (d) {
 return d.item;
@@ -590,6 +604,13 @@ svg.append("svg:g")
 .attr("transform", "translate(0)")
 .call(xAxis);
 
+svg.append("svg:text")
+    .attr("class", "text")
+    .attr("x", width / 2 )
+    .attr("y",  -25) //margin.top )
+    .style("text-anchor", "middle")
+    .text(dvName);
+
 var yAxis = d3.svg.axis()
 .scale(y)
 .orient("left")
@@ -598,6 +619,15 @@ var yAxis = d3.svg.axis()
 svg.append("g")
 .attr("class", "y axis")
 .call(yAxis);
+
+svg.append("svg:text")
+    .attr("class", "text")
+    .attr("transform", "rotate(-90)")
+    .attr("x",  -height / 2) //-margin.top - margin.bottom)
+    .attr("y", -45) //.attr("y",  MARGINS.left)
+    .attr("dy", "1em")
+    .style("text-anchor", "middle")
+    .text(ivName);
 
 svg.append("g")
 .attr("class", "x grid")
@@ -651,6 +681,7 @@ svg.selectAll("dot").attr()
 
 line_chart('y','#area')
 
+}
 </script>
 </body>
 </html>
