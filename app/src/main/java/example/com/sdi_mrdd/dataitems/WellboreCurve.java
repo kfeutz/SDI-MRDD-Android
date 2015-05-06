@@ -3,6 +3,8 @@ package example.com.sdi_mrdd.dataitems;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+
 /**
  * Represents WellboreCurves as defined by SDI.
  * Subclass of curve
@@ -11,6 +13,8 @@ import android.os.Parcelable;
  */
 public class WellboreCurve extends Curve {
 
+    private String ivValue;
+    private String dvValue;
     /**
      * Creates a new WellboreCurve
      *
@@ -19,6 +23,8 @@ public class WellboreCurve extends Curve {
      */
     public WellboreCurve(String id, String name, String ivName, String dvName, String ivUnit, String dvUnit) {
         super(id, name, ivName, dvName, ivUnit, dvUnit);
+        this.ivValue = "0";
+        this.dvValue = "0";
     }
 
     /**
@@ -47,6 +53,34 @@ public class WellboreCurve extends Curve {
 
     public String getCurveType() {
         return "wellbore_curve";
+    }
+
+    public void setIvValue(String ivValue) {
+        this.ivValue = ivValue;
+    }
+
+    public void setDvValue(String dvValue) { this.dvValue = dvValue; }
+
+    public String getDvValue() {
+        if(this.dvValue == null) {
+            return "0";
+        }
+        else {
+            return this.dvValue;
+        }
+    }
+
+    public String getIvValue() {
+        long milisecondsFromEpoch;
+        if(this.ivValue == null) {
+            return "0";
+        }
+        else if(this.ivValue.equals("0")) {
+            return this.ivValue;
+        }
+        else {
+            return ivValue;
+        }
     }
 
 }

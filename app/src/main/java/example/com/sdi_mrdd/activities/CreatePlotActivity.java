@@ -20,6 +20,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -67,6 +69,15 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
 
     /* Reference to well title */
     private EditText inputTitle;
+
+    /* Reference to Radio group */
+    private RadioGroup ivRadioGroup;
+
+    /* Reference to depth radio button */
+    private RadioButton depthRadio;
+
+    /* Reference to time radio button */
+    private RadioButton timeRadio;
 
     /* Reference to the create plot button */
     private Button btnCreatePlot;
@@ -123,6 +134,11 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         new LoadCurvesForWellTask(this, this.wellId).execute();
 
         inputTitle = (EditText) findViewById(R.id.plot_name_entry);
+        ivRadioGroup = (RadioGroup) findViewById(R.id.iv_radio_group);
+        ivRadioGroup.check(R.id.radio_depth);
+        depthRadio = (RadioButton) findViewById(R.id.radio_depth);
+        timeRadio = (RadioButton) findViewById(R.id.radio_time);
+
         btnCreatePlot =  (Button) findViewById(R.id.btn_create_plot);
         btnCreatePlot.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -152,19 +168,34 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
                                             curveToAddName = curveStringList.get(key);
                                             try {
                                                 for (int j = 0; j < curveList.size(); j++) {
-                                                    if(curveList.get(j).getName() == curveToAddName) {
-                                                        curveType = curveList.get(j).getCurveType();
-                                                        curveToAddId = curveList.get(j).getId();
+                                                    if(curveList.get(j).getName().equals(curveToAddName)) {
+                                                        if(timeRadio.isChecked())
+                                                        {
+                                                            /* Time curve selected, skip curve if its wellbore */
+                                                            if(curveList.get(j).getCurveType().equals("time_curve")) {
+                                                                curveType = curveList.get(j).getCurveType();
+                                                                curveToAddId = curveList.get(j).getId();
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            /* Wellbore curve selected, skip curve if its time */
+                                                            if(curveList.get(j).getCurveType().equals("wellbore_curve")) {
+                                                                curveType = curveList.get(j).getCurveType();
+                                                                curveToAddId = curveList.get(j).getId();
+                                                            }
+                                                        }
+
                                                     }
                                                 }
                                                 loadedCurve = new LoadCurveDataTask(curveToAddId,
-                                                        CreatePlotActivity.this.getWellId()).execute().get();
-                                                curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId, curveToAddName);
+                                                        CreatePlotActivity.this.getWellId(), curveType).execute().get();
+                                                curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId, curveToAddName, curveType);
 
                                                 Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
                                                         curveToAdd.getName(), curveToAdd.getIvName(),
                                                         curveToAdd.getDvName(), curveToAdd.getIvUnit(),
-                                                        curveToAdd.getDvUnit(), wellId, curveType);
+                                                        curveToAdd.getDvUnit(), wellId, curveToAdd.getCurveType());
                                                 curvesToAddList.add(addedCurve);
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
@@ -210,6 +241,23 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         }
     }
 
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radio_depth:
+                if (checked)
+
+                    break;
+            case R.id.radio_time:
+                if (checked)
+
+                    break;
+        }
+    }
+
     public void parseJsonCurveList(String jsonString) {
         curveList = curvesForWellJsonParser.parse(jsonString);
         for (int i = 0; i < curveList.size(); i++) {
@@ -220,56 +268,6 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         curveListView.setAdapter(listAdapter);
         curveListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         curveListView.setTextFilterEnabled(true);
-    }
-
-    private class LoadCurveData extends AsyncTask<String, Void, String> {
-        HttpClient client = new DefaultHttpClient();
-        String server;
-        HttpGet request;
-        String jsonString = "";
-        String curveId;
-        private LoadCurveData(String curveId) {
-            this.curveId = curveId;
-            server = "http://54.67.103.185/getCurveFromCurveId?curve="
-                    + this.curveId;
-            request  = new HttpGet(server);
-        }
-        @Override
-        protected String doInBackground(String... params) {
-            Scanner scanner;
-            HttpResponse response;
-            HttpEntity entity;
-            try {
-                response = client.execute(request);
-                entity = response.getEntity();
-
-                if(entity != null) {
-                    InputStream input = entity.getContent();
-                    if (input != null) {
-                        scanner = new Scanner(input);
-
-                        while (scanner.hasNext()) {
-                            jsonString += scanner.next() + " ";
-                        }
-                        input.close();
-                    }
-                }
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-            }
-            return jsonString;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Log.i("", "Result after getCurveFromCurveId GET : " + result);
-
-
-        }
-
-        @Override
-        protected void onPreExecute() {}
     }
 
     public ListView getListView() {

@@ -39,7 +39,7 @@ public class CurveJsonParser {
      * @return  List<Curve>     A List containing the Curves from the JSON string.
      */
     /*@Override*/
-    public Curve parse(String jsonString, String trueCurveId, String curveToCreateName) {
+    public Curve parse(String jsonString, String trueCurveId, String curveToCreateName, String curveType) {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
         String curveId = trueCurveId;
         String curveName = curveToCreateName;
@@ -64,6 +64,11 @@ public class CurveJsonParser {
         } catch (IOException e) {
             Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
         }
-        return new TimeCurve (curveId, curveName, ivName, dvName, ivUnit, dvUnit);
+        if(curveType.equals("time_curve")) {
+            return new TimeCurve(curveId, curveName, ivName, dvName, ivUnit, dvUnit);
+        }
+        else {
+            return new WellboreCurve(curveId, curveName, ivName, dvName, ivUnit, dvUnit);
+        }
     }
 }

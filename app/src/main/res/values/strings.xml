@@ -35,11 +35,15 @@
     <string name="title_activity_well_dash_board">WellDashBoardActivity</string>
     <string name="title_activity_add_curve">AddCurveActivity</string>
     <string name="title_activity_web_view">WebViewActivity</string>
+    <string name="vsTime">Vs. Time</string>
+    <string name="vsDepth">Vs. Depth</string>
 
     <!-- Strings for Create Plot Page -->
     <string name="btn_create_plot">Create Plot</string>
     <string name="plot_name_prompt">Plot Name: </string>
     <string name="create_plot_page_name">Create New Plot</string>
     <string name="title_activity_view_plot">ViewPlotActivity</string>
-
+    <string name="time">Time </string>
+    <string name="depth">Depth </string>
+    <string name="ivChoice">Independent Variable: </string>
 </resources>

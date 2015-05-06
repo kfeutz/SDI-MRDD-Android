@@ -69,7 +69,12 @@ public class CurveAdapter extends ArrayAdapter<Curve> {
         }
         Curve curve = getItem(position);
         viewHolder.name.setText(curve.getName());
-        viewHolder.ivName.setText(curve.getIvName());
+        if(curve.getCurveType().equals("time_curve")) {
+            viewHolder.ivName.setText(curve.getIvName() + " (age)");
+        }
+        else {
+            viewHolder.ivName.setText(curve.getIvName());
+        }
         viewHolder.dvName.setText(curve.getDvName());
         viewHolder.ivData.setText(curve.getIvValue());
         viewHolder.dvData.setText(curve.getDvValue());

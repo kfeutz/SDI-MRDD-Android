@@ -20,7 +20,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SearchView;
+import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -58,6 +62,15 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
     private static final String TAG = "AddCurveView";
     private ListView curveListView;
     private Button btnAddCurves;
+    /* Reference to Radio group */
+    private RadioGroup ivRadioGroup;
+
+    /* Reference to depth radio button */
+    private RadioButton depthRadio;
+
+    /* Reference to time radio button */
+    private RadioButton timeRadio;
+
     private String wellId;
     private ArrayList<String> curveData;
     private DatabaseCommunicator dbCommunicator;
@@ -92,6 +105,11 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
 
         curveListView = (ListView) findViewById(R.id.add_curve_view);
 
+        ivRadioGroup = (RadioGroup) findViewById(R.id.iv_radio_group);
+        ivRadioGroup.check(R.id.radio_depth);
+        depthRadio = (RadioButton) findViewById(R.id.radio_depth);
+        timeRadio = (RadioButton) findViewById(R.id.radio_time);
+
         dialog = new ProgressDialog(this);
         dialog.setMessage("Retrieving curves");
         dialog.show();
@@ -125,14 +143,28 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
                                             curveToAddName = listAdapter.getItem(key);
                                             try {
                                                 for (int j = 0; j < curveList.size(); j++) {
-                                                    if(curveList.get(j).getName() == curveToAddName) {
-                                                        curveType = curveList.get(j).getCurveType();
-                                                        curveToAddId = curveList.get(j).getId();
+                                                    if(curveList.get(j).getName().equals(curveToAddName)) {
+                                                        if(timeRadio.isChecked()){
+                                                            /* Time curve selected, skip curve if its wellbore */
+                                                            String curveTypeTemp = curveList.get(j).getCurveType();
+                                                            if(curveList.get(j).getCurveType().equals("time_curve")) {
+                                                                curveType = curveList.get(j).getCurveType();
+                                                                curveToAddId = curveList.get(j).getId();
+                                                            }
+                                                        }
+                                                        else {
+                                                            /* Wellbore curve selected, skip curve if its time */
+                                                            if(curveList.get(j).getCurveType().equals("wellbore_curve")) {
+                                                                curveType = curveList.get(j).getCurveType();
+                                                                curveToAddId = curveList.get(j).getId();
+                                                            }
+                                                        }
+
                                                     }
                                                 }
                                                 jsonLoadedCurve = new LoadCurveDataTask(curveToAddId,
-                                                        AddCurveActivity.this.getWellId()).execute().get();
-                                                curveToAdd = curveJsonParser.parse(jsonLoadedCurve, curveToAddId, curveToAddName);
+                                                        AddCurveActivity.this.getWellId(), curveType).execute().get();
+                                                curveToAdd = curveJsonParser.parse(jsonLoadedCurve, curveToAddId, curveToAddName, curveType);
 
                                                 Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
                                                         curveToAdd.getName(), curveToAdd.getIvName(),
@@ -238,52 +270,21 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
         return this.wellId;
     }
 
-    private class LoadCurveData extends AsyncTask<String, Void, String> {
-        HttpClient client = new DefaultHttpClient();
-        String server;
-        HttpGet request;
-        String jsonString = "";
-        String curveId;
-        private LoadCurveData(String curveId) {
-            this.curveId = curveId;
-            server = "http://54.67.103.185/getCurveFromCurveId?curve="
-                    + this.curveId;
-            request  = new HttpGet(server);
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radio_depth:
+                if (checked)
+
+                    break;
+            case R.id.radio_time:
+                if (checked)
+
+                    break;
         }
-        @Override
-        protected String doInBackground(String... params) {
-            Scanner scanner;
-            HttpResponse response;
-            HttpEntity entity;
-            try {
-                response = client.execute(request);
-                entity = response.getEntity();
-
-                if(entity != null) {
-                    InputStream input = entity.getContent();
-                    if (input != null) {
-                        scanner = new Scanner(input);
-
-                        while (scanner.hasNext()) {
-                            jsonString += scanner.next() + " ";
-                        }
-                        input.close();
-                    }
-                }
-            }
-            catch(Exception e) {
-                e.printStackTrace();
-            }
-            return jsonString;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            Log.i("", "Result after getCurveFromCurveId GET : " + result);
-        }
-
-        @Override
-        protected void onPreExecute() {}
     }
 
     @Override
@@ -299,5 +300,16 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onToggleClicked(View view) {
+        // Is the toggle on?
+        boolean on = ((ToggleButton) view).isChecked();
+
+        if (on) {
+            // Enable vibrate
+        } else {
+            // Disable vibrate
+        }
     }
 }
