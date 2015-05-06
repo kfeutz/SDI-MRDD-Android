@@ -41,9 +41,9 @@ public abstract class Curve implements Parcelable {
     /* The number of units. Set default to 0 */
     private double units = 0;
 
-    private long nextStartUnit = 0;
+    private String nextStartUnit = "0";
 
-    private long nextEndUnit = 0;
+    private String nextEndUnit = "0";
 
     private ArrayList<Double> dvValues = new ArrayList<>();
 
@@ -90,20 +90,19 @@ public abstract class Curve implements Parcelable {
             dvValues.add(Double.parseDouble(dvValueList.get(i)));
         }
     }
-
-    public long getNextStartUnit() {
+    public String getNextStartUnit() {
         return nextStartUnit;
     }
 
-    public long getNextEndUnit() {
+    public String getNextEndUnit() {
         return nextEndUnit;
     }
 
-    public void setNextStartUnit(long start) {
+    public void setNextStartUnit(String start) {
         this.nextStartUnit = start;
     }
 
-    public void setNextEndUnit(long end) {
+    public void setNextEndUnit(String end) {
         this.nextEndUnit= end;
     }
     /**

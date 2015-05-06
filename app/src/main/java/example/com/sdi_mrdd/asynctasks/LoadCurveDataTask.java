@@ -37,14 +37,23 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
     /* Start value for REST call, typically user will specifiy this but their API is acting weird */
     private final long STARTLDAPTIME = 120737630793553000L;
 
-    public LoadCurveDataTask(String curveId, String wellId) {
+    public LoadCurveDataTask(String curveId, String wellId, String curveType) {
         this.curveId = curveId;
         this.wellId = wellId;
         /* Converting current Unix epoch time to LDAP time format */
         this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
 
-        server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
-                + this.wellId + "&curve=" + this.curveId;
+        /* Make time curve call */
+        if(curveType.equals("time_curve")) {
+            server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId
+                    + "&start=" + STARTLDAPTIME + "&end=" + currentTimeLdap;
+        }
+        /* Make wellbore curve call */
+        else {
+            server = ApiUrl.BASEURL + "/v2/getWellboreCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId;
+        }
         request  = new HttpGet(server);
     }
     @Override

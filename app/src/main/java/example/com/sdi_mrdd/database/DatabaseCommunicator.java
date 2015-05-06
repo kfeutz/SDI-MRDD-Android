@@ -135,7 +135,12 @@ public class DatabaseCommunicator {
         Curve newCurve;
         /* Curve already exists */
         if (cursor.getColumnCount() == 0) {
-            newCurve = new TimeCurve(curveId, name, ivName, dvName, ivUnit, dvUnit);
+            if(curveType.equals("time_curve")) {
+                newCurve = new TimeCurve(curveId, name, ivName, dvName, ivUnit, dvUnit);
+            }
+            else {
+                newCurve = new WellboreCurve(curveId, name, ivName, dvName, ivUnit, dvUnit);
+            }
         }
         else {
             newCurve = cursorToCurve(cursor);
