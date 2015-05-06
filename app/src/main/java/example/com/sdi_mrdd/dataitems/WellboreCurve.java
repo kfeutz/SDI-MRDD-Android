@@ -71,7 +71,6 @@ public class WellboreCurve extends Curve {
     }
 
     public String getIvValue() {
-        long milisecondsFromEpoch;
         if(this.ivValue == null) {
             return "0";
         }

@@ -266,7 +266,7 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         listAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_multiple_choice, curveStringList);
         curveListView.setAdapter(listAdapter);
-        curveListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        curveListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         curveListView.setTextFilterEnabled(true);
     }
 

@@ -63,12 +63,17 @@ public class TimeCurve extends Curve {
             return this.ivValue;
         }
         else {
-            timeDifSecs = (double)(currentTimeLdap - Long.parseLong(this.ivValue)) / 10000000.0;
-            days = (int) timeDifSecs/86400;
-            hours = (int) (timeDifSecs % 86400) / 3600;
-            minutes = (int) ((timeDifSecs % 86400) % 3600) / 60;
-            seconds = (int) ((timeDifSecs % 86400) % 3600) % 60;
-            return days + "D " + hours + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+            if(!this.ivValue.equals("No data")) {
+                timeDifSecs = (double) (currentTimeLdap - Long.parseLong(this.ivValue)) / 10000000.0;
+                days = (int) timeDifSecs / 86400;
+                hours = (int) (timeDifSecs % 86400) / 3600;
+                minutes = (int) ((timeDifSecs % 86400) % 3600) / 60;
+                seconds = (int) ((timeDifSecs % 86400) % 3600) % 60;
+                return days + "D " + hours + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+            }
+            else {
+                return this.ivValue;
+            }
         }
     }
     /**
