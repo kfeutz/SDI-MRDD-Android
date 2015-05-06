@@ -46,8 +46,6 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
     public ArrayList<Curve> parse(String jsonString) {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
         ArrayList<Curve> curves = new ArrayList<>();
-        ArrayList<String> wellBoreTitles = new ArrayList<>();
-        ArrayList<String> timeCurveTitles = new ArrayList<>();
         Map<String, String> singleCurve = new HashMap<>();
         String curveJsonArray = null;
         JSONArray curveArray = null;
@@ -59,22 +57,19 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
                 /* Retrieve array containing all wellbore_curves */
                 if (token.equals("wellbore_curves")) {
                     /* Grab the json array string from wellbore_curves */
-                    jsonReader.beginArray();
-                    /*Loop through each curve in the json array */
+                    /*jsonReader.beginArray();
+                    *//*Loop through each curve in the json array *//*
                     while (jsonReader.hasNext()) {
-                         /*Pass each json object to retrieve a curve object */
+                        *//* Pass each json object to retrieve a curve object *//*
                         singleCurve = readJsonCurve(jsonReader, "wellbore_curves");
                         for(String curveName : singleCurve.keySet()) {
-                            /* Only add curve if it hasn't been seen yet */
-                            if(!wellBoreTitles.contains(singleCurve.get(curveName))) {
-                                wellBoreTitles.add(singleCurve.get(curveName));
-                                curves.add(new WellboreCurve(singleCurve.get(curveName), curveName,
-                                        "", "", "", ""));
-                            }
+                            curves.add(new WellboreCurve(singleCurve.get(curveName), curveName,
+                                    "", "", "", ""));
                         }
 
                     }
-                    jsonReader.endArray();
+                    jsonReader.endArray();*/
+                    jsonReader.skipValue();
                 }
                 /* Retrieve array containing all time_curves */
                 else if (token.equals("time_curves")) {
@@ -85,12 +80,8 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
                         /* Pass each json object to retrieve a curve object */
                         singleCurve = readJsonCurve(jsonReader, "time_curves");
                         for(String curveName : singleCurve.keySet()) {
-                            /* Only add curve if it hasn't been seen yet */
-                            if(!timeCurveTitles.contains(singleCurve.get(curveName))) {
-                                timeCurveTitles.add(singleCurve.get(curveName));
-                                curves.add(new TimeCurve(singleCurve.get(curveName), curveName,
-                                        "", "", "", ""));
-                            }
+                            curves.add(new TimeCurve(singleCurve.get(curveName), curveName,
+                                    "", "", "", ""));
                         }
                     }
                     jsonReader.endArray();

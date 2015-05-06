@@ -57,6 +57,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
     private Button JSBtn;
 
+    private CurvePoints curvePoints;
+
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
 
     private Button refreshPointsBtn;
@@ -75,6 +77,14 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         plotName = plotToDisplay.getName();
 
         setTitle(plotName);
+
+        /*JSBtn =  (Button) findViewById(R.id.btn_testJS);
+        JSBtn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                myWebView.loadUrl("javascript:setV(\""+
+                    plotToDisplay.getCurves().get(0).getUnitFromRange(0, 20)+"\")");
+            }
+        });*/
 
         myWebView = (WebView) findViewById(R.id.webview);
 
@@ -189,5 +199,141 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
                       + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
         refreshPointsBtn.setEnabled(true);
+    }
+
+    /**
+     * Asynchronous Task class that makes a REST GET request to the backend service
+     * to retrieve an array of doubles that represent the iv and dv values of a curve
+     */
+    private class CurvePoints extends AsyncTask<String, Void, String> {
+        HttpClient client = new DefaultHttpClient();
+        String server = "http://54.67.103.185/getCurveFromCurveIdPresent";
+        HttpGet request;
+        String curveId;
+        String wellId;
+        String jsonString = "";
+        Curve theCurve;
+        List<Double> ivDoubleList;
+        List<Double> dvDoubleList;
+
+        private CurvePoints (Curve curve, Plot plot) {
+            this.theCurve = curve;
+            this.curveId = curve.getId();
+            this.wellId = plot.getWellId();
+            this.server += ("?well=" + this.wellId + "&curve=" + this.curveId);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            this.request = new HttpGet(server);
+        }
+
+
+        /**
+         * Executes the REST request. Reads the data as a string and appends
+         * it into one large JSON string. It returns this value to onPostExecute(...)
+         * result parameter
+         *
+         * @param params
+         * @return String   The JSON string representation of an array of wells.
+         */
+        @Override
+        protected String doInBackground(String... params) {
+            Scanner scanner;
+            HttpResponse response;
+            HttpEntity entity;
+
+            try {
+                response = client.execute(request);
+                entity = response.getEntity();
+
+                if(entity != null) {
+                    InputStream input = entity.getContent();
+                    if (input != null) {
+                        scanner = new Scanner(input);
+
+                        while (scanner.hasNext()) {
+                            jsonString += scanner.next() + " ";
+                        }
+                        input.close();
+                    }
+                }
+            }
+            catch(Exception e) {
+                e.printStackTrace();
+            }
+            return jsonString;
+        }
+
+        /**
+         * Called after the REST call has completed. Parses the JSON string parameter result
+         * and stores the iv and dv values into arrays
+         *
+         * @param result    The return value of the function above
+         *                  'doInBackground(String... params)'
+         */
+        @Override
+        protected void onPostExecute(String result) {
+            String ivValues = curveValueParser.parseIvValues(result);
+            List<String> ivValueList = Arrays.asList(ivValues.split(","));
+            ivDoubleList = new ArrayList<>();
+            /* Loop through the iv list and convert string values to doubles */
+            for (int i = 0; i < ivValueList.size(); i++) {
+                ivDoubleList.add(Double.parseDouble(ivValueList.get(i)));
+            }
+            String dvValues = curveValueParser.parseDvValues(result);
+            List<String> dvValueList = Arrays.asList(dvValues.split(","));
+             dvDoubleList = new ArrayList<>();
+            /* Loop through the list and convert string values to doubles */
+            for (int i = 0; i < ivValueList.size(); i++) {
+                dvDoubleList.add(Double.parseDouble(dvValueList.get(i)));
+            }
+        }
+
+        public List<Double> getDvList() {
+            return dvDoubleList;
+        }
+
+        public List<Double> getIvList() {
+            return ivDoubleList;
+        }
+
+        public String getDvIvString() {
+            String value = "[";
+            for (int i = 0; i < dvDoubleList.size(); i++) {
+                value += "{'x': " + dvDoubleList.get(i) + ", 'y': " + ivDoubleList.get(i) + "},";
+            }
+            value += "]";
+            return value;
+        }
+
+        public String getDvString() {
+            String value = "[";
+            for (int i = 0; i < dvDoubleList.size(); i++) {
+                value += dvDoubleList.get(i);
+                if (i != dvDoubleList.size() - 1) {
+                    value += ", ";
+                }
+            }
+            value += "]";
+            return value;
+        }
+
+        public String getIvString() {
+            String value = "[";
+            for (int i = 0; i < ivDoubleList.size(); i++) {
+                value += ivDoubleList.get(i);
+                if (i != ivDoubleList.size() - 1) {
+                    value += ", ";
+                }
+            }
+            value += "]";
+            return value;
+        }
+
+        public Curve getCurve() {
+            return theCurve;
+        }
     }
 }

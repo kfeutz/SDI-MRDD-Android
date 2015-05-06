@@ -26,49 +26,6 @@ public class CurveValueParser {
         return instance;
     }
 
-    /**
-     * To get latest curve values, parse the start and end iv of initial curve call.
-     * Then, call again with start param defined as the oldIv field.
-     * @param jsonString
-     * @return
-     */
-    public Map<String, String> getLastIvValue(String jsonString) {
-        Map<String, String> recentCurveValues = new HashMap<>();
-        try {
-            JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-            jsonReader.beginArray();
-            /* Skip first array of points */
-            jsonReader.skipValue();
-            /* Read oldIv from json */
-            /* Map values do not exist so we are at the most recent values */
-            if(jsonReader.peek() == JsonToken.NULL) {
-                recentCurveValues = parseRecentValues(jsonString);
-                jsonReader.skipValue();
-            }
-            else {
-                jsonReader.beginObject();
-                while (jsonReader.hasNext()) {
-                    String token = jsonReader.nextName();
-                    /* Grab curve id field */
-                    if (token.equals("startIV")) {
-                        jsonReader.nextString();
-                    }
-                    else if (token.equals("oldIV")) {
-                        recentCurveValues.put("ivValue", jsonReader.nextString());
-                    }
-                }
-                jsonReader.endObject();
-            }
-            /* Skip array of iv and dv names */
-            jsonReader.skipValue();
-            jsonReader.endArray();
-            jsonReader.close();
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
-        }
-        return recentCurveValues;
-    }
-
     public Map<String, String> parseRecentValues(String jsonString) {
         Map<String, String> recentCurveValues = new HashMap<>();
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
@@ -99,15 +56,8 @@ public class CurveValueParser {
             jsonReader.close();
 
             /* Grab last iv and dv values in array */
-            if(ivValues.size() - 1 >= 0) {
-                recentCurveValues.put("ivValue", ivValues.get(ivValues.size() - 1));
-                recentCurveValues.put("dvValue", dvValues.get(dvValues.size() - 1));
-            }
-            /* No data retrived from sdi server */
-            else {
-                recentCurveValues.put("ivValue", "No data");
-                recentCurveValues.put("dvValue", "No data");
-            }
+            recentCurveValues.put("ivValue", ivValues.get(ivValues.size() - 1));
+            recentCurveValues.put("dvValue", dvValues.get(dvValues.size() - 1));
         } catch (IOException e) {
             Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
         }
@@ -136,8 +86,8 @@ public class CurveValueParser {
             jsonReader.endArray();
             /* Map values do not exist */
             if(jsonReader.peek() == JsonToken.NULL) {
-                curveToChange.setNextStartUnit("0");
-                curveToChange.setNextEndUnit("0");
+                curveToChange.setNextStartUnit(0);
+                curveToChange.setNextEndUnit(0);
                 jsonReader.skipValue();
             }
             else {
@@ -146,10 +96,10 @@ public class CurveValueParser {
                     String token = jsonReader.nextName();
                     /* Grab curve id field */
                     if (token.equals("startIV")) {
-                        curveToChange.setNextStartUnit(jsonReader.nextString());
+                        curveToChange.setNextStartUnit(Long.parseLong(jsonReader.nextString()));
                     }
                     else if (token.equals("oldIV")) {
-                        curveToChange.setNextEndUnit(jsonReader.nextString());
+                        curveToChange.setNextEndUnit(Long.parseLong(jsonReader.nextString()));
                     }
                 }
                 jsonReader.endObject();
@@ -165,5 +115,54 @@ public class CurveValueParser {
         curveToChange.setIvValues(ivValues);
         curveToChange.setDvValues(dvValues);
         return curveToChange;
+    }
+
+    public String parseIvValues(String jsonString) {
+        JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
+        String yo = jsonString;
+        String curveJsonArray = null;
+        String ivValues = null;
+        try {
+            jsonReader.beginObject();
+            while (jsonReader.hasNext()) {
+                String token = jsonReader.nextName();
+                /* Grab curve id field */
+                if (token.equals("iv_values")) {
+                    ivValues = jsonReader.nextString();
+                }
+                else {
+                    jsonReader.skipValue();
+                }
+            }
+            jsonReader.endObject();
+            jsonReader.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse iv values\n" + Log.getStackTraceString(e));
+        }
+        return ivValues;
+    }
+
+    public String parseDvValues(String jsonString) {
+        JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
+        String curveJsonArray = null;
+        String dvValues = null;
+        try {
+            jsonReader.beginObject();
+            while (jsonReader.hasNext()) {
+                String token = jsonReader.nextName();
+                /* Grab curve id field */
+                if (token.equals("dv_values")) {
+                    dvValues = jsonReader.nextString();
+                }
+                else {
+                    jsonReader.skipValue();
+                }
+            }
+            jsonReader.endObject();
+            jsonReader.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to parse dv vlaues \n" + Log.getStackTraceString(e));
+        }
+        return dvValues;
     }
 }

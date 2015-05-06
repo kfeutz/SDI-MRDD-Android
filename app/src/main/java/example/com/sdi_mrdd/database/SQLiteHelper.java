@@ -63,7 +63,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + " text not null, "+ COLUMN_WELL_DASH
             + " text not null, " + COLUMN_CURVE_TYPE
             + " text not null, "
-            + "UNIQUE (" + COLUMN_CURVE_ID + ", " + COLUMN_WELL_DASH + ")" + " ON CONFLICT REPLACE);";
+            + "UNIQUE (" + COLUMN_CURVE + ", " + COLUMN_WELL_DASH +  ")" + " ON CONFLICT REPLACE);";
 
     /* Create table statement for Plots table */
     private static final String CREATE_TABLE_PLOTS = "create table "

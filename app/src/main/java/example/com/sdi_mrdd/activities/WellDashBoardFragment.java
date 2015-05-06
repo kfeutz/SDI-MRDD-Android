@@ -3,7 +3,6 @@ package example.com.sdi_mrdd.activities;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.JsonReader;
 import android.util.Log;
@@ -32,8 +31,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.activities.AddCurveActivity;
@@ -83,10 +80,6 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
 
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
 
-    private boolean timerStarted;
-
-    TimerTask doAsynchronousTask;
-
     /**
      * Creates the Well Dashboard fragment view and sets up the fragment view's
      * components. Layout is set to fragment_well_dashboard.xml.
@@ -106,8 +99,6 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
 
         setHasOptionsMenu(true);
 
-        timerStarted = false;
-
         /* Initialize the database communicator */
         dbCommunicator = ((WellDashBoardActivity) getActivity()).getDbCommunicator();
 
@@ -126,7 +117,10 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
         listAdapter = new CurveAdapter(rootView.getContext(), R.layout.well_dash_board_card);
         listAdapter.addAll(curveList);
 
-        initializeAsyncTimer();
+        for (int i = 0; i < curveList.size(); i++) {
+            /*new UpdateCurve(curveList.get(i)).execute();*/
+            new LatestCurveValuesTask(this, curveList.get(i), ((WellDashBoardActivity) getActivity()).getWellId()).execute();
+        }
 
         curvesListView = (GridView) rootView.findViewById(R.id.well_dashboard_list);
         curvesListView.setAdapter(listAdapter);
@@ -199,53 +193,16 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
              * intent started or resumed this activity.
              */
             curveList = dbCommunicator.getCurvesForDashboard(((WellDashBoardActivity) getActivity()).getWellId());
-            initializeAsyncTimer();
-
+            for (int i = 0; i < curveList.size(); i++) {
+                /*new UpdateCurve(curveList.get(i)).execute();*/
+                new LatestCurveValuesTask(this, curveList.get(i),
+                        ((WellDashBoardActivity) getActivity()).getWellId()).execute();
+            }
             if (requestCode == 1 && resultCode == RESULT_OK) {
                 listAdapter.clear();
                 listAdapter.addAll(curveList);
                 listAdapter.notifyDataSetChanged();
             }
-        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        timerStarted = false;
-        doAsynchronousTask.cancel();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        initializeAsyncTimer();
-    }
-
-    public void initializeAsyncTimer() {
-        if(!timerStarted) {
-            timerStarted = true;
-            final Handler handler = new Handler();
-            Timer timer = new Timer();
-            doAsynchronousTask = new TimerTask() {
-                @Override
-                public void run() {
-                handler.post(new Runnable() {
-                    public void run() {
-                    try {
-                        for (int i = 0; i < curveList.size(); i++) {
-                            /*new UpdateCurve(curveList.get(i)).execute();*/
-                            new LatestCurveValuesTask(WellDashBoardFragment.this, curveList.get(i),
-                                    ((WellDashBoardActivity) getActivity()).getWellId()).execute();
-                        }
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                    }
-                    }
-                });
-                }
-            };
-            timer.schedule(doAsynchronousTask, 0, 15000); //execute in every 50000 ms
         }
     }
 

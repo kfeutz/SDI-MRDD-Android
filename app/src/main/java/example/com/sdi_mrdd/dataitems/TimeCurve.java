@@ -48,14 +48,6 @@ public class TimeCurve extends Curve {
 
     public String getIvValue() {
         long milisecondsFromEpoch;
-        /* Converting current Unix epoch time to LDAP time format */
-        long currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
-        double timeDifSecs;
-        long timeDifNanos;
-        int days;
-        int hours;
-        int minutes;
-        int seconds;
         if(this.ivValue == null) {
             return "0";
         }
@@ -63,12 +55,10 @@ public class TimeCurve extends Curve {
             return this.ivValue;
         }
         else {
-            timeDifSecs = (double)(currentTimeLdap - Long.parseLong(this.ivValue)) / 10000000.0;
-            days = (int) timeDifSecs/86400;
-            hours = (int) (timeDifSecs % 86400) / 3600;
-            minutes = (int) ((timeDifSecs % 86400) % 3600) / 60;
-            seconds = (int) ((timeDifSecs % 86400) % 3600) % 60;
-            return days + "D " + hours + ":" + String.format("%02d", minutes) + ":" + String.format("%02d", seconds);
+            milisecondsFromEpoch = (Long.parseLong(this.ivValue) - NANOSECONDSBETWEENEPOCHS) / 10000;
+            Date date = new Date(milisecondsFromEpoch);
+
+            return date.toString();
         }
     }
     /**

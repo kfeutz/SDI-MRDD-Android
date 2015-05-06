@@ -53,18 +53,14 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
         this.curveId = curveToChange.getId();
         /* Converting current Unix epoch time to LDAP time format */
         this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
-        /* Make time curve call */
-        if(curveToChange.getCurveType().equals("time_curve")) {
+        if(curveToChange.getNextStartUnit() != 0 && curveToChange.getNextEndUnit() != 0) {
+            server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId
+                    + "&start=" + curveToChange.getNextStartUnit() + "&end=" + curveToChange.getNextEndUnit();
+        }
+        else {
             server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
                     + this.wellId + "&curve=" + this.curveId;
-        }
-        /* Make wellbore curve call */
-        else {
-            server = ApiUrl.BASEURL + "/v2/getWellboreCurveFromCurveId?well="
-                    + this.wellId + "&curve=" + this.curveId;
-        }
-        if(!curveToChange.getNextStartUnit().equals("0") && !curveToChange.getNextEndUnit().equals("0")) {
-            server += "&start=" + curveToChange.getNextStartUnit() + "&end=" + curveToChange.getNextEndUnit();
         }
     }
 
