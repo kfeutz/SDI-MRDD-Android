@@ -27,6 +27,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -176,6 +177,25 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         return value;
     }
 
+    public String getDateString(ArrayList<String> dateStrings) {
+        if (dateStrings.size() > 0) {
+            String value = "[";
+            for (int i = 0; i < dateStrings.size(); i++) {
+                value += dateStrings.get(i);
+                if (i != dateStrings.size() - 1) {
+                    value += ", ";
+                }
+                Log.i("ViewPlotActivity", "dateString i " + dateStrings.get(i));
+            }
+            value += "]";
+            Log.i("ViewPlotActivity", "Final: " + value);
+            return value;
+        }
+        else {
+            return "n";
+        }
+    }
+
     @Override
     public void onTaskComplete(Curve curveResult) {
         this.plotToDisplay.setCurve(0, curveResult);
@@ -186,8 +206,35 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(350,400,"+ getDvString()+","
                 + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
         myWebView.loadUrl("javascript:clear_chart()");
-        myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
-                      + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+
+        ArrayList<String> dateStrings = new ArrayList<String>();
+        if(curveResult.getCurveType().equals("time_curve")) {
+            ArrayList<String> ivCurves = curveResult.getIvValues();
+            for(int i = 0; i < ivCurves.size(); i++) {
+                Long ivValue = Long.parseLong(ivCurves.get(i));
+                Log.i("ViewPlotActivity", "ivValue: " + ivValue);
+                Log.i("ViewPlotActivity", "stringIV: " + ivCurves.get(i));
+                SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyy hh:mm:ss");
+                Long dateInMillis = ivValue - 116444736000000000L;
+                String dateString = formatter.format(new Date(dateInMillis));
+                Log.i("ViewPlotActivity", "dateString: " + dateString);
+                dateStrings.add(i,dateString);
+            }
+        }
+        System.out.println("DateStrings: " + getDateString(dateStrings));
+        System.out.println("IV: " + getIvString());
+        /*myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
+                      + getIvString()+",\""+getDateString(dateStrings)+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+*/
+        String test = "n";
+        Log.i("ViewPlotActivity", "JS call to refresh plot: " + "javascript:InitChart(350,400,"+ getDvString()+","
+                + getIvString()+",\""+getDateString(dateStrings)+"\",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+        String jsCall = "javascript:InitChart(350,400,"+ getDvString()+","
+                + getIvString()+",\""+getDateString(dateStrings)+"\",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")";
+        myWebView.loadUrl(jsCall);
+
+        //myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
+        //       + getIvString()+"\","+test+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
         refreshPointsBtn.setEnabled(true);
     }
 }
