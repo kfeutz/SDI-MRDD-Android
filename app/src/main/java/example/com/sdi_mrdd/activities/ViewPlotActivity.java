@@ -212,12 +212,10 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             ArrayList<String> ivCurves = curveResult.getIvValues();
             for(int i = 0; i < ivCurves.size(); i++) {
                 Long ivValue = Long.parseLong(ivCurves.get(i));
-                Log.i("ViewPlotActivity", "ivValue: " + ivValue);
-                Log.i("ViewPlotActivity", "stringIV: " + ivCurves.get(i));
-                SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyy hh:mm:ss");
-                Long dateInMillis = ivValue - 116444736000000000L;
-                String dateString = formatter.format(new Date(dateInMillis));
-                Log.i("ViewPlotActivity", "dateString: " + dateString);
+                SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+                Long dateInMillis = (ivValue - 116444736000000000L)/10000;
+                Date date = new Date(dateInMillis);
+                String dateString = formatter.format(date);
                 dateStrings.add(i,dateString);
             }
         }
