@@ -208,6 +208,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         myWebView.loadUrl("javascript:clear_chart()");
 
         ArrayList<String> dateStrings = new ArrayList<String>();
+        ArrayList<String> utcIvValues = new ArrayList<String>();
         if(curveResult.getCurveType().equals("time_curve")) {
             ArrayList<String> ivCurves = curveResult.getIvValues();
             for(int i = 0; i < ivCurves.size(); i++) {
@@ -215,7 +216,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 Log.i("ViewPlotActivity", "ivValue: " + ivValue);
                 Log.i("ViewPlotActivity", "stringIV: " + ivCurves.get(i));
                 SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyy hh:mm:ss");
-                Long dateInMillis = ivValue - 116444736000000000L;
+                Long dateInMillis = (ivValue - 116444736000000000L) / 1000000;
+                Log.i("ViewPlotActivity", "utcValue: " + dateInMillis);
+                utcIvValues.add(i,dateInMillis.toString());
                 String dateString = formatter.format(new Date(dateInMillis));
                 Log.i("ViewPlotActivity", "dateString: " + dateString);
                 dateStrings.add(i,dateString);
@@ -228,9 +231,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 */
         String test = "n";
         Log.i("ViewPlotActivity", "JS call to refresh plot: " + "javascript:InitChart(350,400,"+ getDvString()+","
-                + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+                + getDateString(utcIvValues)+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
         String jsCall = "javascript:InitChart(350,400,"+ getDvString()+","
-                + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")";
+                + getDateString(utcIvValues)+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")";
         myWebView.loadUrl(jsCall);
 
         //myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
