@@ -216,7 +216,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 Log.i("ViewPlotActivity", "ivValue: " + ivValue);
                 Log.i("ViewPlotActivity", "stringIV: " + ivCurves.get(i));
                 SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yyy hh:mm:ss");
-                Long dateInMillis = (ivValue - 116444736000000000L) / 1000000;
+                //Long dateInMillis = (ivValue - 116444736000000000L) / 1000000;
+                Long dateInMillis = ivValue/10000 - 11644473600000L;
                 Log.i("ViewPlotActivity", "utcValue: " + dateInMillis);
                 utcIvValues.add(i,dateInMillis.toString());
                 String dateString = formatter.format(new Date(dateInMillis));
