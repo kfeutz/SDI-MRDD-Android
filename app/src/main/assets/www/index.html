@@ -491,7 +491,7 @@ function clear_chart() {
     d3.select("#area").select("svg").remove();
 }
 
-function InitChart(screenWidth, screenHeight, dv, iv, dateStrings, dvName, ivName) {
+function InitChart(screenWidth, screenHeight, dv, iv, dvName, ivName) {
 
 /*var data = [{"item":4,"diameter":"30.00","point":"8.00"},{"item":2,"diameter":"25.00","point":"2.00"},
 {"item":7,"diameter":"20.00","point":"2.00"},{"item":9,"diameter":"15.00","point":"10.00"},
@@ -517,21 +517,10 @@ left: 45
 };
 tickno = 8;
 
-if (dateStrings.length > 1) {
-    for (var i = 0; i < dv.length; i++) {
-        data[i] = {'x': dv[i], 'y': dateStrings[i]};
-    }
-}
-else {
-    for (var i = 0; i < dv.length; i++) {
-        data[i] = {'x': dv[i], 'y': iv[i]};
-    }
-}
-/*
 for (var i = 0; i < dv.length; i++) {
         data[i] = {'x': dv[i], 'y': iv[i]};
     }
-*/
+
 this.setData = function (dv, iv) {
     for (var i = 0; i < dv.length; i++) {
         data[i] = {'x': dv[i], 'y': iv[i]};

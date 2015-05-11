@@ -228,9 +228,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 */
         String test = "n";
         Log.i("ViewPlotActivity", "JS call to refresh plot: " + "javascript:InitChart(350,400,"+ getDvString()+","
-                + getIvString()+",\""+getDateString(dateStrings)+"\",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+                + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
         String jsCall = "javascript:InitChart(350,400,"+ getDvString()+","
-                + getIvString()+",\""+getDateString(dateStrings)+"\",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")";
+                + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")";
         myWebView.loadUrl(jsCall);
 
         //myWebView.loadUrl("javascript:InitChart(350,400,"+ getDvString()+","
