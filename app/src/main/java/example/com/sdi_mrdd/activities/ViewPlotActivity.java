@@ -6,11 +6,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -71,6 +73,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     /** progress dialog to show user that the curves are loading. */
     private ProgressDialog dialog;
 
+    private ProgressDialog dialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,12 +118,27 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
+                showDialog();
                 refreshPointsBtn.setEnabled(false);
                 new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
             }
         });
+        showDialog();
         refreshPointsBtn.setEnabled(false);
         new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
+    }
+
+    public void showDialog() {
+        dialog = new ProgressDialog(this);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setMessage("Retrieving data");
+        dialog.show();
+    }
+
+    public void closeDialog() {
+        if (dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 
     public String getPlotURL() {
@@ -210,14 +229,15 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
     @Override
     public void onTaskComplete(Boolean curveFullyUpdated) {
+        refreshPointsBtn.setEnabled(false);
         String jsCall = null;
         Curve curveResult = plotToDisplay.getCurves().get(0);
         Log.i("ViewPlotActivity", "Update the points iv values : " + getIvString());
         Log.i("ViewPlotActivity", "Update the points dv values : " + getDvString());
         Log.i("ViewPlotActivity", "Update the points next start value : " + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
         Log.i("ViewPlotActivity", "Update the points next end value : " + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
-        Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(350,400,"+ getDvString()+","
-                + getIvString()+",\""+ this.plotToDisplay.getCurves().get(0).getDvName()+"\",\""+this.plotToDisplay.getCurves().get(0).getIvName()+"\")");
+        Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(325,400," + getDvString() + ","
+                + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")");
 
         /* Only update plot if curve is not fully updated */
         ArrayList<String> utcIvValues = new ArrayList<String>();
@@ -230,16 +250,17 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 dateInMillis = (ivValue - 116444736000000000L) / 10000;
                 utcIvValues.add(i, dateInMillis.toString());
             }
-            jsCall = "javascript:InitChart(350,400," + getDvString() + ","
+            jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
         } else {
-            jsCall = "javascript:InitChart(350,400," + getDvString() + ","
+            jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
         }
 
         myWebView.loadUrl("javascript:clear_chart()");
         myWebView.loadUrl(jsCall);
 
+        closeDialog();
         /* Check if curve has gotten all points from server */
         if (curveFullyUpdated) {
             Toast toast = Toast.makeText(this, "This is the most recent data", Toast.LENGTH_LONG);

@@ -553,8 +553,8 @@ this.setData = function (dv, iv) {
     }
 }
 
-width = screenWidth - margin.left - margin.right;
-height = screenHeight - margin.top - margin.bottom;
+width = window.innerWidth - 10 - margin.left - margin.right; //screenWidth
+height = window.innerHeight - 20 - margin.top - margin.bottom; //screenHeight
 //Based on data
 ymax = d3.max(data,function(d){
     return (parseInt(d[field])+1);
