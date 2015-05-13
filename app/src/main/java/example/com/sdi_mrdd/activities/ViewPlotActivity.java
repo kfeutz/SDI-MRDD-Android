@@ -70,8 +70,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     public boolean initialPlotLoad;
 
     private Button refreshPointsBtn;
-    /** progress dialog to show user that the curves are loading. */
-    private ProgressDialog dialog;
 
     private ProgressDialog dialog;
 
@@ -79,11 +77,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_plot);
-
-        dialog = new ProgressDialog(this);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setMessage("Retrieving plot data");
-        dialog.show();
 
         /**
          * Get Plot object  from intent extras
@@ -269,9 +262,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         }
         else {
             refreshPointsBtn.setEnabled(true);
-        }
-        if (dialog.isShowing()) {
-            dialog.dismiss();
         }
     }
 }
