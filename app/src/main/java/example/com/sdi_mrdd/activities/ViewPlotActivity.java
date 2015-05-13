@@ -2,6 +2,7 @@ package example.com.sdi_mrdd.activities;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -67,11 +68,19 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     public boolean initialPlotLoad;
 
     private Button refreshPointsBtn;
+    /** progress dialog to show user that the curves are loading. */
+    private ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_plot);
+
+        dialog = new ProgressDialog(this);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setMessage("Retrieving plot data");
+        dialog.show();
+
         /**
          * Get Plot object  from intent extras
          * This field is passed from the onClickListener in the
@@ -239,6 +248,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         }
         else {
             refreshPointsBtn.setEnabled(true);
+        }
+        if (dialog.isShowing()) {
+            dialog.dismiss();
         }
     }
 }
