@@ -32,7 +32,8 @@ public class DatabaseCommunicator {
 
     /* Array of the curve table column names */
     private String[] allCurveColumns = { SQLiteHelper.COLUMN_CURVE_KEY,  SQLiteHelper.COLUMN_CURVE_ID,
-            SQLiteHelper.COLUMN_CURVE, SQLiteHelper.COLUMN_WELL_DASH, SQLiteHelper.COLUMN_CURVE_TYPE };
+            SQLiteHelper.COLUMN_CURVE, SQLiteHelper.COLUMN_WELL_DASH, SQLiteHelper.COLUMN_CURVE_TYPE,
+            SQLiteHelper.COLUMN_CURVE_IVVAL, SQLiteHelper.COLUMN_CURVE_DVVAL};
 
     /* Array of the plot table column names */
     private String[] allPlotColumns = { SQLiteHelper.COLUMN_PLOT_KEY,  SQLiteHelper.COLUMN_PLOT_NAME,
@@ -125,10 +126,13 @@ public class DatabaseCommunicator {
                 + SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
                 + SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
                 + SQLiteHelper.COLUMN_WELL_DASH + ", "
-                + SQLiteHelper.COLUMN_CURVE_TYPE +")"
+                + SQLiteHelper.COLUMN_CURVE_TYPE + ", "
+                + SQLiteHelper.COLUMN_CURVE_IVVAL + ", "
+                + SQLiteHelper.COLUMN_CURVE_DVVAL + ")"
                 + " values ('" + curveId + "', '" + name + "', '" + ivName +
                     "', '" + dvName + "', '" + ivUnit + "', '" + dvUnit +
-                    "', '" + wellDash + "', '" + curveType + "');";
+                    "', '" + wellDash + "', '" + curveType +
+                    "', 'Loading data...', 'Loading data...');";
         Cursor cursor = database.rawQuery(insertCurveQuery, null);
 
         cursor.moveToFirst();
@@ -181,6 +185,27 @@ public class DatabaseCommunicator {
         return curves;
     }
 
+    public void updateCurveValues(String curveId, String ivVal, String dvVal) {
+        String updateQuery = "UPDATE " + SQLiteHelper.TABLE_CURVES
+                + " SET " + SQLiteHelper.COLUMN_CURVE_IVVAL + "='" + ivVal
+                + "', " + SQLiteHelper.COLUMN_CURVE_DVVAL + "='" + dvVal
+                + "' WHERE " + SQLiteHelper.COLUMN_CURVE_ID
+                + "='" + curveId + "';";
+/*        String whereClause = SQLiteHelper.COLUMN_CURVE_ID + "=" + curveId;
+        ContentValues args = new ContentValues();
+        args.put(SQLiteHelper.COLUMN_CURVE_IVVAL, ivVal);
+        args.put(SQLiteHelper.COLUMN_CURVE_DVVAL, dvVal);
+        database.update(SQLiteHelper.TABLE_CURVES, args, whereClause, null);*/
+
+        Cursor cursor = database.rawQuery(updateQuery, null);
+        cursor.moveToFirst();/*
+        while (!cursor.isAfterLast()) {
+            Curve tempComment = cursorToCurve(cursor);
+            cursor.moveToNext();
+        }
+        cursor.close();*/
+    }
+
     /**
      * Adds a curve to a specific well dashboard by inserting it into the
      * dashboardcurves table.
@@ -224,7 +249,9 @@ public class DatabaseCommunicator {
                 + "c." +  SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
                 + "c." +  SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
                 + "c." +  SQLiteHelper.COLUMN_WELL_DASH + ", "
-                + "c." +  SQLiteHelper.COLUMN_CURVE_TYPE
+                + "c." +  SQLiteHelper.COLUMN_CURVE_TYPE + ", "
+                + "c." + SQLiteHelper.COLUMN_CURVE_IVVAL + ", "
+                + "c." + SQLiteHelper.COLUMN_CURVE_DVVAL
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_DASHBOARDCURVES + " dc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "dc." + SQLiteHelper.COLUMN_DASHBOARDCURVES_CURVE
                 + " AND dc." + SQLiteHelper.COLUMN_DASHBOARDCURVES_WELL + " = " + "'" + wellId + "';";
@@ -256,11 +283,15 @@ public class DatabaseCommunicator {
             curve = new TimeCurve(cursor.getString(1), cursor.getString(2),
                     cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6));
             curve.setId(cursor.getString(1));
+            curve.setIvValue(cursor.getString(9));
+            curve.setDvValue(cursor.getString(10));
         }
         else {
             curve = new WellboreCurve(cursor.getString(1), cursor.getString(2),
                     cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6));
             curve.setId(cursor.getString(1));
+            curve.setIvValue(cursor.getString(9));
+            curve.setDvValue(cursor.getString(10));
         }
         return curve;
     }
@@ -334,7 +365,9 @@ public class DatabaseCommunicator {
                 + "c." +  SQLiteHelper.COLUMN_CURVE_IVUNIT + ", "
                 + "c." +  SQLiteHelper.COLUMN_CURVE_DVUNIT + ", "
                 + "c." +  SQLiteHelper.COLUMN_WELL_DASH + ", "
-                + "c." +  SQLiteHelper.COLUMN_CURVE_TYPE
+                + "c." +  SQLiteHelper.COLUMN_CURVE_TYPE + ", "
+                + "c." + SQLiteHelper.COLUMN_CURVE_IVVAL + ", "
+                + "c." + SQLiteHelper.COLUMN_CURVE_DVVAL
                 + " FROM " + SQLiteHelper.TABLE_CURVES + " c, " + SQLiteHelper.TABLE_PLOTCURVES + " pc "
                 + "WHERE c." + SQLiteHelper.COLUMN_CURVE_ID + " = " + "pc." + SQLiteHelper.COLUMN_PLOTCURVES_CURVE
                 + " AND pc." + SQLiteHelper.COLUMN_PLOTCURVES_PLOT + " = " +  plotId;

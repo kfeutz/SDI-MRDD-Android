@@ -5,6 +5,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.JsonReader;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -76,7 +79,7 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
     private List<Curve> curveList;
 
     /* The list view widget displayed on the dashboard fragment */
-    private GridView curvesListView;
+    private RecyclerView curvesListView;
 
     /* Database communicator to talk to our SQLite database */
     private DatabaseCommunicator dbCommunicator;
@@ -120,15 +123,14 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
         for (int i = 0; i < curveList.size(); i++) {
             curvesToDisplay.add(curveList.get(i).getName());
         }
-
-        /* Initializes the array adapter to display on the page */
-
-        listAdapter = new CurveAdapter(rootView.getContext(), R.layout.well_dash_board_card);
-        listAdapter.addAll(curveList);
-
         initializeAsyncTimer();
 
-        curvesListView = (GridView) rootView.findViewById(R.id.well_dashboard_list);
+        curvesListView = (RecyclerView) rootView.findViewById(R.id.well_dashboard_list);
+        curvesListView.setLayoutManager(new StaggeredGridLayoutManager(2, 1));
+        curvesListView.setItemAnimator(new DefaultItemAnimator());
+
+        /* Initializes the array adapter to display on the page */
+        listAdapter = new CurveAdapter(curveList, R.layout.well_dash_board_card, this.getActivity());
         curvesListView.setAdapter(listAdapter);
 
         return rootView;
@@ -155,12 +157,6 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.refresh:
-                for (int i = 0; i < curveList.size(); i++) {
-                    new LatestCurveValuesTask(this, curveList.get(i),
-                            ((WellDashBoardActivity) getActivity()).getWellId()).execute();
-                }
-                return true;
             case R.id.add_curve:
                 Intent intent = new Intent(getActivity(), AddCurveActivity.class);
                 intent.putExtra("wellId", ((WellDashBoardActivity) getActivity()).getWellId());
@@ -236,7 +232,8 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
                         for (int i = 0; i < curveList.size(); i++) {
                             /*new UpdateCurve(curveList.get(i)).execute();*/
                             new LatestCurveValuesTask(WellDashBoardFragment.this, curveList.get(i),
-                                    ((WellDashBoardActivity) getActivity()).getWellId()).execute();
+                                    ((WellDashBoardActivity) getActivity()).getWellId(),
+                                    dbCommunicator).execute();
                         }
                     } catch (Exception e) {
                         // TODO Auto-generated catch block

@@ -114,11 +114,13 @@ public class CurveValueParser {
         return recentCurveValues;
     }
 
-    public Curve parseIvDvValues(Curve curveToChange, String jsonString) {
+    /* Return true if all of the curve's data has been returned */
+    public boolean parseIvDvValues(Curve curveToChange, String jsonString) {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
         ArrayList<String> ivValues = new ArrayList<>();
         ArrayList<String> dvValues = new ArrayList<>();
-
+        curveToChange = curveToChange;
+        String oldNextStartUnit = "";
         try {
             jsonReader.beginArray();
             /* Start array of points */
@@ -136,12 +138,12 @@ public class CurveValueParser {
             jsonReader.endArray();
             /* Map values do not exist */
             if(jsonReader.peek() == JsonToken.NULL) {
-                curveToChange.setNextStartUnit("0");
-                curveToChange.setNextEndUnit("0");
+                oldNextStartUnit = curveToChange.getNextStartUnit();
                 jsonReader.skipValue();
             }
             else {
                 jsonReader.beginObject();
+                oldNextStartUnit = curveToChange.getNextStartUnit();
                 while (jsonReader.hasNext()) {
                     String token = jsonReader.nextName();
                     /* Grab curve id field */
@@ -162,8 +164,21 @@ public class CurveValueParser {
         } catch (IOException e) {
             Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
         }
-        curveToChange.setIvValues(ivValues);
-        curveToChange.setDvValues(dvValues);
-        return curveToChange;
+        /* End of points in SDI database */
+        if (curveToChange.getNextStartUnit().equals(oldNextStartUnit)) {
+            /* If the curve only returns one set of points then we need to add
+             * the points to the curve
+             */
+            if(curveToChange.getIvValues().size() == 0) {
+                curveToChange.setIvValues(ivValues);
+                curveToChange.setDvValues(dvValues);
+            }
+            return true;
+        }
+        else {
+            curveToChange.setIvValues(ivValues);
+            curveToChange.setDvValues(dvValues);
+        }
+        return false;
     }
 }

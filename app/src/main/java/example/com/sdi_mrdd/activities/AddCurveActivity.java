@@ -111,6 +111,7 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
         timeRadio = (RadioButton) findViewById(R.id.radio_time);
 
         dialog = new ProgressDialog(this);
+        dialog.setCanceledOnTouchOutside(false);
         dialog.setMessage("Retrieving curves");
         dialog.show();
         new LoadCurvesForWellTask(this, this.wellId).execute();

@@ -129,6 +129,7 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         curveListView = (ListView) findViewById(R.id.create_plot_view);
 
         dialog = new ProgressDialog(this);
+        dialog.setCanceledOnTouchOutside(false);
         dialog.setMessage("Retrieving curves");
         dialog.show();
         new LoadCurvesForWellTask(this, this.wellId).execute();

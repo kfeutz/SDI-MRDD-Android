@@ -108,6 +108,7 @@ public class WellListActivity extends ActionBarActivity {
         @Override
         protected void onPreExecute() {
             dialog = new ProgressDialog(context);
+            dialog.setCanceledOnTouchOutside(false);
             dialog.setMessage("Retrieving wells");
             dialog.show();
         }

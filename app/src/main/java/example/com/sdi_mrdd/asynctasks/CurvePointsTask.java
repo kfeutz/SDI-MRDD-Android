@@ -38,7 +38,7 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
     long currentTimeLdap;
     Curve curveToChange;
-    AsyncTaskCompleteListener<Curve> activity;
+    AsyncTaskCompleteListener<Boolean> activity;
 
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
@@ -46,7 +46,7 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     /* Start value for REST call, typically user will specifiy this but their API is acting weird */
     private final long STARTLDAPTIME = 120737630793553000L;
 
-    public CurvePointsTask (AsyncTaskCompleteListener<Curve> activity, Plot thePlot) {
+    public CurvePointsTask (AsyncTaskCompleteListener<Boolean> activity, Plot thePlot) {
         this.activity = activity;
         this.wellId = thePlot.getWellId();
         this.curveToChange = thePlot.getCurves().get(0);
@@ -120,9 +120,9 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
      */
     @Override
     protected void onPostExecute(String result) {
-        Log.i("ViewPlotActivity", "GET call result: " + result);
-        Curve newCurve = CurveValueParser.getInstance().parseIvDvValues(curveToChange, result);
-        this.activity.onTaskComplete(newCurve);
+        Log.i("ViewPlotActivity", "GET " + server + " call result: " + result);
+        this.activity.onTaskComplete(CurveValueParser.getInstance()
+                .parseIvDvValues(curveToChange, result));
     }
 
     public List<Double> getDvList() {

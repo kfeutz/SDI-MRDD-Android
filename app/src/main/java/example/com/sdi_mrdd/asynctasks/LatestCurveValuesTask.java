@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Scanner;
 
+import example.com.sdi_mrdd.activities.WellDashBoardActivity;
+import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.ApiUrl;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveValueParser;
@@ -30,6 +32,8 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
     long currentTimeLdap;
     Curve curveToUpdate;
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
+    /* Database communicator to talk to our SQLite database */
+    private DatabaseCommunicator dbCommunicator;
     AsyncTaskCompleteListener<String> activity;
 
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
@@ -39,13 +43,15 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
     private final long STARTLDAPTIME = 120737630793553000L;
 
     public LatestCurveValuesTask(AsyncTaskCompleteListener<String> activity,
-                                 Curve curveToUpdate, String wellId) {
+                                 Curve curveToUpdate, String wellId, DatabaseCommunicator dbCommunicator) {
         this.activity = activity;
         this.curveToUpdate = curveToUpdate;
         this.curveId = curveToUpdate.getId();
         this.wellId = wellId;
         /* Converting current Unix epoch time to LDAP time format */
         this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
+
+        this.dbCommunicator =  dbCommunicator;
         /* Make time curve call */
         if(curveToUpdate.getCurveType().equals("time_curve")) {
             server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
@@ -130,6 +136,11 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
         Map<String, String> newValueMap = result;
         curveToUpdate.setIvValue(newValueMap.get("ivValue"));
         curveToUpdate.setDvValue(newValueMap.get("dvValue"));
+        if(!dbCommunicator.isOpen()) {
+            dbCommunicator.open();
+        }
+        dbCommunicator.updateCurveValues(curveToUpdate.getId(),
+                newValueMap.get("ivValue"), newValueMap.get("dvValue"));
         activity.onTaskComplete("");
     }
 }

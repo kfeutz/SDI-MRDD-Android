@@ -3,10 +3,9 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".WebViewActivity">
+    tools:context=".WebViewActivity"
+    android:paddingTop="20dp">
 
-    <TextView android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
     <Button
         android:id="@+id/btn_curve_points"
         android:layout_width="fill_parent"

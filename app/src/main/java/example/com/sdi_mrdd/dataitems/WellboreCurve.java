@@ -66,7 +66,14 @@ public class WellboreCurve extends Curve {
             return "0";
         }
         else {
-            return this.dvValue;
+            if(this.dvValue.contains(".")
+                    && this.dvValue.substring(this.dvValue.indexOf('.')).length() > 5) {
+                return this.dvValue.substring(0, this.dvValue.indexOf('.'))
+                        + this.dvValue.substring(this.dvValue.indexOf('.'), this.dvValue.indexOf('.') + 5);
+            }
+            else {
+                return this.dvValue;
+            }
         }
     }
 
@@ -78,7 +85,14 @@ public class WellboreCurve extends Curve {
             return this.ivValue;
         }
         else {
-            return ivValue;
+            if(this.ivValue.contains(".")
+                    && this.ivValue.substring(this.ivValue.indexOf('.')).length() > 5) {
+                return this.ivValue.substring(0, this.ivValue.indexOf('.'))
+                        + this.ivValue.substring(this.ivValue.indexOf('.'), this.ivValue.indexOf('.') + 3);
+            }
+            else {
+                return this.ivValue;
+            }
         }
     }
 

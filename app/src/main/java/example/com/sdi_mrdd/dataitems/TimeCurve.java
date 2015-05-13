@@ -63,6 +63,9 @@ public class TimeCurve extends Curve {
             return this.ivValue;
         }
         else {
+            if(this.ivValue.equals("Loading data...")) {
+                this.ivValue = "No data";
+            }
             if(!this.ivValue.equals("No data")) {
                 timeDifSecs = (double) (currentTimeLdap - Long.parseLong(this.ivValue)) / 10000000.0;
                 days = (int) timeDifSecs / 86400;

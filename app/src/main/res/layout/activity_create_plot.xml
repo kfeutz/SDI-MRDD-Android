@@ -12,6 +12,8 @@
         android:layout_marginBottom="15dp"
         android:paddingTop="20dp"
         android:paddingBottom="20dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:background="@color/sdi_white">
 
         <TextView
@@ -43,23 +45,25 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="75dp"
+            android:layout_height="170dp"
             android:layout_gravity="center_horizontal"
-            android:orientation="vertical"
-            android:layout_marginLeft="20dp">
+            android:orientation="vertical">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp"
                 android:id="@+id/text"
-                android:text="@string/ivChoice" />
+                android:text="@string/ivChoice"
+                android:paddingLeft="30dp"/>
 
             <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:id="@+id/iv_radio_group">
+                android:id="@+id/iv_radio_group"
+                android:paddingLeft="30dp"
+                android:paddingBottom="20dp">
                 <RadioButton android:id="@+id/radio_depth"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -73,7 +77,7 @@
                     android:text="@string/time"
                     android:onClick="onRadioButtonClicked"/>
             </RadioGroup>
-        </LinearLayout>
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="75dp"
@@ -82,7 +86,10 @@
             android:layout_gravity="center_horizontal"
             android:background="@color/sdi_white"
             android:textColor="@color/sdi_grey"
-            android:layout_weight="0"/>
+            android:layout_weight="0"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

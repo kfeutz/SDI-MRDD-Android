@@ -3,6 +3,8 @@ package example.com.sdi_mrdd.dataitems;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
@@ -228,7 +230,14 @@ public abstract class Curve implements Parcelable {
     }
 
     public String getDvValue() {
-        return dvValue;
+        if(this.dvValue.contains(".")
+                && this.dvValue.substring(this.dvValue.indexOf('.')).length() > 5) {
+            return this.dvValue.substring(0, this.dvValue.indexOf('.'))
+                    + this.dvValue.substring(this.dvValue.indexOf('.'), this.dvValue.indexOf('.') + 5);
+        }
+        else {
+            return this.dvValue;
+        }
     }
 
     public void setDvValue(String dvValue) {
