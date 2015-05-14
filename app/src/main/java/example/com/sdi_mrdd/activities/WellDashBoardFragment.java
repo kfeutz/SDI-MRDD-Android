@@ -90,6 +90,8 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
 
     TimerTask doAsynchronousTask;
 
+    private ArrayList<LatestCurveValuesTask> asyncTasks = new ArrayList<>();
+
     /**
      * Creates the Well Dashboard fragment view and sets up the fragment view's
      * components. Layout is set to fragment_well_dashboard.xml.
@@ -210,6 +212,12 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
         super.onPause();
         timerStarted = false;
         doAsynchronousTask.cancel();
+        for(int i = 0; i < asyncTasks.size(); i++) {
+            if(asyncTasks.get(i).getStatus().equals(AsyncTask.Status.RUNNING))
+            {
+                asyncTasks.get(i).cancel(true);
+            }
+        }
     }
 
     @Override
@@ -231,9 +239,12 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
                     try {
                         for (int i = 0; i < curveList.size(); i++) {
                             /*new UpdateCurve(curveList.get(i)).execute();*/
-                            new LatestCurveValuesTask(WellDashBoardFragment.this, curveList.get(i),
+                            LatestCurveValuesTask curveTask
+                                    = new LatestCurveValuesTask(WellDashBoardFragment.this, curveList.get(i),
                                     ((WellDashBoardActivity) getActivity()).getWellId(),
-                                    dbCommunicator).execute();
+                                    dbCommunicator);
+                            asyncTasks.add(curveTask);
+                            curveTask.execute();
                         }
                     } catch (Exception e) {
                         // TODO Auto-generated catch block
@@ -242,7 +253,7 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
                 });
                 }
             };
-            timer.schedule(doAsynchronousTask, 0, 15000); //execute in every 50000 ms
+            timer.schedule(doAsynchronousTask, 0, 30000); //execute in every 50000 ms
         }
     }
 
