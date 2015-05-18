@@ -9,7 +9,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -65,6 +67,7 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
 
         request  = new HttpGet(server);
     }
+
     @Override
     protected Map doInBackground(String... params) {
         Scanner scanner;
@@ -78,10 +81,10 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
             if(entity != null) {
                 InputStream input = entity.getContent();
                 if (input != null) {
-                    scanner = new Scanner(input);
-
-                    while (scanner.hasNext()) {
-                        jsonString += scanner.next() + " ";
+                    String line = "";
+                    BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(input));
+                    while((line = bufferedReader.readLine()) != null) {
+                        jsonString += line;
                     }
                     input.close();
                 }
@@ -100,6 +103,7 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
             return requestLatestValueMap(recentCurveValues.get("ivValue"));
         }
     }
+
     protected Map requestLatestValueMap(String endIvValue) {
         Scanner scanner;
         HttpResponse response;

@@ -2,8 +2,6 @@ package example.com.sdi_mrdd.dataitems;
 
 import android.util.JsonReader;
 import android.util.Log;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -49,8 +47,6 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
         ArrayList<String> wellBoreTitles = new ArrayList<>();
         ArrayList<String> timeCurveTitles = new ArrayList<>();
         Map<String, String> singleCurve = new HashMap<>();
-        String curveJsonArray = null;
-        JSONArray curveArray = null;
 
         try {
             jsonReader.beginObject();
@@ -108,64 +104,6 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
         }
         return curves;
     }
-
-    /*public Map<String, String> parse(String jsonString) {
-        JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
-        Map<String, String> curves = new HashMap<>();
-        Map<String, String> singleCurve = new HashMap<>();
-        String curveJsonArray = null;
-        JSONArray curveArray = null;
-
-        try {
-            jsonReader.beginObject();
-            while (jsonReader.hasNext()) {
-                String token = jsonReader.nextName();
-                *//* Retrieve array containing all wellbore_curves *//*
-                if (token.equals("wellbore_curves")) {
-                    *//* Grab the json array string from wellbore_curves *//*
-                    jsonReader.beginArray();
-                    *//*Loop through each curve in the json array *//*
-                    while (jsonReader.hasNext()) {
-                        *//* Pass each json object to retrieve a curve object *//*
-                        singleCurve = readJsonCurve(jsonReader, "wellbore_curves");
-                        for(String curveName : singleCurve.keySet()) {
-                            if (curves.get(curveName) == null) {
-                                curves.putAll(singleCurve);
-                            }
-                        }
-
-                    }
-                    jsonReader.endArray();
-                }
-                *//* Retrieve array containing all time_curves *//*
-                else if (token.equals("time_curves")) {
-                    *//* Grab the json array string from wellbore_curves *//*
-                    jsonReader.beginArray();
-                    *//*Loop through each curve in the json array *//*
-                    while (jsonReader.hasNext()) {
-                        *//* Pass each json object to retrieve a curve object *//*
-                        singleCurve = readJsonCurve(jsonReader, "time_curves");
-                        for(String curveName : singleCurve.keySet()) {
-                            if (curves.get(curveName) == null) {
-                                curves.putAll(singleCurve);
-                            }
-                        }
-                    }
-                    jsonReader.endArray();
-                }
-                else {
-                    jsonReader.skipValue();
-                }
-            }
-            jsonReader.endObject();
-            jsonReader.close();
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
-        } catch (JSONException e) {
-            Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
-        }
-        return curves;
-    }*/
 
     /**
      * Parses a JSON Curve Object and returns a java Curve object

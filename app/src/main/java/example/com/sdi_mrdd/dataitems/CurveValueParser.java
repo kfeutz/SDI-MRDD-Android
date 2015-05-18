@@ -119,7 +119,6 @@ public class CurveValueParser {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
         ArrayList<String> ivValues = new ArrayList<>();
         ArrayList<String> dvValues = new ArrayList<>();
-        curveToChange = curveToChange;
         String oldNextStartUnit = "";
         try {
             jsonReader.beginArray();

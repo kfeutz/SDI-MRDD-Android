@@ -77,6 +77,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_plot);
+        myWebView = (WebView) findViewById(R.id.webview);
 
         /**
          * Get Plot object  from intent extras
@@ -87,8 +88,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         plotName = plotToDisplay.getName();
 
         setTitle(plotName);
-
-        myWebView = (WebView) findViewById(R.id.webview);
 
         //Opens in-app instead of in browser
         myWebView.setWebViewClient(new WebViewClient() {
@@ -105,6 +104,15 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
 
+        myWebView.setWebViewClient(new WebViewClient(){
+            public void onPageStarted(WebView view, String url, Bitmap favicon){
+                //show progress indicator
+            }
+
+            public void onPageFinished(WebView view, String url){
+            }
+        });
+
         myWebView.loadUrl("file:///android_asset/www/index.html");
 
         refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
@@ -117,6 +125,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             }
         });
         showDialog();
+
+        initialPlotLoad = true;
         refreshPointsBtn.setEnabled(false);
         new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
     }
@@ -176,44 +186,18 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     public Plot getPlot() {
         return this.plotToDisplay;
     }
+
     public String getDvString() {
-        List<Double> dvDoubleList = this.plotToDisplay.getCurves().get(0).getDvValues();
-        String value = "[";
-        for (int i = 0; i < dvDoubleList.size(); i++) {
-            value += dvDoubleList.get(i);
-            if (i != dvDoubleList.size() - 1) {
-                value += ", ";
-            }
-        }
-        value += "]";
-        return value;
+        return this.plotToDisplay.getCurves().get(0).getDvValues().toString();
     }
 
     public String getIvString() {
-        String value = "[";
-        List<String> ivDoubleList = this.plotToDisplay.getCurves().get(0).getIvValues();
-        for (int i = 0; i < ivDoubleList.size(); i++) {
-            value += ivDoubleList.get(i);
-            if (i != ivDoubleList.size() - 1) {
-                value += ", ";
-            }
-        }
-        value += "]";
-        return value;
+        return this.plotToDisplay.getCurves().get(0).getIvValues().toString();
     }
 
     public String getDateString(ArrayList<String> dateStrings) {
         if (dateStrings.size() > 0) {
-            String value = "[";
-            for (int i = 0; i < dateStrings.size(); i++) {
-                value += dateStrings.get(i);
-                if (i != dateStrings.size() - 1) {
-                    value += ", ";
-                }
-                /*Log.i("ViewPlotActivity", "dateString i " + dateStrings.get(i));*/
-            }
-            value += "]";
-            return value;
+            return dateStrings.toString();
         }
         else {
             return "n";
@@ -238,7 +222,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             ArrayList<String> ivCurves = curveResult.getIvValues();
             Long ivValue;
             Long dateInMillis;
-            for (int i = 0; i < ivCurves.size(); i++) {
+            int ivListSize = ivCurves.size();
+            for (int i = 0; i < ivListSize; i++) {
                 ivValue = Long.parseLong(ivCurves.get(i));
                 dateInMillis = (ivValue - 116444736000000000L) / 10000;
                 utcIvValues.add(i, dateInMillis.toString());
@@ -250,18 +235,17 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                     + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
         }
 
-        myWebView.loadUrl("javascript:clear_chart()");
-        myWebView.loadUrl(jsCall);
-
         closeDialog();
         /* Check if curve has gotten all points from server */
-        if (curveFullyUpdated) {
+        if (curveFullyUpdated && !initialPlotLoad) {
             Toast toast = Toast.makeText(this, "This is the most recent data", Toast.LENGTH_LONG);
             toast.show();
-            refreshPointsBtn.setEnabled(true);
         }
         else {
-            refreshPointsBtn.setEnabled(true);
+            myWebView.loadUrl("javascript:clear_chart()");
+            myWebView.loadUrl(jsCall);
         }
+        initialPlotLoad = false;
+        refreshPointsBtn.setEnabled(true);
     }
 }
