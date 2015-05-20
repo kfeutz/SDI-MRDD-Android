@@ -78,6 +78,16 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_plot);
 
+        setPlotToDisplay();
+
+        createWebview();
+
+        addRefreshButton();
+
+        new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
+    }
+
+    private void setPlotToDisplay() {
         /**
          * Get Plot object  from intent extras
          * This field is passed from the onClickListener in the
@@ -87,14 +97,16 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         plotName = plotToDisplay.getName();
 
         setTitle(plotName);
+    }
 
+    private void createWebview() {
         myWebView = (WebView) findViewById(R.id.webview);
 
         //Opens in-app instead of in browser
         myWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
                 //myWebView.loadUrl("javascript:InitChart(350,400,"+ curvePoints.getDvString()+","
-                  //      +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
+                //      +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
             }
         });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
@@ -106,7 +118,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         webSettings.setDomStorageEnabled(true);
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
+    }
 
+    private void addRefreshButton() {
         refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
         refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,7 +132,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         });
         showDialog();
         refreshPointsBtn.setEnabled(false);
-        new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
     }
 
     public void showDialog() {
