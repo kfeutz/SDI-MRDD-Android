@@ -10,7 +10,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -96,10 +98,10 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
             if(entity != null) {
                 InputStream input = entity.getContent();
                 if (input != null) {
-                    scanner = new Scanner(input);
-
-                    while (scanner.hasNext()) {
-                        jsonString += scanner.next() + " ";
+                    String line = "";
+                    BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(input));
+                    while((line = bufferedReader.readLine()) != null) {
+                        jsonString += line;
                     }
                     input.close();
                 }

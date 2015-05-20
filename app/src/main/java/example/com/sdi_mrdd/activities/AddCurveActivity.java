@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Debug;
+import android.os.Trace;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -80,8 +82,8 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
     private CurvesForWellJsonParser curvesForWellJsonParser = CurvesForWellJsonParser.getInstance();
     private CurveJsonParser curveJsonParser = CurveJsonParser.getInstance();
 
-    String jsonCurves;
-    Map<String, String> curveMap = new HashMap<>();
+    Map<String, Curve> timeCurveMap = new HashMap<>();
+    Map<String, Curve> wellboreCurveMap = new HashMap<>();
     ArrayList<String> curveStringList = new ArrayList<String>();
     ArrayList<String> selectedCurveList = new ArrayList<String>();
     ArrayList<Curve> curveList = new ArrayList<>();
@@ -114,6 +116,7 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
         dialog.setCanceledOnTouchOutside(false);
         dialog.setMessage("Retrieving curves");
         dialog.show();
+
         new LoadCurvesForWellTask(this, this.wellId).execute();
 
         btnAddCurves =  (Button) findViewById(R.id.btn_add_curves);
@@ -130,10 +133,10 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
 
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    String curveToAddId = null;
+                                    String curveToAddId;
                                     String curveToAddName;
-                                    String jsonLoadedCurve = null;
-                                    String curveType = null;
+                                    String jsonLoadedCurve;
+                                    String curveType;
                                     Curve curveToAdd;
                                     SparseBooleanArray checked = AddCurveActivity.this.getListView().getCheckedItemPositions();
                                     int size = checked.size(); // number of name-value pairs in the array
@@ -143,26 +146,17 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
                                         if (value && curveStringList != null) {
                                             curveToAddName = listAdapter.getItem(key);
                                             try {
-                                                for (int j = 0; j < curveList.size(); j++) {
-                                                    if(curveList.get(j).getName().equals(curveToAddName)) {
-                                                        if(timeRadio.isChecked()){
-                                                            /* Time curve selected, skip curve if its wellbore */
-                                                            String curveTypeTemp = curveList.get(j).getCurveType();
-                                                            if(curveList.get(j).getCurveType().equals("time_curve")) {
-                                                                curveType = curveList.get(j).getCurveType();
-                                                                curveToAddId = curveList.get(j).getId();
-                                                            }
-                                                        }
-                                                        else {
-                                                            /* Wellbore curve selected, skip curve if its time */
-                                                            if(curveList.get(j).getCurveType().equals("wellbore_curve")) {
-                                                                curveType = curveList.get(j).getCurveType();
-                                                                curveToAddId = curveList.get(j).getId();
-                                                            }
-                                                        }
-
-                                                    }
+                                                boolean timeRadioChecked = timeRadio.isChecked();
+                                                /* Time curve selected */
+                                                if(timeRadioChecked) {
+                                                    curveToAdd = timeCurveMap.get(curveToAddName);
                                                 }
+                                                else {
+                                                    curveToAdd = wellboreCurveMap.get(curveToAddName);
+                                                }
+                                                curveToAddId = curveToAdd.getId();
+                                                curveType = curveToAdd.getCurveType();
+                                                /* Retrieve data for the curve (ie. iv and dv names) */
                                                 jsonLoadedCurve = new LoadCurveDataTask(curveToAddId,
                                                         AddCurveActivity.this.getWellId(), curveType).execute().get();
                                                 curveToAdd = curveJsonParser.parse(jsonLoadedCurve, curveToAddId, curveToAddName, curveType);
@@ -213,8 +207,21 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
 
     public void parseJsonCurveList(String jsonString) {
         curveList = curvesForWellJsonParser.parse(jsonString);
-        for (int i = 0; i < curveList.size(); i++) {
-            curveStringList.add(curveList.get(i).getName());
+        int curveListSize = curveList.size();
+        String curveName;
+        String curveType;
+        Curve curveForMap;
+        for (int i = 0; i < curveListSize; i++) {
+            curveForMap = curveList.get(i);
+            curveName = curveForMap.getName();
+            curveType = curveForMap.getCurveType();
+            curveStringList.add(curveName);
+            if(curveType.equals("time_curve")) {
+                timeCurveMap.put(curveName, curveForMap);
+            }
+            else {
+                wellboreCurveMap.put(curveName, curveForMap);
+            }
         }
         listAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_multiple_choice, curveStringList);
