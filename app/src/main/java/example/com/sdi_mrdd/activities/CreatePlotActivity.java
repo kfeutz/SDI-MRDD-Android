@@ -2,12 +2,16 @@ package example.com.sdi_mrdd.activities;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -22,6 +26,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.SearchView;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -166,7 +171,7 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
                                         int key = checked.keyAt(i);
                                         boolean value = checked.get(key);
                                         if (value && curveStringList != null) {
-                                            curveToAddName = curveStringList.get(key);
+                                            curveToAddName = listAdapter.getItem(key);
                                             try {
                                                 for (int j = 0; j < curveList.size(); j++) {
                                                     if(curveList.get(j).getName().equals(curveToAddName)) {
@@ -295,6 +300,37 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_create_plot, menu);
+        // Get the SearchView and set the searchable configuration
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.curve_search)
+                .getActionView();
+
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconifiedByDefault(false); // Collapseable widget
+
+        SearchView.OnQueryTextListener textChangeListener = new SearchView.OnQueryTextListener()
+        {
+            @Override
+            public boolean onQueryTextChange(String newText)
+            {
+                // this is your adapter that will be filtered
+                listAdapter.getFilter().filter(newText);
+                System.out.println("on text chnge text: "+newText);
+                return true;
+            }
+            @Override
+            public boolean onQueryTextSubmit(String query)
+            {
+                // this is your adapter that will be filtered
+                listAdapter.getFilter().filter(query);
+                System.out.println("on query submit: "+query);
+                return true;
+            }
+        };
+        searchView.setOnQueryTextListener(textChangeListener);
+
         return super.onCreateOptionsMenu(menu);
     }
 }

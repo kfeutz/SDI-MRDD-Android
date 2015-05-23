@@ -89,13 +89,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
         setTitle(plotName);
 
-        //Opens in-app instead of in browser
-        myWebView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                //myWebView.loadUrl("javascript:InitChart(350,400,"+ curvePoints.getDvString()+","
-                  //      +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
-            }
-        });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         //Enable javascript
@@ -105,11 +98,11 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         webSettings.setDomStorageEnabled(true);
 
         myWebView.setWebViewClient(new WebViewClient(){
-            public void onPageStarted(WebView view, String url, Bitmap favicon){
-                //show progress indicator
-            }
-
+            /* Wait for html to load all javascript before calling getting points and initiating chart */
             public void onPageFinished(WebView view, String url){
+                initialPlotLoad = true;
+                refreshPointsBtn.setEnabled(false);
+                new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
             }
         });
 
@@ -125,10 +118,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             }
         });
         showDialog();
-
-        initialPlotLoad = true;
-        refreshPointsBtn.setEnabled(false);
-        new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
     }
 
     public void showDialog() {

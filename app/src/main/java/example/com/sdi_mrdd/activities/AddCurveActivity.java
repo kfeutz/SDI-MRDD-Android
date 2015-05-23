@@ -235,15 +235,13 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_add_curve, menu);
 
-
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
         SearchView searchView = (SearchView) menu.findItem(R.id.add_curve_search)
                 .getActionView();
         // Assumes current activity is the searchable activity
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(
-                new ComponentName(getApplicationContext(), AddCurveActivity.class)));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(false); // Collapseable widget
 
         SearchView.OnQueryTextListener textChangeListener = new SearchView.OnQueryTextListener()
