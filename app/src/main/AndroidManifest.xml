@@ -76,6 +76,14 @@
             android:label="@string/create_plot_page_name"
             android:launchMode="singleTop"
             android:parentActivityName=".activities.WellDashBoardActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+                android:value=".AddCurveActivity" />
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
@@ -91,7 +99,8 @@
         <activity
             android:name=".activities.ViewPlotActivity"
             android:label="@string/title_activity_view_plot"
-            android:parentActivityName=".activities.WellDashBoardActivity" >
+            android:parentActivityName=".activities.WellDashBoardActivity"
+            android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.WellDashBoardActivity" />

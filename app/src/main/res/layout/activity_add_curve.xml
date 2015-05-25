@@ -15,57 +15,44 @@
             android:layout_height="0dip"
             android:id="@+id/add_curve_view"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="1"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"/>
+            android:layout_weight="1"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="170dp"
             android:layout_gravity="center_horizontal"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            android:background="@xml/top_border_radius">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="15dp"
                 android:id="@+id/text"
-                android:text="@string/ivChoice"
-                android:paddingLeft="30dp"/>
+                android:text="@string/ivChoice"/>
 
-            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            <Spinner
+                android:id="@+id/iv_spinner"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:id="@+id/iv_radio_group"
-                android:paddingLeft="30dp"
-                android:paddingBottom="20dp"
-                >
-                <RadioButton android:id="@+id/radio_depth"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/depth"
-                    android:onClick="onRadioButtonClicked"/>
-                <RadioButton android:id="@+id/radio_time"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:text="@string/time"
-                    android:onClick="onRadioButtonClicked"/>
-            </RadioGroup>
+                android:prompt="@string/ivChoice"
+                android:spinnerMode="dropdown"
+                android:paddingBottom="10dp"
+                android:layout_weight="1"
+                android:layout_gravity="top"/>
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="75dp"
-            android:text="@string/btn_add_curves"
-            android:id="@+id/btn_add_curves"
-            android:layout_gravity="center_horizontal"
-            android:background="@color/sdi_white"
-            android:textColor="@color/sdi_grey"
-            android:layout_weight="0"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/btn_create_plot"
+                android:id="@+id/btn_add_curves"
+                android:layout_gravity="center_horizontal"
+                android:background="@color/sdi_black"
+                android:textColor="@color/sdi_white"
+                android:layout_marginBottom="10dp"/>
+
         </LinearLayout>
     </LinearLayout>
 

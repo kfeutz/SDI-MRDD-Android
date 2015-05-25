@@ -27,6 +27,7 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SearchView;
+import android.widget.Spinner;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -53,6 +54,7 @@ import example.com.sdi_mrdd.dataitems.CurvesForWellJsonParser;
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.Plot;
 import example.com.sdi_mrdd.R;
+import example.com.sdi_mrdd.dataitems.WellboreCurve;
 
 /**
  * This class represents an Activity that allows the user to
@@ -104,9 +106,12 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
     /* List of selected curves to add to plot */
     private List<Curve> curvesToAddList = new ArrayList<Curve>();
 
-    Map<String, String> curveMap = new HashMap<>();
+    private Spinner ivSpinner;
 
-    String jsonCurves;
+    Map<String, Curve> timeCurveMap = new HashMap<>();
+    Map<String, WellboreCurve> wellboreMeasuredDepthCurveMap = new HashMap<>();
+    Map<String, WellboreCurve> wellboreVertDepthCurveMap = new HashMap<>();
+    Map<String, WellboreCurve> wellboreVertSectionCurveMap = new HashMap<>();
 
     /* The curve titles to display */
     ArrayList<String> curveStringList = new ArrayList<String>();
@@ -140,10 +145,12 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         new LoadCurvesForWellTask(this, this.wellId).execute();
 
         inputTitle = (EditText) findViewById(R.id.plot_name_entry);
-        ivRadioGroup = (RadioGroup) findViewById(R.id.iv_radio_group);
-        ivRadioGroup.check(R.id.radio_depth);
-        depthRadio = (RadioButton) findViewById(R.id.radio_depth);
-        timeRadio = (RadioButton) findViewById(R.id.radio_time);
+
+        ivSpinner = (Spinner) findViewById(R.id.iv_spinner);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_dropdown_item, new String[]{"Time", "Measured Depth",
+                "True Vertical Depth", "Vertical Section"});
+        ivSpinner.setAdapter(spinnerAdapter);
 
         btnCreatePlot =  (Button) findViewById(R.id.btn_create_plot);
         btnCreatePlot.setOnClickListener(new View.OnClickListener() {
@@ -164,8 +171,9 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
                                     String curveToAddId = null;
                                     String curveToAddName;
                                     String curveType = null;
-                                    Curve curveToAdd;
-                                    String loadedCurve;
+                                    Curve curveToAdd = null;
+                                    Curve addedCurve;
+                                    String jsonLoadedCurve;
                                     int size = checked.size(); // number of name-value pairs in the array
                                     for (int i = 0; i < size; i++) {
                                         int key = checked.keyAt(i);
@@ -173,36 +181,59 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
                                         if (value && curveStringList != null) {
                                             curveToAddName = listAdapter.getItem(key);
                                             try {
-                                                for (int j = 0; j < curveList.size(); j++) {
-                                                    if(curveList.get(j).getName().equals(curveToAddName)) {
-                                                        if(timeRadio.isChecked())
-                                                        {
-                                                            /* Time curve selected, skip curve if its wellbore */
-                                                            if(curveList.get(j).getCurveType().equals("time_curve")) {
-                                                                curveType = curveList.get(j).getCurveType();
-                                                                curveToAddId = curveList.get(j).getId();
-                                                            }
-                                                        }
-                                                        else
-                                                        {
-                                                            /* Wellbore curve selected, skip curve if its time */
-                                                            if(curveList.get(j).getCurveType().equals("wellbore_curve")) {
-                                                                curveType = curveList.get(j).getCurveType();
-                                                                curveToAddId = curveList.get(j).getId();
-                                                            }
-                                                        }
-
-                                                    }
+                                                addedCurve = null;
+                                                String ivSelection = ivSpinner.getSelectedItem().toString();
+                                                /* Time curve selected */
+                                                if (ivSelection.equals("Time")) {
+                                                    curveToAdd = timeCurveMap.get(curveToAddName);
+                                                    /* Retrieve data for the curve (ie. iv and dv names) */
+                                                    jsonLoadedCurve = new LoadCurveDataTask(curveToAdd, wellId).execute().get();
+                                                    curveJsonParser.parseIvDvNames(curveToAdd, jsonLoadedCurve, curveToAdd.getId(),
+                                                            curveToAddName, curveToAdd.getCurveType());
+                                                    addedCurve = dbCommunicator.createTimeCurve(curveToAdd.getId(),
+                                                            curveToAdd.getName(), curveToAdd.getIvName(),
+                                                            curveToAdd.getDvName(), curveToAdd.getIvUnit(),
+                                                            curveToAdd.getDvUnit(), wellId, curveToAdd.getCurveType());
                                                 }
-                                                loadedCurve = new LoadCurveDataTask(curveToAddId,
-                                                        CreatePlotActivity.this.getWellId(), curveType).execute().get();
-                                                curveToAdd = curveJsonParser.parse(loadedCurve, curveToAddId, curveToAddName, curveType);
-
-                                                Curve addedCurve = dbCommunicator.createCurve(curveToAdd.getId(),
-                                                        curveToAdd.getName(), curveToAdd.getIvName(),
-                                                        curveToAdd.getDvName(), curveToAdd.getIvUnit(),
-                                                        curveToAdd.getDvUnit(), wellId, curveToAdd.getCurveType());
-                                                curvesToAddList.add(addedCurve);
+                                                else if (ivSelection.equals("Measured Depth")) {
+                                                    WellboreCurve wellboreCurveToAdd = wellboreMeasuredDepthCurveMap.get(curveToAddName);
+                                                    /* Retrieve data for the curve (ie. iv and dv names) */
+                                                    jsonLoadedCurve = new LoadCurveDataTask(wellboreCurveToAdd, wellId).execute().get();
+                                                    curveJsonParser.parseIvDvNames(wellboreCurveToAdd, jsonLoadedCurve, wellboreCurveToAdd.getId(),
+                                                            curveToAddName, wellboreCurveToAdd.getCurveType());
+                                                    addedCurve = dbCommunicator.createWellboreCurve(wellboreCurveToAdd.getId(),
+                                                            wellboreCurveToAdd.getName(), wellboreCurveToAdd.getIvName(),
+                                                            wellboreCurveToAdd.getDvName(), wellboreCurveToAdd.getIvUnit(),
+                                                            wellboreCurveToAdd.getDvUnit(), wellId, wellboreCurveToAdd.getCurveType(),
+                                                            wellboreCurveToAdd.getWellboreId(), wellboreCurveToAdd.getWellboreType());
+                                                }
+                                                else if (ivSelection.equals("True Vertical Depth")) {
+                                                    WellboreCurve wellboreCurveToAdd = wellboreVertDepthCurveMap.get(curveToAddName);
+                                                    /* Retrieve data for the curve (ie. iv and dv names) */
+                                                    jsonLoadedCurve = new LoadCurveDataTask(wellboreCurveToAdd, wellId).execute().get();
+                                                    curveJsonParser.parseIvDvNames(wellboreCurveToAdd, jsonLoadedCurve, wellboreCurveToAdd.getId(),
+                                                            curveToAddName, wellboreCurveToAdd.getCurveType());
+                                                    addedCurve = dbCommunicator.createWellboreCurve(wellboreCurveToAdd.getId(),
+                                                            wellboreCurveToAdd.getName(), wellboreCurveToAdd.getIvName(),
+                                                            wellboreCurveToAdd.getDvName(), wellboreCurveToAdd.getIvUnit(),
+                                                            wellboreCurveToAdd.getDvUnit(), wellId, wellboreCurveToAdd.getCurveType(),
+                                                            wellboreCurveToAdd.getWellboreId(), wellboreCurveToAdd.getWellboreType());
+                                                }
+                                                else {
+                                                    WellboreCurve wellboreCurveToAdd = wellboreVertSectionCurveMap.get(curveToAddName);
+                                                    /* Retrieve data for the curve (ie. iv and dv names) */
+                                                    jsonLoadedCurve = new LoadCurveDataTask(wellboreCurveToAdd, wellId).execute().get();
+                                                    curveJsonParser.parseIvDvNames(wellboreCurveToAdd, jsonLoadedCurve, wellboreCurveToAdd.getId(),
+                                                            curveToAddName, wellboreCurveToAdd.getCurveType());
+                                                    addedCurve = dbCommunicator.createWellboreCurve(wellboreCurveToAdd.getId(),
+                                                            wellboreCurveToAdd.getName(), wellboreCurveToAdd.getIvName(),
+                                                            wellboreCurveToAdd.getDvName(), wellboreCurveToAdd.getIvUnit(),
+                                                            wellboreCurveToAdd.getDvUnit(), wellId, wellboreCurveToAdd.getCurveType(),
+                                                            wellboreCurveToAdd.getWellboreId(), wellboreCurveToAdd.getWellboreType());
+                                                }
+                                                if(addedCurve != null) {
+                                                    curvesToAddList.add(addedCurve);
+                                                }
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             } catch (ExecutionException e) {
@@ -247,27 +278,34 @@ public class CreatePlotActivity  extends ActionBarActivity implements AsyncTaskC
         }
     }
 
-    public void onRadioButtonClicked(View view) {
-        // Is the button now checked?
-        boolean checked = ((RadioButton) view).isChecked();
-
-        // Check which radio button was clicked
-        switch(view.getId()) {
-            case R.id.radio_depth:
-                if (checked)
-
-                    break;
-            case R.id.radio_time:
-                if (checked)
-
-                    break;
-        }
-    }
-
     public void parseJsonCurveList(String jsonString) {
         curveList = curvesForWellJsonParser.parse(jsonString);
-        for (int i = 0; i < curveList.size(); i++) {
-            curveStringList.add(curveList.get(i).getName());
+        int curveListSize = curveList.size();
+        String curveName;
+        String curveType;
+        for (int i = 0; i < curveListSize; i++) {
+            Curve curveForMap = curveList.get(i);
+            curveName = curveForMap.getName();
+            curveType = curveForMap.getCurveType();
+
+            if(curveType.equals("time_curve")) {
+                timeCurveMap.put(curveName, curveForMap);
+                curveStringList.add(curveName);
+            }
+            else {
+                WellboreCurve wellboreCurveForMap = (WellboreCurve) curveList.get(i);
+                /* Assign the approprate name mappings for each wellbore type */
+                if(wellboreCurveForMap.getWellboreType().equals("Measured Depth")) {
+                    wellboreMeasuredDepthCurveMap.put(curveName, wellboreCurveForMap);
+                }
+                else if (wellboreCurveForMap.getWellboreType().equals("True Vertical Depth")) {
+                    wellboreVertDepthCurveMap.put(curveName, wellboreCurveForMap);
+                }
+                else {
+                    wellboreVertSectionCurveMap.put(curveName, wellboreCurveForMap);
+                }
+            }
+
         }
         listAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_multiple_choice, curveStringList);

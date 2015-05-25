@@ -10,11 +10,15 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseBooleanArray;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -36,16 +40,11 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
     public List<Curve> curves = new ArrayList<Curve>();
     private int rowLayout;
     public Context mContext;
+    /* Allows to remember the last item shown on screen */
+    private int lastPosition = -1;
 
-    static class CurveCardHolder {
-        TextView name;
-        TextView ivName;
-        TextView ivData;
-        TextView dvName;
-        TextView dvData;
-        TextView ivUnit;
-        TextView dvUnit;
-    }
+    /* Position of long click */
+    private int position;
 
     public CurveAdapter(List<Curve> curves, int rowLayout, Context context) {
         this.curves = curves;
@@ -60,9 +59,9 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final ViewHolder viewHolder, int i) {
         Curve curve = curves.get(i);
-
+        final int position = viewHolder.getPosition();
         viewHolder.name.setText(curve.getName());
         if(curve.getCurveType().equals("time_curve")) {
             viewHolder.ivName.setText(curve.getIvName() + " (age)");
@@ -73,6 +72,37 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
         viewHolder.dvName.setText(curve.getDvName());
         viewHolder.ivData.setText(curve.getIvValue());
         viewHolder.dvData.setText(curve.getDvValue());
+        viewHolder.curveId = curve.getId();
+
+        /* Apply animation when view is bound */
+        setAnimation(viewHolder.cardview, position);
+
+        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                setPosition(viewHolder.getPosition());
+                return false;
+            }
+        });
+    }
+    /**
+     * Here is the key method to apply the animation
+     */
+    private void setAnimation(View viewToAnimate, int position)
+    {
+        // If the bound view wasn't previously displayed on screen, it's animated
+        if (position > lastPosition)
+        {
+            Animation animation = AnimationUtils.loadAnimation(mContext, android.R.anim.slide_in_left);
+            viewToAnimate.startAnimation(animation);
+            lastPosition = position;
+        }
+    }
+
+    @Override
+    public void onViewRecycled(ViewHolder holder) {
+        holder.itemView.setOnLongClickListener(null);
+        super.onViewRecycled(holder);
     }
 
     @Override
@@ -86,15 +116,7 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
         }
     }
 
-    public void clear() {
-        curves.clear();
-    }
-
-    public void remove(int position) {
-        curves.remove(position);
-    }
-
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         TextView ivName;
         TextView ivData;
@@ -104,6 +126,7 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
         TextView dvUnit;
         CardView cardview;
         AdapterView.OnItemClickListener mItemClickListener;
+        String curveId;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -113,40 +136,27 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
             dvName = (TextView) itemView.findViewById(R.id.curveDvName);
             ivData = (TextView) itemView.findViewById(R.id.curveIvData);
             dvData = (TextView) itemView.findViewById(R.id.curveDvData);
-
-            cardview.setOnLongClickListener(this);
         }
+    }
+    public void clear() {
+        curves.clear();
+    }
 
-        @Override
-        public boolean onLongClick(View v) {
-            /*cardview.setCardBackgroundColor(Color.parseColor("#FF4D4D"));
-            new AlertDialog.Builder(mContext)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle(R.string.confirm_curve_add_title)
-                    .setMessage(R.string.confirm_curve_msg)
-                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //delete from SQLite database
-                            dialog.dismiss();
-                            CurveAdapter.this.remove(getPosition());
-                            CurveAdapter.this.notifyItemRemoved(getPosition());
-                        }
+    public void remove(int positionToRemove) {
+        curves.remove(positionToRemove);
+        this.notifyItemRemoved(positionToRemove);
+    }
 
-                    })
-                    .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+    public int getPosition() {
+        return position;
+    }
 
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            //delete from SQLite database
-                            dialog.dismiss();
-                            cardview.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
-                        }
+    public Curve getCurveFromPosition(int pos) {
+        return this.curves.get(pos);
+    }
 
-                    })
-                    .show();*/
-            return false;
-        }
+    public void setPosition(int position) {
+        this.position = position;
     }
 
    /* @Override

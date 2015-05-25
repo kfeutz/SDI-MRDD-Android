@@ -79,6 +79,14 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         setContentView(R.layout.activity_view_plot);
         myWebView = (WebView) findViewById(R.id.webview);
 
+        setPlotToDisplay();
+
+        createWebview();
+
+        addRefreshButton();
+    }
+
+    private void setPlotToDisplay() {
         /**
          * Get Plot object  from intent extras
          * This field is passed from the onClickListener in the
@@ -88,6 +96,10 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         plotName = plotToDisplay.getName();
 
         setTitle(plotName);
+    }
+
+    private void createWebview() {
+        myWebView = (WebView) findViewById(R.id.webview);
 
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
@@ -107,7 +119,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         });
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
+    }
 
+    private void addRefreshButton() {
         refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
         refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -118,6 +132,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             }
         });
         showDialog();
+
+        initialPlotLoad = true;
+        refreshPointsBtn.setEnabled(false);
     }
 
     public void showDialog() {
@@ -203,7 +220,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         Log.i("ViewPlotActivity", "Update the points next start value : " + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
         Log.i("ViewPlotActivity", "Update the points next end value : " + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
         Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(325,400," + getDvString() + ","
-                + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")");
+                        + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
+                        + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                        + "\",\"" + this.plotToDisplay.getTitle() + "\")");
 
         /* Only update plot if curve is not fully updated */
         ArrayList<String> utcIvValues = new ArrayList<String>();
@@ -218,10 +237,14 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 utcIvValues.add(i, dateInMillis.toString());
             }
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
-                    + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
+                    + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
+                    + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                    + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         } else {
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
-                    + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
+                    + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
+                    + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                    + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         }
 
         closeDialog();

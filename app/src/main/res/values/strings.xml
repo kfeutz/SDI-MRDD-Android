@@ -18,6 +18,7 @@
 
     <!--Strings for Well Dashboard Fragment-->
     <string name="refresh_dashboard_action">Refresh Dashboard</string>
+    <string name="context_delete">Delete</string>
 
     <!-- Strings for Add Curve Menu -->
     <string name="add_curve_search_hint">Search curves</string>

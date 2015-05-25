@@ -79,6 +79,8 @@ public class LoginActivity extends ActionBarActivity {
      /* Button to sign out. Currently this starts SDI authentication */
      private Button signInBtn;
 
+     private ProgressDialog pDialog;
+
      /**
       * Set view of the page to the activity login template.
       * Add listeners to sign in button and sign out button.
@@ -208,7 +210,6 @@ public class LoginActivity extends ActionBarActivity {
       * back-end service (Daniel's mock server)
       */
      private class TokenGet extends AsyncTask<String, String, JSONObject> {
-         private ProgressDialog pDialog;
          String accessCode;
 
          /**
@@ -282,7 +283,6 @@ public class LoginActivity extends ActionBarActivity {
           */
          @Override
          protected void onPostExecute(JSONObject json) {
-             pDialog.dismiss();
              if (json != null){
                  try {
                      String tok = json.getString("access_token");
@@ -364,6 +364,7 @@ public class LoginActivity extends ActionBarActivity {
 
          @Override
          protected void onPostExecute(JSONObject json) {
+             pDialog.dismiss();
              System.out.println("Post Execute");
              Toast.makeText(getApplicationContext(),"Sign in Successful", Toast.LENGTH_SHORT).show();
              Intent intent = new Intent(LoginActivity.this, WellListActivity.class);

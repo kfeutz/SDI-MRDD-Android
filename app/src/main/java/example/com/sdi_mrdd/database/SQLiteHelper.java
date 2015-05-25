@@ -36,6 +36,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CURVE_TYPE = "curveType";
     public static final String COLUMN_CURVE_IVVAL = "ivValue";
     public static final String COLUMN_CURVE_DVVAL = "dvValue";
+    public static final String COLUMN_CURVE_WELLBORE_ID = "wellboreId";
+    public static final String COLUMN_CURVE_WELLBORE_TYPE = "wellboreType";
 
     /* Columns for Plots Table */
     public static final String COLUMN_PLOT_KEY = "_id";
@@ -65,7 +67,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + " text not null, "+ COLUMN_WELL_DASH
             + " text not null, " + COLUMN_CURVE_TYPE
             + " text not null, " + COLUMN_CURVE_IVVAL
-            + ", " + COLUMN_CURVE_DVVAL  + ", "
+            + " text, " + COLUMN_CURVE_DVVAL
+            + " text, " + COLUMN_CURVE_WELLBORE_ID
+            + " text, " + COLUMN_CURVE_WELLBORE_TYPE + " text, "
             + "UNIQUE (" + COLUMN_CURVE_ID + ", " + COLUMN_WELL_DASH + ")" + " ON CONFLICT REPLACE);";
 
     /* Create table statement for Plots table */

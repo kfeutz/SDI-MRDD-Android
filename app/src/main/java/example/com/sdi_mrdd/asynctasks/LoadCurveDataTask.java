@@ -19,6 +19,7 @@ import example.com.sdi_mrdd.R;
 import example.com.sdi_mrdd.dataitems.ApiUrl;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveValueParser;
+import example.com.sdi_mrdd.dataitems.WellboreCurve;
 
 /**
  * Created by Kevin on 4/26/2015.
@@ -39,22 +40,24 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
     /* Start value for REST call, typically user will specifiy this but their API is acting weird */
     private final long STARTLDAPTIME = 120737630793553000L;
 
-    public LoadCurveDataTask(String curveId, String wellId, String curveType) {
-        this.curveId = curveId;
+    public LoadCurveDataTask(Curve curveToChange, String wellId) {
+        this.curveId = curveToChange.getId();
         this.wellId = wellId;
+
         /* Converting current Unix epoch time to LDAP time format */
         this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
 
         /* Make time curve call */
-        if(curveType.equals("time_curve")) {
+        if(curveToChange.getCurveType().equals("time_curve")) {
             server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
-                    + this.wellId + "&curve=" + this.curveId
-                    + "&start=" + STARTLDAPTIME + "&end=" + currentTimeLdap;
+                    + this.wellId + "&curve=" + this.curveId;
+                    /*+ "&start=" + STARTLDAPTIME + "&end=" + currentTimeLdap;*/
         }
         /* Make wellbore curve call */
         else {
             server = ApiUrl.BASEURL + "/v2/getWellboreCurveFromCurveId?well="
-                    + this.wellId + "&curve=" + this.curveId;
+                    + this.wellId + "&curve=" + this.curveId + "&wellbore="
+                    + ((WellboreCurve) curveToChange).getWellboreId();
         }
         request  = new HttpGet(server);
     }
@@ -87,7 +90,7 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-        Log.i("", "Result after getCurveFromCurveId GET: " + result);
+        Log.i("", "Result after getCurveFromCurveId GET " + server + ": " + result);
     }
 }
 

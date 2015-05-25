@@ -15,16 +15,22 @@ public class WellboreCurve extends Curve {
 
     private String ivValue;
     private String dvValue;
+    private String wellboreId;
+    private String wellboreType;
+
     /**
      * Creates a new WellboreCurve
      *
      * @param id    The id to give to the WellboreCurve
      * @param name  The name to give to the WellboreCurve
      */
-    public WellboreCurve(String id, String name, String ivName, String dvName, String ivUnit, String dvUnit) {
+    public WellboreCurve(String id, String name, String ivName, String dvName, String ivUnit,
+                         String dvUnit, String wellboreId, String wellboreType) {
         super(id, name, ivName, dvName, ivUnit, dvUnit);
         this.ivValue = "0";
         this.dvValue = "0";
+        this.wellboreId = wellboreId;
+        this.wellboreType = wellboreType;
     }
 
     /**
@@ -60,6 +66,22 @@ public class WellboreCurve extends Curve {
     }
 
     public void setDvValue(String dvValue) { this.dvValue = dvValue; }
+
+    public String getWellboreId() {
+        return wellboreId;
+    }
+
+    public void setWellboreId(String wellboreId) {
+        this.wellboreId = wellboreId;
+    }
+
+    public String getWellboreType() {
+        return wellboreType;
+    }
+
+    public void setWellboreType(String wellboreType) {
+        this.wellboreType = wellboreType;
+    }
 
     public String getDvValue() {
         if(this.dvValue == null) {

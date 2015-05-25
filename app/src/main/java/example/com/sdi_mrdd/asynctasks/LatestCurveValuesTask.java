@@ -20,6 +20,7 @@ import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.dataitems.ApiUrl;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveValueParser;
+import example.com.sdi_mrdd.dataitems.WellboreCurve;
 
 /**
  * Created by Kevin on 4/26/2015.
@@ -62,7 +63,8 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
         /* Make wellbore curve call */
         else {
             server = ApiUrl.BASEURL + "/v2/getWellboreCurveFromCurveId?well="
-                    + this.wellId + "&curve=" + this.curveId;
+                    + this.wellId + "&curve=" + this.curveId + "&wellbore="
+                    + ((WellboreCurve) curveToUpdate).getWellboreId();
         }
 
         request  = new HttpGet(server);

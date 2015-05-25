@@ -1,5 +1,7 @@
 package example.com.sdi_mrdd.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -82,7 +84,7 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
     private RecyclerView curvesListView;
 
     /* Database communicator to talk to our SQLite database */
-    private DatabaseCommunicator dbCommunicator;
+    DatabaseCommunicator dbCommunicator;
 
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
 
@@ -134,6 +136,8 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
         /* Initializes the array adapter to display on the page */
         listAdapter = new CurveAdapter(curveList, R.layout.well_dash_board_card, this.getActivity());
         curvesListView.setAdapter(listAdapter);
+        /* Register each card to prompt context menu on long click */
+        registerForContextMenu(curvesListView);
 
         return rootView;
     }
@@ -204,6 +208,43 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
                 listAdapter.addAll(curveList);
                 listAdapter.notifyDataSetChanged();
             }
+        }
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info
+                = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        final int position = listAdapter.getPosition();
+        switch (item.getItemId()) {
+            case R.id.context_delete:
+                new AlertDialog.Builder(getActivity())
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .setTitle(R.string.confirm_curve_add_title)
+                        .setMessage(R.string.confirm_curve_msg)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //delete from SQLite database
+                                dialog.dismiss();
+                                dbCommunicator.deleteCurveFromDashboard(
+                                        listAdapter.getCurveFromPosition(position).getId(),
+                                        ((WellDashBoardActivity) getActivity()).getWellId());
+                                listAdapter.remove(position);
+                            }
+
+                        })
+                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+
+                        })
+                        .show();
+                return true;
+            default:
+                return super.onContextItemSelected(item);
         }
     }
 

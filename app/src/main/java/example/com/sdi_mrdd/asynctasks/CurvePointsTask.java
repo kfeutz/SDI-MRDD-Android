@@ -23,6 +23,7 @@ import example.com.sdi_mrdd.dataitems.ApiUrl;
 import example.com.sdi_mrdd.dataitems.Curve;
 import example.com.sdi_mrdd.dataitems.CurveValueParser;
 import example.com.sdi_mrdd.dataitems.Plot;
+import example.com.sdi_mrdd.dataitems.WellboreCurve;
 
 /**
  * Created by Kevin on 4/26/2015.
@@ -63,7 +64,8 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
         /* Make wellbore curve call */
         else {
             server = ApiUrl.BASEURL + "/v2/getWellboreCurveFromCurveId?well="
-                    + this.wellId + "&curve=" + this.curveId;
+                    + this.wellId + "&curve=" + this.curveId + "&wellbore="
+                    + ((WellboreCurve) curveToChange).getWellboreId();
         }
         if(!curveToChange.getNextStartUnit().equals("0") && !curveToChange.getNextEndUnit().equals("0")) {
             server += "&start=" + curveToChange.getNextStartUnit() + "&end=" + curveToChange.getNextEndUnit();

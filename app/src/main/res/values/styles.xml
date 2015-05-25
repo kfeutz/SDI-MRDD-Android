@@ -13,5 +13,7 @@
 
     <color name="sdi_white">#FCFAFA</color>
     <color name="sdi_grey">#636B61</color>
+    <color name="sdi_black">#222222</color>
+    <color name="sdi_light_grey">#B2B2B2</color>
 
 </resources>
