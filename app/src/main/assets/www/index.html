@@ -66,6 +66,8 @@ var xmin;
 var xAxis;
 var yAxis;
 var zoom;
+var insertLinebreaks;
+var clip;
 
 function setTitle(title) {
     console.log("attempting to set title " + title);
@@ -77,19 +79,15 @@ function setTitle(title) {
 
 function InitChart(screenWidth, screenHeight, dv, iv, dvName, ivName, plotTitle) {
 
-/*var data = [{"item":4,"diameter":"30.00","point":"8.00"},{"item":2,"diameter":"25.00","point":"2.00"},
-{"item":7,"diameter":"20.00","point":"2.00"},{"item":9,"diameter":"15.00","point":"10.00"},
-{"item":4,"diameter":"5.00","point":"8.00"},{"item":5,"diameter":"0.00","point":"2.00"},
-{"item":6,"diameter":"-5.00","point":"2.00"},{"item":5,"diameter":"-10.00","point":"4.00"},
-{"item":4,"diameter":"-15.00","point":"1.00"},{"item":5,"diameter":"-20.00","point":"3.00"},
-{"item":4,"diameter":"-25.00","point":"5.00"},{"item":3,"diameter":"-30.00","point":"6.00"},
-];*/
-function line_chart(field,el) {
-    setTitle(plotTitle);
+var field = 'y';
+var el = '#area';
+
+setTitle(plotTitle);
+
 margin = {
-top: 45,
-right: 20,
-bottom: 20
+    top: 45,
+    right: 20,
+    bottom: 20
 };
 
 /* Larger margin for time curves y-axis */
@@ -106,7 +104,6 @@ if(data.length > 5000) {
         data.shift();
     }
 }
-
 
 for (var i = 0; i < dv.length; i++) {
     data.push({'x': dv[i], 'y': iv[i]});
@@ -159,6 +156,7 @@ y = d3.scale.linear()
 .range([height, 0]);
 
 line = d3.svg.line()
+    .interpolate("basis")
     .x(function (d) {
         return x(d.x); //x(d.item);
     })
@@ -224,7 +222,6 @@ if(ivName == "Time") {
             });
 }
 else {
-    console.log("depth plot " + ivName);
     yAxis = d3.svg.axis()
         .scale(y)
         .orient("left")
@@ -248,7 +245,7 @@ svg.append("g")
     .tickSize(-width, 0, 0)
     .tickFormat(""));
 
-var insertLinebreaks = function (d) {
+insertLinebreaks = function (d) {
     var el = d3.select(this);
     var words=d3.select(this).text().split(' ');
     el.text('');
@@ -261,7 +258,7 @@ var insertLinebreaks = function (d) {
 
 svg.selectAll(".y.axis g text").each(insertLinebreaks);
 
-var clip = svg.append("svg:clipPath")
+clip = svg.append("svg:clipPath")
     .attr("id", "clip")
     .append("svg:rect")
     .attr("x", 0)
@@ -272,15 +269,11 @@ var clip = svg.append("svg:clipPath")
 chartBody = svg.append("g")
     .attr("clip-path", "url(#clip)");
 
-/*chartBody.append("svg:path")
-    .datum(data)
-    .attr("class", "line")
-    .attr("d", line);*/
-
 chartBody.append("svg:path")
     .data([data])
     .attr("class", "line")
     .attr("d", line);
+}
 
 function zoomed() {
     //console.log(d3.event.translate);
@@ -302,9 +295,6 @@ function zoomed() {
     svg.selectAll("dot").attr();
         console.log("Y axis is: " + y.domain());
         console.log("Y max is: " + ymax);
-}
-}
-line_chart('y','#area');
 }
 
 var make_x_axis = function () {
@@ -333,17 +323,7 @@ function updateXaxis() {
     svg.selectAll("dot").attr();
 }
 
-function update(dvVals, ivVals) {
-    var minY;
-    for (var i = 0; i < dvVals.length; i++) {
-        if(i == 0) {
-            minY = ivVals[0]
-        }
-        else if (minY > ivVals[i]) {
-            minY = ivVals[i] + 1;
-        }
-        data.push({'x': dvVals[i], 'y': ivVals[i]});
-    }
+function resetDomainRanges() {
     /*Only scale the x axis */
     xmax = d3.max(data,function(d){
         return d.x + 1;
@@ -353,19 +333,49 @@ function update(dvVals, ivVals) {
         return d.x - 1;
     });
 
-    ymax = d3.max(data, function(d) {
-        return d.y + 1;
-    });
-
-    console.log("Min and Max: " + xmin + " " + xmax + " y: " + minY + " " + ymax);
-    console.log("Current number of points: " + data.length);
-
     x.domain([xmin,xmax]);
-    y.domain([ymax,minY]);
+}
 
-    chartBody.selectAll("path").data([data])
-        .attr("d", line);
-    updateXaxis();
+function updateAppendValues(dvVals, ivVals, maxPoints) {
+    var startDataPos = data.length;
+    var tooManyPoints = false;
+    console.log("Data before shift is " + startDataPos);
+    console.log("Dv length before shift is " + dvVals.length);
+    if(data.length >= maxPoints) {
+        tooManyPoints = true;
+    }
+    for (var i = startDataPos; i < dvVals.length; i++) {
+        if(tooManyPoints) {
+            data.shift();
+        }
+        data.push({'x': dvVals[i], 'y': ivVals[i]});
+    }
+
+    resetDomainRanges();
+    var updateTransition = svg.transition().duration(750);
+    updateTransition.select(".x.axis").call(xAxis);
+    updateTransition.select(".line").attr("d", line(data));
+}
+
+function updatePrependValues(dvVals, ivVals, maxPoints) {
+    /* End position to copy is interval length */
+    var endDataPos = (dvVals.length - data.length);
+    var tooManyPoints = false;
+    var tempData = [];
+    if(data.length >= maxPoints) {
+        tooManyPoints = true;
+    }
+    for (var i = 0; i < endDataPos; i++) {
+        if(tooManyPoints) {
+            data.pop();
+        }
+        data.unshift({'x': dvVals[(endDataPos-1)-i], 'y': ivVals[(endDataPos-1)-i]});
+    }
+    resetDomainRanges();
+    var updateAxisTransition = svg.transition().duration(750);
+    var updateTransition = svg.transition().duration(750);
+    updateTransition.select(".x.axis").call(xAxis);
+    updateTransition.select(".line").attr("d", line(data));
 }
 </script>
 </body>

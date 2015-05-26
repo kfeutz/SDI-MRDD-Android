@@ -252,7 +252,9 @@ public class AddCurveActivity extends ActionBarActivity implements AsyncTaskComp
 
             if(curveType.equals("time_curve")) {
                 timeCurveMap.put(curveName, curveForMap);
-                curveStringList.add(curveName);
+                if(!curveStringList.contains(curveName)) {
+                    curveStringList.add(curveName);
+                }
             }
             else {
                 WellboreCurve wellboreCurveForMap = (WellboreCurve) curveList.get(i);

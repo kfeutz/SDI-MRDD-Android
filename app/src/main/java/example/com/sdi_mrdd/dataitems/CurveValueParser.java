@@ -115,7 +115,7 @@ public class CurveValueParser {
     }
 
     /* Return true if all of the curve's data has been returned */
-    public boolean parseIvDvValues(Curve curveToChange, String jsonString) {
+    public boolean parseIvDvValues(Curve curveToChange, String jsonString, boolean prependValues) {
         JsonReader jsonReader = new JsonReader(new StringReader(jsonString));
         ArrayList<String> ivValues = new ArrayList<>();
         ArrayList<String> dvValues = new ArrayList<>();
@@ -143,15 +143,22 @@ public class CurveValueParser {
             else {
                 jsonReader.beginObject();
                 oldNextStartUnit = curveToChange.getNextStartUnit();
+                String startIv = null;
+                String endIv = null;
                 while (jsonReader.hasNext()) {
                     String token = jsonReader.nextName();
                     /* Grab curve id field */
                     if (token.equals("startIV")) {
-                        curveToChange.setNextStartUnit(jsonReader.nextString());
+                        startIv = jsonReader.nextString();
+                        curveToChange.setNextStartUnit(startIv);
                     }
                     else if (token.equals("oldIV")) {
-                        curveToChange.setNextEndUnit(jsonReader.nextString());
+                        endIv = jsonReader.nextString();
+                        curveToChange.setNextEndUnit(endIv);
                     }
+                }
+                if(startIv != null && endIv != null) {
+                    curveToChange.addToStartEndMap(startIv, endIv);
                 }
                 jsonReader.endObject();
             }
@@ -164,7 +171,7 @@ public class CurveValueParser {
             Log.e(TAG, "Failed to parse curves\n" + Log.getStackTraceString(e));
         }
         /* End of points in SDI database */
-        if (curveToChange.getNextStartUnit().equals(oldNextStartUnit)) {
+        if (curveToChange.getNextStartUnit().equals(oldNextStartUnit) && !prependValues) {
             /* If the curve only returns one set of points then we need to add
              * the points to the curve
              */
@@ -175,8 +182,12 @@ public class CurveValueParser {
             return true;
         }
         else {
-            curveToChange.setIvValues(ivValues);
-            curveToChange.setDvValues(dvValues);
+            if (prependValues) {
+                curveToChange.prependIvDvValues(ivValues, dvValues);
+            }
+            else {
+                curveToChange.appendIvDvValues(ivValues, dvValues);
+            }
         }
         return false;
     }

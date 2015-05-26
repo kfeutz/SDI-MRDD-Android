@@ -41,7 +41,7 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
     long currentTimeLdap;
     Curve curveToChange;
-    AsyncTaskCompleteListener<Boolean> activity;
+    AsyncTaskCompleteListener<String> activity;
 
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
@@ -49,7 +49,7 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     /* Start value for REST call, typically user will specifiy this but their API is acting weird */
     private final long STARTLDAPTIME = 120737630793553000L;
 
-    public CurvePointsTask (AsyncTaskCompleteListener<Boolean> activity, Plot thePlot) {
+    public CurvePointsTask (AsyncTaskCompleteListener<String> activity, Plot thePlot) {
         this.activity = activity;
         this.wellId = thePlot.getWellId();
         this.curveToChange = thePlot.getCurves().get(0);
@@ -67,8 +67,28 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
                     + this.wellId + "&curve=" + this.curveId + "&wellbore="
                     + ((WellboreCurve) curveToChange).getWellboreId();
         }
-        if(!curveToChange.getNextStartUnit().equals("0") && !curveToChange.getNextEndUnit().equals("0")) {
-            server += "&start=" + curveToChange.getNextStartUnit() + "&end=" + curveToChange.getNextEndUnit();
+    }
+
+    public CurvePointsTask (AsyncTaskCompleteListener<String> activity, Plot thePlot,
+                            String startIv, String endIv) {
+        this.activity = activity;
+        this.wellId = thePlot.getWellId();
+        this.curveToChange = thePlot.getCurves().get(0);
+        this.curveId = curveToChange.getId();
+        /* Converting current Unix epoch time to LDAP time format */
+        this.currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
+        /* Make time curve call */
+        if(curveToChange.getCurveType().equals("time_curve")) {
+            server = ApiUrl.BASEURL + "/v2/getCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId
+                    + "&start=" + startIv + "&end=" + endIv;
+        }
+        /* Make wellbore curve call */
+        else {
+            server = ApiUrl.BASEURL + "/v2/getWellboreCurveFromCurveId?well="
+                    + this.wellId + "&curve=" + this.curveId + "&wellbore="
+                    + ((WellboreCurve) curveToChange).getWellboreId()
+                    + "&start=" + startIv + "&end=" + endIv;
         }
     }
 
@@ -94,6 +114,7 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
         HttpEntity entity;
 
         try {
+            Log.i("CurvePointsTask", "GET URL for retrieving curve points: " + this.server);
             response = client.execute(request);
             entity = response.getEntity();
 
@@ -125,8 +146,7 @@ public class CurvePointsTask extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         Log.i("ViewPlotActivity", "GET " + server + " call result: " + result);
-        this.activity.onTaskComplete(CurveValueParser.getInstance()
-                .parseIvDvValues(curveToChange, result));
+        this.activity.onTaskComplete(result);
     }
 
     public List<Double> getDvList() {

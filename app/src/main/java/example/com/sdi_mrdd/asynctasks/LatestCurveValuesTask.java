@@ -37,7 +37,7 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
     private CurveValueParser curveValueParser = CurveValueParser.getInstance();
     /* Database communicator to talk to our SQLite database */
     private DatabaseCommunicator dbCommunicator;
-    AsyncTaskCompleteListener<String> activity;
+    AsyncTaskCompleteListener<Curve> activity;
 
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
@@ -45,7 +45,7 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
     /* Start value for REST call, typically user will specifiy this but their API is acting weird */
     private final long STARTLDAPTIME = 120737630793553000L;
 
-    public LatestCurveValuesTask(AsyncTaskCompleteListener<String> activity,
+    public LatestCurveValuesTask(AsyncTaskCompleteListener<Curve> activity,
                                  Curve curveToUpdate, String wellId, DatabaseCommunicator dbCommunicator) {
         this.activity = activity;
         this.curveToUpdate = curveToUpdate;
@@ -147,6 +147,6 @@ public class LatestCurveValuesTask extends AsyncTask<String, Void, Map> {
         }
         dbCommunicator.updateCurveValues(curveToUpdate.getId(),
                 newValueMap.get("ivValue"), newValueMap.get("dvValue"));
-        activity.onTaskComplete("");
+        activity.onTaskComplete(curveToUpdate);
     }
 }

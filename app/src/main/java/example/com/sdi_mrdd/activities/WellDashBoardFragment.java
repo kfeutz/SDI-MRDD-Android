@@ -61,7 +61,7 @@ import example.com.sdi_mrdd.dataitems.Well;
  *
  * Created by Kevin on 2/28/2015.
  */
-public class WellDashBoardFragment extends Fragment implements AsyncTaskCompleteListener<String> {
+public class WellDashBoardFragment extends Fragment implements AsyncTaskCompleteListener<Curve> {
     /* Result tag used to check the result of adding a curve */
     private static final int RESULT_OK = -1;
 
@@ -299,7 +299,8 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
     }
 
     @Override
-    public void onTaskComplete(String result) {
+    public void onTaskComplete(Curve result) {
+
         listAdapter.notifyDataSetChanged();
     }
 }
