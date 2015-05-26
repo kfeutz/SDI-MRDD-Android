@@ -87,8 +87,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         createWebview();
 
         addRefreshButton();
-
-        new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
     }
 
     private void setPlotToDisplay() {
@@ -106,13 +104,6 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     private void createWebview() {
         myWebView = (WebView) findViewById(R.id.webview);
 
-        //Opens in-app instead of in browser
-        myWebView.setWebViewClient(new WebViewClient() {
-            public void onPageFinished(WebView view, String url) {
-                //myWebView.loadUrl("javascript:InitChart(350,400,"+ curvePoints.getDvString()+","
-                //      +curvePoints.getIvString()+",\""+curvePoints.getCurve().getDvName()+"\",\""+curvePoints.getCurve().getIvName()+"\")");
-            }
-        });
         myWebView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 
         //Enable javascript
@@ -122,11 +113,11 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         webSettings.setDomStorageEnabled(true);
 
         myWebView.setWebViewClient(new WebViewClient(){
-            public void onPageStarted(WebView view, String url, Bitmap favicon){
-                //show progress indicator
-            }
-
+            /* Wait for html to load all javascript before calling getting points and initiating chart */
             public void onPageFinished(WebView view, String url){
+                initialPlotLoad = true;
+                refreshPointsBtn.setEnabled(false);
+                new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
             }
         });
 
@@ -232,7 +223,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         Log.i("ViewPlotActivity", "Update the points next start value : " + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
         Log.i("ViewPlotActivity", "Update the points next end value : " + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
         Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(325,400," + getDvString() + ","
-                + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")");
+                        + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
+                        + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                        + "\",\"" + this.plotToDisplay.getTitle() + "\")");
 
         /* Only update plot if curve is not fully updated */
         ArrayList<String> utcIvValues = new ArrayList<String>();
@@ -249,10 +242,14 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 Log.i("ViewPlotActivity", "LDAP " + i + " : " + ivValue.toString());
             }
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
-                    + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
+                    + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
+                    + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                    + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         } else {
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
-                    + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
+                    + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
+                    + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                    + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         }
         Log.i("ViewPlotActivity", "dvs: " + getDvString());
 

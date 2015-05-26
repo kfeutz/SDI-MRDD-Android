@@ -92,7 +92,7 @@ public class CurveValueParser {
             jsonReader.endArray();
             /* Map ranges do not exist*/
             jsonReader.skipValue();
-            /* Skip array of iv and dv names */
+            /* Skip array of iv and dv names if they exist*/
             jsonReader.skipValue();
 
             jsonReader.endArray();

@@ -46,7 +46,7 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
         ArrayList<Curve> curves = new ArrayList<>();
         ArrayList<String> wellBoreTitles = new ArrayList<>();
         ArrayList<String> timeCurveTitles = new ArrayList<>();
-        Map<String, String> singleCurve = new HashMap<>();
+        Curve singleCurve;
 
         try {
             jsonReader.beginObject();
@@ -60,15 +60,10 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
                     while (jsonReader.hasNext()) {
                          /*Pass each json object to retrieve a curve object */
                         singleCurve = readJsonCurve(jsonReader, "wellbore_curves");
-                        for(String curveName : singleCurve.keySet()) {
-                            /* Only add curve if it hasn't been seen yet */
-                            if(!wellBoreTitles.contains(singleCurve.get(curveName))) {
-                                wellBoreTitles.add(singleCurve.get(curveName));
-                                curves.add(new WellboreCurve(singleCurve.get(curveName), curveName,
-                                        "", "", "", ""));
-                            }
+                        /* Add wellbore curve to list if it was read properly */
+                        if(singleCurve != null) {
+                            curves.add(singleCurve);
                         }
-
                     }
                     jsonReader.endArray();
                 }
@@ -78,15 +73,11 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
                     jsonReader.beginArray();
                     /*Loop through each curve in the json array */
                     while (jsonReader.hasNext()) {
-                        /* Pass each json object to retrieve a curve object */
+                         /*Pass each json object to retrieve a curve object */
                         singleCurve = readJsonCurve(jsonReader, "time_curves");
-                        for(String curveName : singleCurve.keySet()) {
-                            /* Only add curve if it hasn't been seen yet */
-                            if(!timeCurveTitles.contains(singleCurve.get(curveName))) {
-                                timeCurveTitles.add(singleCurve.get(curveName));
-                                curves.add(new TimeCurve(singleCurve.get(curveName), curveName,
-                                        "", "", "", ""));
-                            }
+                        /* Add wellbore curve to list if it was read properly */
+                        if(singleCurve != null) {
+                            curves.add(singleCurve);
                         }
                     }
                     jsonReader.endArray();
@@ -114,10 +105,11 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
      * @return  Curve       Java object representation of the passed Curve Json object
      * @throws IOException  Thrown if error when reading json object
      */
-    private Map<String, String> readJsonCurve(JsonReader reader, String curveType) throws IOException, JSONException {
+    private Curve readJsonCurve(JsonReader reader, String curveType) throws IOException, JSONException {
         String curveId = null;
         String name = null;
-        Map<String, String> curveMap = new HashMap<String, String>();
+        String wellboreId = null;
+        String wellboreType = null;
 
         reader.beginObject();
         /* Loop for entire curve object */
@@ -131,6 +123,14 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
             else if (token.equals("name")) {
                 name = reader.nextString();
             }
+            /* Grab wellbore id field */
+            else if (token.equals("wellbore")) {
+                wellboreId = reader.nextString();
+            }
+            /* Grab wellbore type field */
+            else if (token.equals("type")) {
+                wellboreType = reader.nextString();
+            }
             /* Grab curve iv_name field */
             else {
                 reader.skipValue();
@@ -139,12 +139,11 @@ public class CurvesForWellJsonParser /*implements Parser<Curve>*/ {
         reader.endObject();
         /* Create WellboreCurves and TimeCurves respectively */
         if (curveType.equals("wellbore_curves")) {
-            curveMap.put(name, curveId);
-            return curveMap;
+            return new WellboreCurve(curveId, name, wellboreType, "", "", "", wellboreId, wellboreType);
         }
         else if (curveType.equals("time_curves")) {
-            curveMap.put(name, curveId);
-            return curveMap;
+            return new TimeCurve(curveId, name,
+                    "", "", "", "");
         }
         else {
             return null;

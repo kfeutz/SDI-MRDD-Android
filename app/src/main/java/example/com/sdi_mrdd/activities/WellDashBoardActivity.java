@@ -5,6 +5,9 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
+import android.view.View;
 
 import example.com.sdi_mrdd.database.DatabaseCommunicator;
 import example.com.sdi_mrdd.R;
@@ -36,7 +39,6 @@ public class WellDashBoardActivity extends ActionBarActivity implements
 
     /* Communicator to our database */
     private DatabaseCommunicator dbCommunicator;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,6 +103,14 @@ public class WellDashBoardActivity extends ActionBarActivity implements
     protected void onStop() {
         super.onStop();
         dbCommunicator.close();
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.context_delete_menu, menu);
     }
 
     /**

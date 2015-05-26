@@ -14,6 +14,7 @@ public class Plot implements Parcelable {
     private int id;
     private String wellId;
     private String name;
+    private String title;
 
     public Plot (int id, String name, String wellId) {
         this.curves = new ArrayList<Curve>();
@@ -27,6 +28,8 @@ public class Plot implements Parcelable {
         this.id = id;
         this.name = name;
         this.wellId = wellId;
+        /* Plot title is the plot's curve's iv and dv names */
+        this.title = this.curves.get(0).getName() + " Vs. " + this.curves.get(0).getIvName();
     }
 
     /**
@@ -41,14 +44,25 @@ public class Plot implements Parcelable {
         this.id = in.readInt();
         this.name = in.readString();
         this.wellId = in.readString();
+        /* Plot title is the plot's curve's iv and dv names */
+        this.title = this.curves.get(0).getName() + " Vs. " + this.curves.get(0).getIvName();
     }
 
     public List<Curve> getCurves() {
         return curves;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public void setCurves(List<Curve> curves) {
         this.curves = curves;
+        setTitle(this.curves.get(0).getName() + " Vs. " + this.curves.get(0).getIvName());
     }
 
     public void setCurve(int index, Curve curve) {

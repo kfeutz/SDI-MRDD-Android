@@ -40,6 +40,10 @@ public abstract class Curve implements Parcelable {
 
     private String dvValue;
 
+    private String wellboreType;
+
+    private String wellboreId;
+
     /* The number of units. Set default to 0 */
     private double units = 0;
 

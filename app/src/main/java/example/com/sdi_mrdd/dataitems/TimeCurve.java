@@ -29,7 +29,6 @@ public class TimeCurve extends Curve {
      */
     public TimeCurve(String id, String name, String ivName, String dvName, String ivUnit, String dvUnit) {
         super(id, name, ivName, dvName, ivUnit, dvUnit);
-        this.ivValue = "0";
     }
 
     /**
@@ -48,7 +47,7 @@ public class TimeCurve extends Curve {
 
     public String getIvValue() {
         long milisecondsFromEpoch;
-        /* Converting current Unix epoch time to LDAP time format */
+        /* Converting current Unix epoch time to LDAP time format*/
         long currentTimeLdap = (System.currentTimeMillis() * 10000) + NANOSECONDSBETWEENEPOCHS;
         double timeDifSecs;
         long timeDifNanos;
