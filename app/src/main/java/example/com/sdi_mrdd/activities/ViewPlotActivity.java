@@ -3,6 +3,7 @@ package example.com.sdi_mrdd.activities;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -78,6 +80,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_plot);
         myWebView = (WebView) findViewById(R.id.webview);
+        myWebView.addJavascriptInterface(new WebAppInterface(this), "Android");
 
         setPlotToDisplay();
 
@@ -242,6 +245,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 ivValue = Long.parseLong(ivCurves.get(i));
                 dateInMillis = (ivValue - 116444736000000000L) / 10000;
                 utcIvValues.add(i, dateInMillis.toString());
+                Log.i("ViewPlotActivity", "Epoch " + i + " : " + dateInMillis.toString());
+                Log.i("ViewPlotActivity", "LDAP " + i + " : " + ivValue.toString());
             }
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
@@ -249,6 +254,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName() + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName() + "\")";
         }
+        Log.i("ViewPlotActivity", "dvs: " + getDvString());
 
         closeDialog();
         /* Check if curve has gotten all points from server */
@@ -262,5 +268,29 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         }
         initialPlotLoad = false;
         refreshPointsBtn.setEnabled(true);
+    }
+
+    //Class to be injected in Web page
+    public class WebAppInterface {
+        ViewPlotActivity activity;
+
+        /** Instantiate the interface and set the context */
+        WebAppInterface(ViewPlotActivity a) {
+            activity = a;
+        }
+
+        /**
+         * Show Toast Message
+         * @param toast
+         */
+        @JavascriptInterface
+        public void showToast(String toast) {
+            Toast.makeText(activity, toast, Toast.LENGTH_SHORT).show();
+        }
+
+        @JavascriptInterface
+        public void updatePlot() {
+            activity.onTaskComplete(false);
+        }
     }
 }

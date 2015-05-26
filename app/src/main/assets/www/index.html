@@ -491,6 +491,14 @@ function zoomed() {
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
+function showAndroidToast(toastmsg) {
+        window.Android.showToast(toastmsg);
+    }
+
+    function updatePlot() {
+        window.Android.updatePlot();
+    }
+
 function clear_chart() {
     d3.select("#area").select("svg").remove();
 }
@@ -734,6 +742,19 @@ function zoomed() {
     .attr("class", "line")
     .attr("d", line);
     svg.selectAll("dot").attr();
+
+    console.log("y domain: " + y.domain());
+    console.log("y x: " + y.domain()[0]);
+    console.log("y y: " + y.domain()[1]);
+    console.log("ymax: " + ymax);
+    console.log("ymin: " + ymin);
+
+    if ((y.domain()[0] + y.domain()[1]) / 2 > ymax) {
+        console.log("Update!!");
+        //showAndroidToast("UPDATE!!");
+        updatePlot();
+    }
+
 }
 }
 line_chart('y','#area')
