@@ -53,8 +53,11 @@ function showAndroidToast(toastmsg) {
         window.Android.showToast(toastmsg);
     }
 
-    function updatePlot() {
-        window.Android.updatePlot();
+    function appendPlot() {
+        window.Android.appendPlot();
+    }
+    function prependPlot() {
+        window.Android.prependPlot();
     }
 
 function clear_chart() {
@@ -139,7 +142,7 @@ this.setData = function (dv, iv) {
 }
 
 width = window.innerWidth - 10 - margin.left - margin.right; //screenWidth
-height = window.innerHeight - 20 - margin.top - margin.bottom; //screenHeight
+height = window.innerHeight - 50 - margin.top - margin.bottom; //screenHeight
 
 /*ymax = d3.max(data,function(d){
     return (parseInt(d[field])+1);
@@ -308,10 +311,13 @@ function zoomed() {
     console.log("ymax: " + ymax);
     console.log("ymin: " + ymin);
 
-    if ((y.domain()[0] + y.domain()[1]) / 2 > ymax) {
-        console.log("Update!!");
-        //showAndroidToast("UPDATE!!");
-        updatePlot();
+    if (((y.domain()[0] - y.domain()[1]) * .85) + y.domain()[1] > ymax) {
+        console.log("Update!! Append");
+        appendPlot();
+    }
+    else if (((y.domain()[0] - y.domain()[1]) * .15) + y.domain()[1] < ymin) {
+        console.log("Update!! Prepend");
+        prependPlot();
     }
 }
 
@@ -352,6 +358,25 @@ function resetDomainRanges() {
     });
 
     x.domain([xmin,xmax]);
+
+    //Does not scale y axis
+    //Does update the min and max for scrolling purposes
+    for (var i = 0; i < data.length; i++) {
+        if(i == 0) {
+            ymin = data[i].y;
+            ymax = data[i].y;
+        }
+        else {
+            if (ymin > data[i].y) {
+                ymin = data[i].y + 1;
+            }
+            if (ymax < data[i].y) {
+                ymax = data[i].y;
+            }
+        }
+    }
+    console.log("new ymax: " + ymax);
+    console.log("new ymin: " + ymin);
 }
 
 function updateAppendValues(dvVals, ivVals, maxPoints) {

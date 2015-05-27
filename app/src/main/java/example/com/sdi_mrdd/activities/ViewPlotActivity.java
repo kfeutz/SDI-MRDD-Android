@@ -447,8 +447,13 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         }
 
         @JavascriptInterface
-        public void updatePlot() {
+        public void appendPlot() {
             activity.updateLargerIv();
+        }
+
+        @JavascriptInterface
+        public void prependPlot() {
+            activity.updateSmallerIv();
         }
     }
 }
