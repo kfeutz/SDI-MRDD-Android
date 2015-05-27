@@ -7,6 +7,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Random;
 
 /**
@@ -55,8 +56,18 @@ public abstract class Curve implements Parcelable {
 
     private ArrayList<String> ivValues = new ArrayList<>();
 
+    private ArrayList<HashMap<String, String>> startEndIvValues = new ArrayList<>();
+
+    private int plotStartIndexForMap = 0;
+    private int plotEndIndexForMap = 1;
+
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
+
+    final public int MAX_POINTS_FOR_PLOT = 5000;
+
+    /* Size of each point interval, based on first api result */
+    public int intervalSize = 0;
 
     /**
      * Constructor to create a Curve
@@ -83,19 +94,183 @@ public abstract class Curve implements Parcelable {
         return ivValues;
     }
 
+    public void addToStartEndMap(String startIv, String endIv) {
+        HashMap<String, String> ivMap = new HashMap<>();
+        boolean containsMapping = false;
+
+        /* Initial point set start and end times are blank for api calls */
+        if(this.startEndIvValues.size() == 0) {
+            HashMap<String, String> initialHashMap = new HashMap<>();
+            initialHashMap.put("startIv", "");
+            initialHashMap.put("endIv", "");
+            this.startEndIvValues.add(initialHashMap);
+        }
+
+        /* Traverse ArrayList of maps to check if start and end iv mappings were already added */
+        for (HashMap<String, String> existingIvMap : startEndIvValues) {
+            if(existingIvMap.get("startIv").equals(startIv)
+                    && existingIvMap.get("endIv").equals(endIv)) {
+                containsMapping = true;
+            }
+        }
+        /* Only add to arraylist if it doesn't contain the start and end mappings */
+        if(!containsMapping) {
+            ivMap.put("startIv", startIv);
+            ivMap.put("endIv", endIv);
+            this.startEndIvValues.add(ivMap);
+        }
+    }
+
+    public boolean isIvAtYoungestPoint() {
+        if(this.plotStartIndexForMap > 1) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    public ArrayList<HashMap<String, String>> getStartEndIvValues() {
+        return this.startEndIvValues;
+    }
+
     public void setIvValues(ArrayList<String> ivValueList) {
-        this.ivValues.clear();
+        ivValues.clear();
         for(int i = 0; i < ivValueList.size(); i++) {
             ivValues.add(ivValueList.get(i));
         }
     }
 
     public void setDvValues(ArrayList<String> dvValueList) {
-        this.dvValues.clear();
+        dvValues.clear();
         for(int i = 0; i < dvValueList.size(); i++) {
             dvValues.add(Double.parseDouble(dvValueList.get(i)));
         }
     }
+
+    public int getPlotStartIndexForMap() {
+        return plotStartIndexForMap;
+    }
+
+    public int getPlotEndIndexForMap() {
+        return plotEndIndexForMap;
+    }
+
+    public void setPlotStartIndexForMap(int plotStartIndexForMap) {
+        this.plotStartIndexForMap = plotStartIndexForMap;
+    }
+
+    public void prependIvDvValues(ArrayList<String> ivValueList, ArrayList<String> dvValueList) {
+        if(prependIvValues(ivValueList) && prependDvValues(dvValueList)) {
+            plotStartIndexForMap--;
+            plotEndIndexForMap--;
+            /* Map containing the latest (largest) set of iv values for the curve.
+                 * Contains startIv and endIv used to retrieve next set of data */
+            HashMap<String, String> currentDataPosition
+                    = startEndIvValues.get(plotEndIndexForMap - 1);
+            setNextStartUnit(currentDataPosition.get("startIv"));
+            setNextEndUnit(currentDataPosition.get("endIv"));
+        }
+    }
+
+    private boolean prependIvValues(ArrayList<String> ivValueList) {
+        boolean tooManyPoints = false;
+        ArrayList<String> tempIvValues = new ArrayList<>();
+        ArrayList<String> finalIvValues = new ArrayList<>();
+        if(ivValues.size() > MAX_POINTS_FOR_PLOT) {
+            tooManyPoints = true;
+        }
+        int ivValueSize = ivValueList.size();
+        if (plotStartIndexForMap > 0) {
+            for (int i = 0; i < ivValueList.size(); i++) {
+                /* Remove last value first if there are too many values */
+                if (tooManyPoints) {
+                    ivValues.remove(ivValues.size() - 1);
+                }
+                tempIvValues.add(ivValueList.get(i));
+            }
+            /* Add prepended values to front of new list */
+            finalIvValues.addAll(tempIvValues);
+            finalIvValues.addAll(ivValues);
+            this.ivValues = finalIvValues;
+            return true;
+        }
+        return false;
+    }
+
+    private boolean prependDvValues(ArrayList<String> dvValueList) {
+        boolean tooManyPoints = false;
+        ArrayList<Double> tempDvValues = new ArrayList<>();
+        ArrayList<Double> finalDvValues = new ArrayList<>();
+        if (dvValues.size() > MAX_POINTS_FOR_PLOT) {
+            tooManyPoints = true;
+        }
+        if (plotStartIndexForMap > 0) {
+            for(int i = 0; i < dvValueList.size(); i++) {
+            /* Remove last value first if there are too many values */
+                if(tooManyPoints) {
+                    dvValues.remove(dvValues.size() - 1);
+                }
+                tempDvValues.add(Double.parseDouble(dvValueList.get(i)));
+            }
+            /* Add prepended values to front of new list */
+            finalDvValues.addAll(tempDvValues);
+            finalDvValues.addAll(dvValues);
+            this.dvValues = finalDvValues;
+            return true;
+        }
+        return false;
+    }
+
+    public void appendIvDvValues(ArrayList<String> ivValueList, ArrayList<String> dvValueList) {
+        if (ivValueList.size() > 0 && dvValueList.size() > 0) {
+            /* Interval has not been set yet, set to first array list size */
+            if(this.intervalSize == 0) {
+                this.intervalSize = ivValueList.size();
+            }
+            appendIvValues(ivValueList);
+            appendDvValues(dvValueList);
+            /* Move plot set start pointer if we have more than MAX_PLOT_POINTS */
+            if (this.intervalSize > 0 &&
+                    ((plotEndIndexForMap - plotStartIndexForMap) > (MAX_POINTS_FOR_PLOT / this.intervalSize))) {
+                plotStartIndexForMap++;
+            }
+            plotEndIndexForMap++;
+        }
+    }
+
+    public void appendIvValues(ArrayList<String> ivValueList) {
+        boolean tooManyPoints = false;
+        if(ivValues.size() > MAX_POINTS_FOR_PLOT) {
+            tooManyPoints = true;
+        }
+        for(int i = 0; i < ivValueList.size(); i++) {
+            /* Remove last value first if there are too many values */
+            if(tooManyPoints) {
+                ivValues.remove(0);
+            }
+            ivValues.add(ivValueList.get(i));
+        }
+    }
+
+    public void appendDvValues(ArrayList<String> dvValueList) {
+        boolean tooManyPoints = false;
+        if(dvValues.size() > MAX_POINTS_FOR_PLOT) {
+            tooManyPoints = true;
+        }
+        for(int i = 0; i < dvValueList.size(); i++) {
+            /* Remove last value first if there are too many values */
+            if(tooManyPoints) {
+                dvValues.remove(0);
+            }
+            dvValues.add(Double.parseDouble(dvValueList.get(i)));
+        }
+    }
+
+    public int getMAX_POINTS_FOR_PLOT() {
+        return this.MAX_POINTS_FOR_PLOT;
+    }
+
     public String getNextStartUnit() {
         return nextStartUnit;
     }

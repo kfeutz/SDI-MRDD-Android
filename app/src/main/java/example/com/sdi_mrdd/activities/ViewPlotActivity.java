@@ -38,6 +38,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
@@ -53,7 +54,7 @@ import example.com.sdi_mrdd.R;
  * This class displays a graphical representation of a plot. Each ViewPlotActivity
  * has a Plot and a String plotName
  */
-public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskCompleteListener<Boolean> {
+public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskCompleteListener<String> {
 
     /* Hold the plot object to display */
     public Plot plotToDisplay;
@@ -72,8 +73,17 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     public boolean initialPlotLoad;
 
     private Button refreshPointsBtn;
+    private Button previousPointsBtn;
 
     private ProgressDialog dialog;
+
+    private int curveMapPositionOnPlot;
+
+    /* Size of each point interval, based on first api result */
+    public int intervalSize;
+
+    private boolean currentlyPrepending = false;
+    private boolean currentlyAppending = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,7 +127,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             public void onPageFinished(WebView view, String url){
                 initialPlotLoad = true;
                 refreshPointsBtn.setEnabled(false);
-                new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
+                initPlot();
             }
         });
 
@@ -131,7 +141,18 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             public void onClick(View arg0) {
                 showDialog();
                 refreshPointsBtn.setEnabled(false);
-                new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
+                previousPointsBtn.setEnabled(false);
+                updateLargerIv();
+            }
+        });
+        previousPointsBtn = (Button)findViewById(R.id.btn_previous_points);
+        previousPointsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                showDialog();
+                refreshPointsBtn.setEnabled(false);
+                previousPointsBtn.setEnabled(false);
+                updateSmallerIv();
             }
         });
         showDialog();
@@ -213,24 +234,169 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         }
     }
 
+    public void initPlot() {
+        currentlyAppending = true;
+        new CurvePointsTask(ViewPlotActivity.this, plotToDisplay).execute();
+    }
+
+    /**
+     * Method that updates a plot by retrieving the larger iv values from its current position
+     * on the plot
+     */
+    public void updateLargerIv() {
+        if(!currentlyAppending && !currentlyPrepending) {
+            currentlyAppending = true;
+            Curve curveToUpdate = this.plotToDisplay.getCurves().get(0);
+            int endIndex = curveToUpdate.getPlotEndIndexForMap();
+            if (endIndex > 0 && curveToUpdate.getStartEndIvValues().size() > 0) {
+                int endMapPosition = endIndex - 1;
+                /* Map containing the latest (largest) set of iv values for the curve.
+                 * Contains startIv and endIv used to retrieve next set of data */
+                HashMap<String, String> currentDataPosition
+                        = curveToUpdate.getStartEndIvValues().get(endMapPosition);
+                new CurvePointsTask(this, plotToDisplay,
+                        currentDataPosition.get("startIv"), currentDataPosition.get("endIv")).execute();
+            } else {
+                new CurvePointsTask(this, plotToDisplay).execute();
+            }
+        }
+    }
+
+    /**
+     * Method that updates a plot by retrieving the larger iv values from its current position
+     * on the plot
+     */
+    public void updateSmallerIv() {
+        if(!currentlyAppending && !currentlyPrepending) {
+            currentlyPrepending = true;
+            Curve curveToUpdate = this.plotToDisplay.getCurves().get(0);
+            int ivStartIndex = curveToUpdate.getPlotStartIndexForMap();
+            if (ivStartIndex > 0) {
+                int startMapPosition = ivStartIndex - 1;
+                /* Map containing the latest (largest) set of iv values for the curve.
+                 * Contains startIv and endIv used to retrieve next set of data */
+                HashMap<String, String> currentDataPosition
+                        = curveToUpdate.getStartEndIvValues().get(startMapPosition);
+                if(currentDataPosition.get("startIv").length() > 0 &&
+                        currentDataPosition.get("endIv").length() > 0) {
+                    new CurvePointsTask(this, plotToDisplay,
+                            currentDataPosition.get("startIv"), currentDataPosition.get("endIv")).execute();
+                }
+                else {
+                    new CurvePointsTask(this, plotToDisplay).execute();
+                }
+            }
+            else {
+                closeDialog();
+                Toast toast = Toast.makeText(this, "You've reached the minimum", Toast.LENGTH_LONG);
+                toast.show();
+                currentlyPrepending = false;
+                refreshPointsBtn.setEnabled(true);
+                previousPointsBtn.setEnabled(true);
+            }
+        }
+    }
+
     @Override
-    public void onTaskComplete(Boolean curveFullyUpdated) {
-        refreshPointsBtn.setEnabled(false);
-        String jsCall = null;
+    public void onTaskComplete(String jsonString) {
+        boolean curveFullyUpdated;
+        if(currentlyAppending) {
+            curveFullyUpdated = CurveValueParser.getInstance()
+                    .parseIvDvValues(plotToDisplay.getCurves().get(0), jsonString, false);
+        }
+        else {
+            curveFullyUpdated = CurveValueParser.getInstance()
+                    .parseIvDvValues(plotToDisplay.getCurves().get(0), jsonString, true);
+        }
         Curve curveResult = plotToDisplay.getCurves().get(0);
+
+        Log.i("ViewPlotActivity", "Curve Start and End pointers " + curveResult.getPlotStartIndexForMap()
+                    + " " + curveResult.getPlotEndIndexForMap() + " with mapsize of " + curveResult.getStartEndIvValues().size());
         Log.i("ViewPlotActivity", "Update the points iv values : " + getIvString());
         Log.i("ViewPlotActivity", "Update the points dv values : " + getDvString());
-        Log.i("ViewPlotActivity", "Update the points next start value : " + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
-        Log.i("ViewPlotActivity", "Update the points next end value : " + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
-        Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + "javascript:InitChart(325,400," + getDvString() + ","
-                        + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
-                        + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
-                        + "\",\"" + this.plotToDisplay.getTitle() + "\")");
+        Log.i("ViewPlotActivity", "Update the points next start value : "
+                + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
+        Log.i("ViewPlotActivity", "Update the points next end value : "
+                + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
 
-        /* Only update plot if curve is not fully updated */
+        closeDialog();
+        /* Init plot for initial load */
+        if (initialPlotLoad) {
+            initialWebViewPlot(curveResult);
+        }
+        /* Check if curve has gotten all points from server */
+        else  if (curveFullyUpdated && !initialPlotLoad) {
+            Toast toast = Toast.makeText(this, "This is the most recent data", Toast.LENGTH_LONG);
+            toast.show();
+        }
+        else if (currentlyAppending) {
+            updateWebViewPlotAppend(curveResult);
+        }
+        else {
+            updateWebViewPlotPrepend(curveResult);
+        }
+        initialPlotLoad = false;
+        currentlyAppending = false;
+        currentlyPrepending = false;
+        refreshPointsBtn.setEnabled(true);
+        previousPointsBtn.setEnabled(true);
+    }
+
+    public void updateWebViewPlotPrepend(Curve curveToPlot) {
+        String jsCall = null;
         ArrayList<String> utcIvValues = new ArrayList<String>();
-        if (curveResult.getCurveType().equals("time_curve")) {
-            ArrayList<String> ivCurves = curveResult.getIvValues();
+        if (curveToPlot.getCurveType().equals("time_curve")) {
+            ArrayList<String> ivCurves = curveToPlot.getIvValues();
+            Long ivValue;
+            Long dateInMillis;
+            int ivListSize = ivCurves.size();
+            for (int i = 0; i < ivListSize; i++) {
+                ivValue = Long.parseLong(ivCurves.get(i));
+                dateInMillis = (ivValue - 116444736000000000L) / 10000;
+                utcIvValues.add(i, dateInMillis.toString());
+            }
+            jsCall = "javascript:updatePrependValues(" + getDvString() + ","
+                    + getDateString(utcIvValues) + ", " + curveToPlot.getMAX_POINTS_FOR_PLOT() + ")";
+        }
+        else {
+            jsCall = "javascript:updatePrependValues(" + getDvString() + ","
+                    + getIvString() + ", " + curveToPlot.getMAX_POINTS_FOR_PLOT() + ")";
+        }
+        Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + jsCall);
+
+        myWebView.loadUrl(jsCall);
+    }
+
+    public void updateWebViewPlotAppend(Curve curveToPlot) {
+        String jsCall = null;
+        ArrayList<String> utcIvValues = new ArrayList<String>();
+        if (curveToPlot.getCurveType().equals("time_curve")) {
+            ArrayList<String> ivCurves = curveToPlot.getIvValues();
+            Long ivValue;
+            Long dateInMillis;
+            int ivListSize = ivCurves.size();
+            for (int i = 0; i < ivListSize; i++) {
+                ivValue = Long.parseLong(ivCurves.get(i));
+                dateInMillis = (ivValue - 116444736000000000L) / 10000;
+                utcIvValues.add(i, dateInMillis.toString());
+            }
+            jsCall = "javascript:updateAppendValues(" + getDvString() + ","
+                    + getDateString(utcIvValues) + ", " + curveToPlot.getMAX_POINTS_FOR_PLOT() + ")";
+        }
+        else {
+            jsCall = "javascript:updateAppendValues(" + getDvString() + ","
+                    + getIvString() + ", " + curveToPlot.getMAX_POINTS_FOR_PLOT() + ")";
+        }
+        Log.i("ViewPlotActivity", "Javascript call to refresh plot: " + jsCall);
+
+        myWebView.loadUrl(jsCall);
+    }
+
+    public void initialWebViewPlot(Curve curveToPlot) {
+        String jsCall = null;
+        ArrayList<String> utcIvValues = new ArrayList<String>();
+        if (curveToPlot.getCurveType().equals("time_curve")) {
+            ArrayList<String> ivCurves = curveToPlot.getIvValues();
             Long ivValue;
             Long dateInMillis;
             int ivListSize = ivCurves.size();
@@ -245,26 +411,21 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                     + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
                     + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
                     + "\",\"" + this.plotToDisplay.getTitle() + "\")";
-        } else {
+        }
+        else {
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
                     + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
                     + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         }
         Log.i("ViewPlotActivity", "dvs: " + getDvString());
+        Log.i("ViewPlotActivity", jsCall);
 
-        closeDialog();
-        /* Check if curve has gotten all points from server */
-        if (curveFullyUpdated && !initialPlotLoad) {
-            Toast toast = Toast.makeText(this, "This is the most recent data", Toast.LENGTH_LONG);
-            toast.show();
-        }
-        else {
-            myWebView.loadUrl("javascript:clear_chart()");
-            myWebView.loadUrl(jsCall);
-        }
-        initialPlotLoad = false;
-        refreshPointsBtn.setEnabled(true);
+        /* Assign interval between points based on initial size of arrays */
+        intervalSize = curveToPlot.getDvValues().size();
+
+        myWebView.loadUrl("javascript:clear_chart()");
+        myWebView.loadUrl(jsCall);
     }
 
     //Class to be injected in Web page
@@ -287,7 +448,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
         @JavascriptInterface
         public void updatePlot() {
-            activity.onTaskComplete(false);
+            activity.updateLargerIv();
         }
     }
 }
