@@ -276,25 +276,21 @@ chartBody.append("svg:path")
 }
 
 function zoomed() {
-    //console.log(d3.event.translate);
-    //console.log(d3.event.scale);
     svg.select(".x.axis").call(xAxis);
     svg.select(".y.axis").call(yAxis);
     svg.selectAll(".y.axis g text").each(insertLinebreaks);
     svg.select(".x.grid")
-    .call(make_x_axis()
-    .tickSize(-height, 0, 0)
-    .tickFormat(""));
+        .call(make_x_axis()
+        .tickSize(-height, 0, 0)
+        .tickFormat(""));
     svg.select(".y.grid")
-    .call(make_y_axis()
-    .tickSize(-width, 0, 0)
-    .tickFormat(""));
+        .call(make_y_axis()
+        .tickSize(-width, 0, 0)
+        .tickFormat(""));
     svg.select(".line")
-    .attr("class", "line")
-    .attr("d", line);
+        .attr("class", "line")
+        .attr("d", line);
     svg.selectAll("dot").attr();
-        console.log("Y axis is: " + y.domain());
-        console.log("Y max is: " + ymax);
 }
 
 var make_x_axis = function () {
@@ -310,18 +306,6 @@ var make_y_axis = function () {
         .orient("left")
         .ticks(tickno);
 };
-
-function updateXaxis() {
-    svg.select(".x.axis").call(xAxis);
-    svg.select(".x.grid")
-    .call(make_x_axis()
-    .tickSize(-height, 0, 0)
-    .tickFormat(""));
-    svg.select(".line")
-    .attr("class", "line")
-    .attr("d", line);
-    svg.selectAll("dot").attr();
-}
 
 function resetDomainRanges() {
     /*Only scale the x axis */
