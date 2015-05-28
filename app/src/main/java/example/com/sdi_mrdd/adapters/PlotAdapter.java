@@ -63,7 +63,7 @@ public class PlotAdapter extends ArrayAdapter<Plot> {
             holder = new PlotHolder();
             /* Get widget references by using R.id's defined in listview_plot_row */
             holder.txtTitle = (TextView)row.findViewById(R.id.plotTitle);
-            holder.numberCurvesDisplay = (TextView)row.findViewById(R.id.activeCurves);
+            holder.curveTitle = (TextView)row.findViewById(R.id.curveTitle);
 
             row.setTag(holder);
         }
@@ -74,7 +74,7 @@ public class PlotAdapter extends ArrayAdapter<Plot> {
         Plot plot = data.get(position);
         /* Set display for each plot holder component */
         holder.txtTitle.setText(plot.getName());
-        holder.numberCurvesDisplay.setText("Active Curves: " + plot.getCurves().size());
+        holder.curveTitle.setText(plot.getTitle());
 
         return row;
     }
@@ -86,6 +86,6 @@ public class PlotAdapter extends ArrayAdapter<Plot> {
     static class PlotHolder
     {
         TextView txtTitle;
-        TextView numberCurvesDisplay;
+        TextView curveTitle;
     }
 }

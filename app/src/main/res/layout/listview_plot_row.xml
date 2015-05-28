@@ -17,6 +17,6 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Small Text"
-        android:id="@+id/activeCurves"
+        android:id="@+id/curveTitle"
         android:layout_marginBottom="15dp"/>
 </LinearLayout>

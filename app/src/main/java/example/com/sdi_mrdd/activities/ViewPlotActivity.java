@@ -96,7 +96,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
         createWebview();
 
-        addRefreshButton();
+        //addRefreshButton();
+        initialPlotLoad = true;
+        showDialog();
     }
 
     private void setPlotToDisplay() {
@@ -126,7 +128,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             /* Wait for html to load all javascript before calling getting points and initiating chart */
             public void onPageFinished(WebView view, String url){
                 initialPlotLoad = true;
-                refreshPointsBtn.setEnabled(false);
+                //refreshPointsBtn.setEnabled(false);
                 initPlot();
             }
         });
@@ -134,7 +136,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         myWebView.loadUrl("file:///android_asset/www/index.html");
     }
 
-    private void addRefreshButton() {
+    /*private void addRefreshButton() {
         refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
         refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,11 +157,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 updateSmallerIv();
             }
         });
-        showDialog();
 
-        initialPlotLoad = true;
         refreshPointsBtn.setEnabled(false);
-    }
+    }*/
 
     public void showDialog() {
         dialog = new ProgressDialog(this);
@@ -288,11 +288,11 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             }
             else {
                 closeDialog();
-                Toast toast = Toast.makeText(this, "You've reached the minimum", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(this, "This is the oldest data", Toast.LENGTH_LONG);
                 toast.show();
                 currentlyPrepending = false;
-                refreshPointsBtn.setEnabled(true);
-                previousPointsBtn.setEnabled(true);
+                //refreshPointsBtn.setEnabled(true);
+                //previousPointsBtn.setEnabled(true);
             }
         }
     }
@@ -338,8 +338,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         initialPlotLoad = false;
         currentlyAppending = false;
         currentlyPrepending = false;
-        refreshPointsBtn.setEnabled(true);
-        previousPointsBtn.setEnabled(true);
+        //refreshPointsBtn.setEnabled(true);
+        //previousPointsBtn.setEnabled(true);
     }
 
     public void updateWebViewPlotPrepend(Curve curveToPlot) {
