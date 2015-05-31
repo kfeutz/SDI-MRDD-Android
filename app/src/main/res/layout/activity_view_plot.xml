@@ -6,31 +6,6 @@
     tools:context=".WebViewActivity"
     android:paddingTop="5dp">
 
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/curveButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="5dp">
-
-        <Button
-            android:id="@+id/btn_curve_points"
-            android:layout_width="fill_parent"
-            android:text="Next Set of Points"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_weight=".5"/>
-        <Button
-            android:id="@+id/btn_previous_points"
-            android:layout_width="fill_parent"
-            android:text="Previous Points"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_weight=".5"/>
-
-    </LinearLayout>
-
     <WebView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/webview"

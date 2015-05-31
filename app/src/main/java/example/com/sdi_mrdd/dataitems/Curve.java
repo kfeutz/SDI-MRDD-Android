@@ -64,7 +64,7 @@ public abstract class Curve implements Parcelable {
     /* Number of 100ns between Jan 1. 1601 and Jan 1. 1970 */
     private final long NANOSECONDSBETWEENEPOCHS = 116444736000000000L;
 
-    final public int MAX_POINTS_FOR_PLOT = 5000;
+    final public int MAX_POINTS_FOR_PLOT = 3000;
 
     /* Size of each point interval, based on first api result */
     public int intervalSize = 0;

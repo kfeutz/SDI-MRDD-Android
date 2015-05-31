@@ -63,7 +63,6 @@ public class LoadCurveDataTask extends AsyncTask<String, Void, String> {
     }
     @Override
     protected String doInBackground(String... params) {
-        Scanner scanner;
         HttpResponse response;
         HttpEntity entity;
         try {

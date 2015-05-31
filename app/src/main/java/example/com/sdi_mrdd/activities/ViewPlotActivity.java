@@ -3,6 +3,7 @@ package example.com.sdi_mrdd.activities;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -70,8 +72,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
     public boolean initialPlotLoad;
 
-    private Button refreshPointsBtn;
-    private Button previousPointsBtn;
+    /*private Button refreshPointsBtn;
+    private Button previousPointsBtn;*/
 
     private ProgressDialog dialog;
 
@@ -88,6 +90,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_plot);
         myWebView = (WebView) findViewById(R.id.webview);
+        myWebView.addJavascriptInterface(new WebAppInterface(this), "Android");
 
         setPlotToDisplay();
 
@@ -123,7 +126,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             /* Wait for html to load all javascript before calling getting points and initiating chart */
             public void onPageFinished(WebView view, String url){
                 initialPlotLoad = true;
-                refreshPointsBtn.setEnabled(false);
+                /*refreshPointsBtn.setEnabled(false);*/
                 initPlot();
             }
         });
@@ -132,7 +135,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     }
 
     private void addRefreshButton() {
-        refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
+        /*refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
         refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
@@ -151,11 +154,11 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 previousPointsBtn.setEnabled(false);
                 updateSmallerIv();
             }
-        });
+        });*/
         showDialog();
 
         initialPlotLoad = true;
-        refreshPointsBtn.setEnabled(false);
+       /* refreshPointsBtn.setEnabled(false);*/
     }
 
     public void showDialog() {
@@ -241,6 +244,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
      * on the plot
      */
     public void updateLargerIv() {
+        /*showDialog();*/
         if(!currentlyAppending && !currentlyPrepending) {
             currentlyAppending = true;
             Curve curveToUpdate = this.plotToDisplay.getCurves().get(0);
@@ -257,6 +261,19 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 new CurvePointsTask(this, plotToDisplay).execute();
             }
         }
+        else {
+            closeDialog();
+        }
+    }
+
+    public void notifyViewBeginning() {
+        /* Notify javascript that the plot reached the most recent data */
+        myWebView.post(new Runnable() {
+            @Override
+            public void run() {
+                myWebView.loadUrl("javascript:reachedBeginningOfData()");
+            }
+        });
     }
 
     /**
@@ -264,6 +281,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
      * on the plot
      */
     public void updateSmallerIv() {
+        /*showDialog();*/
         if(!currentlyAppending && !currentlyPrepending) {
             currentlyPrepending = true;
             Curve curveToUpdate = this.plotToDisplay.getCurves().get(0);
@@ -285,12 +303,17 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             }
             else {
                 closeDialog();
+                notifyViewBeginning();
+                Log.e("Yo", "Reached beginning of data");
                 Toast toast = Toast.makeText(this, "You've reached the minimum", Toast.LENGTH_LONG);
                 toast.show();
                 currentlyPrepending = false;
-                refreshPointsBtn.setEnabled(true);
-                previousPointsBtn.setEnabled(true);
+/*                refreshPointsBtn.setEnabled(true);
+                previousPointsBtn.setEnabled(true);*/
             }
+        }
+        else {
+            closeDialog();
         }
     }
 
@@ -315,14 +338,14 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 + this.plotToDisplay.getCurves().get(0).getNextStartUnit());
         Log.i("ViewPlotActivity", "Update the points next end value : "
                 + this.plotToDisplay.getCurves().get(0).getNextEndUnit());
-
-        closeDialog();
         /* Init plot for initial load */
         if (initialPlotLoad) {
             initialWebViewPlot(curveResult);
         }
         /* Check if curve has gotten all points from server */
         else  if (curveFullyUpdated && !initialPlotLoad) {
+            /* Notify javascript that the plot reached the most recent data */
+            myWebView.loadUrl("javascript:reachedEndOfData()");
             Toast toast = Toast.makeText(this, "This is the most recent data", Toast.LENGTH_LONG);
             toast.show();
         }
@@ -332,11 +355,13 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         else {
             updateWebViewPlotPrepend(curveResult);
         }
+
         initialPlotLoad = false;
         currentlyAppending = false;
         currentlyPrepending = false;
-        refreshPointsBtn.setEnabled(true);
-        previousPointsBtn.setEnabled(true);
+/*        refreshPointsBtn.setEnabled(true);
+        previousPointsBtn.setEnabled(true);*/
+        closeDialog();
     }
 
     public void updateWebViewPlotPrepend(Curve curveToPlot) {
@@ -401,6 +426,8 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 ivValue = Long.parseLong(ivCurves.get(i));
                 dateInMillis = (ivValue - 116444736000000000L) / 10000;
                 utcIvValues.add(i, dateInMillis.toString());
+                Log.i("ViewPlotActivity", "Epoch " + i + " : " + dateInMillis.toString());
+                Log.i("ViewPlotActivity", "LDAP " + i + " : " + ivValue.toString());
             }
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
@@ -413,6 +440,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                     + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
                     + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         }
+        Log.i("ViewPlotActivity", "dvs: " + getDvString());
         Log.i("ViewPlotActivity", jsCall);
 
         /* Assign interval between points based on initial size of arrays */
@@ -420,5 +448,34 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
         myWebView.loadUrl("javascript:clear_chart()");
         myWebView.loadUrl(jsCall);
+    }
+
+    //Class to be injected in Web page
+    public class WebAppInterface {
+        ViewPlotActivity activity;
+
+        /** Instantiate the interface and set the context */
+        WebAppInterface(ViewPlotActivity a) {
+            activity = a;
+        }
+
+        /**
+         * Show Toast Message
+         * @param toast
+         */
+        @JavascriptInterface
+        public void showToast(String toast) {
+            Toast.makeText(activity, toast, Toast.LENGTH_SHORT).show();
+        }
+
+        @JavascriptInterface
+        public void appendPlot() {
+            activity.updateLargerIv();
+        }
+
+        @JavascriptInterface
+        public void prependPlot() {
+            activity.updateSmallerIv();
+        }
     }
 }

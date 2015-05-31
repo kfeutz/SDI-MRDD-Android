@@ -220,8 +220,8 @@ public class WellDashBoardFragment extends Fragment implements AsyncTaskComplete
             case R.id.context_delete:
                 new AlertDialog.Builder(getActivity())
                         .setIcon(android.R.drawable.ic_dialog_alert)
-                        .setTitle(R.string.confirm_curve_add_title)
-                        .setMessage(R.string.confirm_curve_msg)
+                        .setTitle("Confirm Deletion")
+                        .setMessage("Are you sure you want to delete the curve from this dashboard?")
                         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

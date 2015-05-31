@@ -49,11 +49,46 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
 
+function showAndroidToast(toastmsg) {
+    window.Android.showToast(toastmsg);
+}
+
+function appendPlot() {
+    if(!appendingOrPrepending  || isBeginningOfData) {
+        console.log("Update!! Append");
+        window.Android.appendPlot();
+        appendingOrPrepending = true;
+        isBeginningOfData = false;
+    }
+}
+
+function prependPlot() {
+    if(!appendingOrPrepending || isEndOfData) {
+        console.log("Update!! Prepend");
+        window.Android.prependPlot();
+        appendingOrPrepending = true;
+        isEndOfData = false;
+    }
+}
+
 function clear_chart() {
     d3.select("#area").select(".plot-title").remove();
     d3.select("#area").select("svg").remove();
 }
 
+function reachedEndOfData() {
+    isEndOfData = true;
+}
+
+function reachedBeginningOfData() {
+    isBeginningOfData = true;
+}
+
+var canAppend = true;
+var canPrepend = true;
+var appendingOrPrepending = false;
+var isEndOfData = false;
+var isBeginningOfData = false;
 var data = [];
 var line;
 var chartBody;
@@ -131,14 +166,8 @@ this.setData = function (dv, iv) {
 }
 
 width = window.innerWidth - 10 - margin.left - margin.right; //screenWidth
-height = window.innerHeight - 20 - margin.top - margin.bottom; //screenHeight
+height = window.innerHeight - 50 - margin.top - margin.bottom; //screenHeight
 
-/*ymax = d3.max(data,function(d){
-    return (parseInt(d[field])+1);
-});
-ymin = d3.min(data,function(d){
-    return d[field];
-});*/
 xmax = d3.max(data,function(d){
     return d.x + 1;
 });
@@ -152,8 +181,8 @@ return d.item;
 .range([0, width]);
 
 y = d3.scale.linear()
-.domain([ymax,ymin])
-.range([height, 0]);
+    .domain([ymax,ymin])
+    .range([height, 0]);
 
 line = d3.svg.line()
     .interpolate("basis")
@@ -291,6 +320,21 @@ function zoomed() {
         .attr("class", "line")
         .attr("d", line);
     svg.selectAll("dot").attr();
+
+    /*console.log("y domain: " + y.domain());
+    console.log("y x: " + y.domain()[0]);
+    console.log("y y: " + y.domain()[1]);
+    console.log("ymax: " + ymax);
+    console.log("ymin: " + ymin);*/
+
+    if(!appendingOrPrepending || isBeginningOfData || isEndOfData) {
+        if (((y.domain()[0] - y.domain()[1]) * .85) + y.domain()[1] > ymax) {
+            appendPlot();
+        }
+        else if (((y.domain()[0] - y.domain()[1]) * .15) + y.domain()[1] < ymin) {
+            prependPlot();
+        }
+    }
 }
 
 var make_x_axis = function () {
@@ -316,15 +360,35 @@ function resetDomainRanges() {
     xmin = d3.min(data,function(d) {
         return d.x - 1;
     });
+    ymax = d3.max(data,function(d){
+        return d.y + 1;
+    });
+    ymin = d3.min(data,function(d){
+        return d.y - 1;
+    });
 
     x.domain([xmin,xmax]);
+    //Does not scale y axis
+    //Does update the min and max for scrolling purposes
+    for (var i = 0; i < data.length; i++) {
+        if(i == 0) {
+            ymin = data[i].y;
+            ymax = data[i].y;
+        }
+        else {
+            if (ymin > data[i].y) {
+                ymin = data[i].y + 1;
+            }
+            if (ymax < data[i].y) {
+                ymax = data[i].y;
+            }
+        }
+    }
 }
 
 function updateAppendValues(dvVals, ivVals, maxPoints) {
     var startDataPos = data.length;
     var tooManyPoints = false;
-    console.log("Data before shift is " + startDataPos);
-    console.log("Dv length before shift is " + dvVals.length);
     if(data.length >= maxPoints) {
         tooManyPoints = true;
     }
@@ -339,6 +403,7 @@ function updateAppendValues(dvVals, ivVals, maxPoints) {
     var updateTransition = svg.transition().duration(750);
     updateTransition.select(".x.axis").call(xAxis);
     updateTransition.select(".line").attr("d", line(data));
+    appendingOrPrepending = false;
 }
 
 function updatePrependValues(dvVals, ivVals, maxPoints) {
@@ -360,6 +425,7 @@ function updatePrependValues(dvVals, ivVals, maxPoints) {
     var updateTransition = svg.transition().duration(750);
     updateTransition.select(".x.axis").call(xAxis);
     updateTransition.select(".line").attr("d", line(data));
+    appendingOrPrepending = false;
 }
 </script>
 </body>

@@ -25,6 +25,7 @@ import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 
 import example.com.sdi_mrdd.R;
@@ -42,6 +43,7 @@ public class CurveAdapter extends RecyclerView.Adapter<CurveAdapter.ViewHolder> 
     public Context mContext;
     /* Allows to remember the last item shown on screen */
     private int lastPosition = -1;
+    TimerTask incrementTimeTask;
 
     /* Position of long click */
     private int position;
