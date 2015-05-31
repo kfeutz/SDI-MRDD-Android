@@ -96,7 +96,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
 
         createWebview();
 
-        addRefreshButton();
+        //addRefreshButton();
+        initialPlotLoad = true;
+        showDialog();
     }
 
     private void setPlotToDisplay() {
@@ -126,39 +128,11 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
             /* Wait for html to load all javascript before calling getting points and initiating chart */
             public void onPageFinished(WebView view, String url){
                 initialPlotLoad = true;
-                /*refreshPointsBtn.setEnabled(false);*/
                 initPlot();
             }
         });
 
         myWebView.loadUrl("file:///android_asset/www/index.html");
-    }
-
-    private void addRefreshButton() {
-        /*refreshPointsBtn = (Button)findViewById(R.id.btn_curve_points);
-        refreshPointsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                showDialog();
-                refreshPointsBtn.setEnabled(false);
-                previousPointsBtn.setEnabled(false);
-                updateLargerIv();
-            }
-        });
-        previousPointsBtn = (Button)findViewById(R.id.btn_previous_points);
-        previousPointsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                showDialog();
-                refreshPointsBtn.setEnabled(false);
-                previousPointsBtn.setEnabled(false);
-                updateSmallerIv();
-            }
-        });*/
-        showDialog();
-
-        initialPlotLoad = true;
-       /* refreshPointsBtn.setEnabled(false);*/
     }
 
     public void showDialog() {
@@ -305,11 +279,9 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 closeDialog();
                 notifyViewBeginning();
                 Log.e("Yo", "Reached beginning of data");
-                Toast toast = Toast.makeText(this, "You've reached the minimum", Toast.LENGTH_LONG);
+                Toast toast = Toast.makeText(this, "This is the oldest data", Toast.LENGTH_LONG);
                 toast.show();
                 currentlyPrepending = false;
-/*                refreshPointsBtn.setEnabled(true);
-                previousPointsBtn.setEnabled(true);*/
             }
         }
         else {
@@ -359,8 +331,7 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
         initialPlotLoad = false;
         currentlyAppending = false;
         currentlyPrepending = false;
-/*        refreshPointsBtn.setEnabled(true);
-        previousPointsBtn.setEnabled(true);*/
+
         closeDialog();
     }
 
