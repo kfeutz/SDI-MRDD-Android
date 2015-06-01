@@ -388,6 +388,13 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
     public void initialWebViewPlot(Curve curveToPlot) {
         String jsCall = null;
         ArrayList<String> utcIvValues = new ArrayList<String>();
+        String ivName;
+        if (this.plotToDisplay.getCurves().get(0).getIvName().contains("Measured Depth")) {
+            ivName = "MD";
+        }
+        else {
+            ivName = this.plotToDisplay.getCurves().get(0).getIvName();
+        }
         if (curveToPlot.getCurveType().equals("time_curve")) {
             ArrayList<String> ivCurves = curveToPlot.getIvValues();
             Long ivValue;
@@ -400,15 +407,16 @@ public class ViewPlotActivity extends ActionBarActivity implements AsyncTaskComp
                 Log.i("ViewPlotActivity", "Epoch " + i + " : " + dateInMillis.toString());
                 Log.i("ViewPlotActivity", "LDAP " + i + " : " + ivValue.toString());
             }
+
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getDateString(utcIvValues) + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
-                    + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                    + "\",\"" + ivName
                     + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         }
         else {
             jsCall = "javascript:InitChart(325,400," + getDvString() + ","
                     + getIvString() + ",\"" + this.plotToDisplay.getCurves().get(0).getDvName()
-                    + "\",\"" + this.plotToDisplay.getCurves().get(0).getIvName()
+                    + "\",\"" + ivName //this.plotToDisplay.getCurves().get(0).getIvName()
                     + "\",\"" + this.plotToDisplay.getTitle() + "\")";
         }
         Log.i("ViewPlotActivity", "dvs: " + getDvString());

@@ -55,7 +55,7 @@ function showAndroidToast(toastmsg) {
 
 function appendPlot() {
     if(!appendingOrPrepending  || isBeginningOfData) {
-        console.log("Update!! Append");
+        //console.log("Update!! Append");
         window.Android.appendPlot();
         appendingOrPrepending = true;
         isBeginningOfData = false;
@@ -64,7 +64,7 @@ function appendPlot() {
 
 function prependPlot() {
     if(!appendingOrPrepending || isEndOfData) {
-        console.log("Update!! Prepend");
+        //console.log("Update!! Prepend");
         window.Android.prependPlot();
         appendingOrPrepending = true;
         isEndOfData = false;
@@ -132,7 +132,7 @@ if(ivName == "Time") {
 else {
     margin.left = 50;
 }
-tickno = 8;
+tickno = 7;
 
 if(data.length > 5000) {
     for (var i = 0; i < dv.length; i++) {
